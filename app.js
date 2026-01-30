@@ -9,7 +9,7 @@ let editingId = null;
 
 // ========== MAIN INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('App initialized');
+    console.log('QFC Group Platform initialized');
     initializeForm();
     loadAcquisitions();
     
@@ -88,7 +88,7 @@ function calculateBalanceTickets() {
 async function saveAcquisition() {
     console.log('Save acquisition started');
     
-    // Disable save button to prevent double click
+    // Disable save button
     const saveBtn = document.querySelector('button[onclick="saveAcquisition()"]');
     const originalText = saveBtn?.innerHTML;
     if (saveBtn) {
@@ -97,17 +97,14 @@ async function saveAcquisition() {
     }
     
     try {
-        // Get only BASIC fields (others can be added later via edit)
+        // Get form data
         const formData = {
-            // Basic required fields
             sr_number: document.getElementById('srNumber')?.value || '',
             request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
             airline_pnr: document.getElementById('airlinePnr')?.value || '',
             no_of_seats: parseInt(document.getElementById('noOfSeats')?.value) || 0,
             fare: parseFloat(document.getElementById('fare')?.value) || 0,
             time_limit: document.getElementById('timeLimit')?.value || '',
-            
-            // Optional basic fields
             investment_type: document.getElementById('investmentType')?.value || 'group_seats',
             license_number: document.getElementById('license')?.value || '',
             branch: document.getElementById('branch')?.value || '',
@@ -122,8 +119,6 @@ async function saveAcquisition() {
             pnr_amount: parseFloat(document.getElementById('pnrAmount')?.value) || 0,
             issuance_date: document.getElementById('issuanceDate')?.value || null,
             payment_percentage: parseFloat(document.getElementById('paymentPercentage')?.value) || 100,
-            
-            // EMD fields - can be empty initially
             emd_refund_date: document.getElementById('emdRefundDate')?.value || null,
             first_emd_number: document.getElementById('emd1Number')?.value || null,
             first_emd_amount: document.getElementById('emd1Amount')?.value ? parseFloat(document.getElementById('emd1Amount').value) : null,
@@ -131,83 +126,65 @@ async function saveAcquisition() {
             first_emd_time_limit: document.getElementById('emd1TimeLimit')?.value || null,
             first_emd_issuance_date: document.getElementById('emd1IssuanceDate')?.value || null,
             first_emd_payment_percentage: document.getElementById('emd1PaymentPercent')?.value ? parseFloat(document.getElementById('emd1PaymentPercent').value) : null,
-            
-            // More EMD fields
             second_emd_number: document.getElementById('emd2Number')?.value || null,
             second_emd_amount: document.getElementById('emd2Amount')?.value ? parseFloat(document.getElementById('emd2Amount').value) : null,
             second_emd_time_limit: document.getElementById('emd2TimeLimit')?.value || null,
             third_emd_number: document.getElementById('emd3Number')?.value || null,
             third_emd_amount: document.getElementById('emd3Amount')?.value ? parseFloat(document.getElementById('emd3Amount').value) : null,
             third_emd_time_limit: document.getElementById('emd3TimeLimit')?.value || null,
-            
-            // Ticketing
             ticketing_status: document.getElementById('ticketingStatus')?.value || 'pending',
             no_of_tickets_issued: parseInt(document.getElementById('ticketsIssued')?.value) || 0,
             balance_tickets: parseInt(document.getElementById('balanceTickets')?.value) || 0,
             last_ticket_date: document.getElementById('lastTicketDate')?.value || null,
-            
-            // Status
             status: document.getElementById('overallStatus')?.value || 'draft',
             notes: document.getElementById('notes')?.value || null
         };
 
-        console.log('Saving data:', formData);
-
-        // Validate required fields
+        // Validate
         if (!formData.sr_number || !formData.airline_pnr || !formData.time_limit) {
             throw new Error('SR Number, Airline PNR and Time Limit are required');
         }
 
         if (editingId) {
-            // UPDATE existing record
+            // UPDATE
             const { data, error } = await supabaseClient
                 .from('seat_acquisitions')
                 .update(formData)
                 .eq('id', editingId)
                 .select();
             
-            if (error) {
-                console.error('Update error:', error);
-                throw error;
-            }
+            if (error) throw error;
             
-            showSuccess('✅ Acquisition updated successfully! SR#: ' + formData.sr_number);
+            showSuccess('✅ Updated successfully! SR#: ' + formData.sr_number);
             editingId = null;
         } else {
-            // INSERT new record
+            // INSERT
             const { data, error } = await supabaseClient
                 .from('seat_acquisitions')
                 .insert([formData])
                 .select();
             
-            if (error) {
-                console.error('Insert error:', error);
-                throw error;
-            }
+            if (error) throw error;
             
-            showSuccess('✅ Acquisition saved successfully! SR#: ' + formData.sr_number);
+            showSuccess('✅ Saved successfully! SR#: ' + formData.sr_number);
         }
         
-        // Reset and reload
         resetForm();
         loadAcquisitions();
         
     } catch (error) {
-        console.error('Error in saveAcquisition:', error);
-        showError('❌ Save failed: ' + (error.message || 'Unknown error'));
+        console.error('Error:', error);
+        showError('❌ Error: ' + (error.message || 'Check console'));
     } finally {
-        // Re-enable save button
         if (saveBtn) {
             saveBtn.disabled = false;
-            saveBtn.innerHTML = originalText || '<i class="bi bi-save me-2"></i>Save Acquisition';
+            saveBtn.innerHTML = originalText || '<i class="bi bi-save me-2"></i>Save';
         }
     }
 }
 
 async function editAcquisition(id) {
     try {
-        console.log('Editing acquisition:', id);
-        
         const { data, error } = await supabaseClient
             .from('seat_acquisitions')
             .select('*')
@@ -218,12 +195,12 @@ async function editAcquisition(id) {
         
         editingId = id;
         
-        // Fill form with existing data
+        // Fill form
         const fields = [
             { id: 'srNumber', value: data.sr_number },
             { id: 'requestDate', value: data.request_date },
             { id: 'investmentType', value: data.investment_type },
-            { id: 'license', value: data.license_number || data.license || '' },
+            { id: 'license', value: data.license_number || '' },
             { id: 'branch', value: data.branch },
             { id: 'airlinePnr', value: data.airline_pnr },
             { id: 'gdsPnr', value: data.gds_pnr || '' },
@@ -260,41 +237,34 @@ async function editAcquisition(id) {
         
         fields.forEach(field => {
             const element = document.getElementById(field.id);
-            if (element) {
-                element.value = field.value || '';
-            }
+            if (element) element.value = field.value || '';
         });
         
-        // Calculate derived fields
         calculateAmounts();
         calculateBalanceTickets();
         
-        // Update button text
+        // Update UI
         const saveBtn = document.querySelector('button[onclick="saveAcquisition()"]');
         if (saveBtn) {
-            saveBtn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update Acquisition';
+            saveBtn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update';
             saveBtn.className = 'btn btn-warning btn-lg';
         }
         
-        // Show cancel button
         const cancelBtn = document.getElementById('cancelEditBtn');
         if (cancelBtn) cancelBtn.style.display = 'inline-block';
         
-        // Scroll to form
         document.getElementById('acquireForm')?.scrollIntoView({ behavior: 'smooth' });
         
         showSuccess('✏️ Editing: ' + data.sr_number);
         
     } catch (error) {
-        console.error('Error loading for edit:', error);
+        console.error('Edit error:', error);
         showError('Failed to load for editing');
     }
 }
 
 async function deleteAcquisition(id, srNumber) {
-    if (!confirm(`🗑️ Delete ${srNumber}?\n\nThis action cannot be undone!`)) {
-        return;
-    }
+    if (!confirm(`Delete ${srNumber}?`)) return;
     
     try {
         const { error } = await supabaseClient
@@ -304,27 +274,22 @@ async function deleteAcquisition(id, srNumber) {
         
         if (error) throw error;
         
-        // If editing this record, reset form
         if (editingId === id) {
             editingId = null;
             resetForm();
         }
         
-        showSuccess('🗑️ Deleted: ' + srNumber);
-        
-        // Reload data
+        showSuccess('Deleted: ' + srNumber);
         loadAcquisitions();
         
     } catch (error) {
-        console.error('Error deleting:', error);
+        console.error('Delete error:', error);
         showError('Failed to delete');
     }
 }
 
 async function loadAcquisitions() {
     try {
-        console.log('Loading acquisitions...');
-        
         const { data, error } = await supabaseClient
             .from('seat_acquisitions')
             .select('*')
@@ -334,13 +299,11 @@ async function loadAcquisitions() {
         if (error) throw error;
         
         acquisitions = data || [];
-        console.log('Loaded', acquisitions.length, 'acquisitions');
-        
         updateTable();
         updateDashboard();
         
     } catch (error) {
-        console.error('Error loading acquisitions:', error);
+        console.error('Load error:', error);
         acquisitions = [];
         updateTable();
     }
@@ -349,77 +312,33 @@ async function loadAcquisitions() {
 // ========== UI FUNCTIONS ==========
 function updateTable() {
     const tableBody = document.getElementById('acquisitionsTable');
-    if (!tableBody) {
-        console.error('Table body not found!');
-        return;
-    }
+    if (!tableBody) return;
     
     if (!acquisitions || acquisitions.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-4">
-                    <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
-                    <p class="mt-2 text-muted">No acquisitions yet</p>
-                </td>
-            </tr>
-        `;
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No data</td></tr>';
         return;
     }
     
     let html = '';
-    
     acquisitions.forEach(item => {
-        const srNumber = item.sr_number || 'N/A';
-        const airlinePnr = item.airline_pnr || '';
-        const seats = item.no_of_seats || 0;
-        const fare = item.fare ? parseFloat(item.fare).toFixed(2) : '0.00';
-        const status = item.status || 'draft';
-        const date = item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A';
         const id = item.id || '';
-        
-        // Status styling
-        let statusClass = 'status-draft';
-        let statusText = 'Draft';
-        if (status === 'approved') {
-            statusClass = 'status-approved';
-            statusText = 'Approved';
-        } else if (status === 'pending') {
-            statusClass = 'status-pending';
-            statusText = 'Pending';
-        }
-        
-        // Check if editing
         const isEditing = editingId === id;
         const rowClass = isEditing ? 'table-warning' : '';
         
-        // Check EMD status
-        const hasEMD = item.first_emd_number || item.second_emd_number || item.third_emd_number;
-        const emdBadge = hasEMD 
-            ? '<span class="badge bg-success ms-1" title="Has EMD">✓</span>' 
-            : '<span class="badge bg-secondary ms-1" title="No EMD yet">…</span>';
-        
         html += `
             <tr class="${rowClass}">
+                <td><strong>${item.sr_number || ''}</strong></td>
+                <td>${item.airline_pnr || ''}</td>
+                <td>${item.no_of_seats || 0}</td>
+                <td>${item.fare ? parseFloat(item.fare).toFixed(2) : '0.00'}</td>
+                <td><span class="status-badge status-draft">${item.status || 'draft'}</span></td>
+                <td>${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</td>
                 <td>
-                    <strong>${srNumber}</strong>
-                    ${isEditing ? '<span class="badge bg-warning ms-1">Editing</span>' : ''}
-                    ${emdBadge}
-                </td>
-                <td>${airlinePnr}</td>
-                <td>${seats}</td>
-                <td>${fare}</td>
-                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td>${date}</td>
-                <td>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-outline-primary" 
-                                onclick="editAcquisition('${id}')" 
-                                title="Edit / Add EMD">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="editAcquisition('${id}')">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-danger" 
-                                onclick="deleteAcquisition('${id}', '${srNumber}')" 
-                                title="Delete">
+                        <button class="btn btn-outline-danger" onclick="deleteAcquisition('${id}', '${item.sr_number}')">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -451,15 +370,12 @@ function updateDashboard() {
 }
 
 function resetForm() {
-    console.log('Resetting form...');
-    
-    // Exit edit mode
     editingId = null;
     
-    // Generate new SR number
+    // Generate new SR
     generateSRNumber();
     
-    // Clear form fields
+    // Clear fields
     const clearIds = [
         'license', 'branch', 'airlinePnr', 'gdsPnr', 'airline',
         'noOfSeats', 'outboundDate', 'inboundDate', 'sector',
@@ -484,7 +400,7 @@ function resetForm() {
     document.getElementById('overallStatus').value = 'draft';
     document.getElementById('paymentPercentage').value = 100;
     
-    // Set default dates
+    // Set dates
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('requestDate').value = today;
     
@@ -492,31 +408,26 @@ function resetForm() {
     nextWeek.setDate(nextWeek.getDate() + 7);
     document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
     
-    // Clear calculated fields
+    // Calculate
     calculateAmounts();
     calculateBalanceTickets();
     
-    // Reset button
+    // Update buttons
     const saveBtn = document.querySelector('button[onclick="saveAcquisition()"]');
     if (saveBtn) {
-        saveBtn.innerHTML = '<i class="bi bi-save me-2"></i>Save Acquisition';
+        saveBtn.innerHTML = '<i class="bi bi-save me-2"></i>Save';
         saveBtn.className = 'btn btn-primary btn-lg';
     }
     
-    // Hide cancel button
     const cancelBtn = document.getElementById('cancelEditBtn');
     if (cancelBtn) cancelBtn.style.display = 'none';
     
-    // Update table
     updateTable();
-    
-    showSuccess('✅ Form reset. Ready for new entry.');
+    showSuccess('Form reset');
 }
 
 function cancelEdit() {
-    if (editingId) {
-        resetForm();
-    }
+    if (editingId) resetForm();
 }
 
 function showSuccess(message) {
@@ -541,5 +452,16 @@ function showError(message) {
     }
 }
 
-// Initialize
-loadAcquisitions();
+// Fix for Chrome extension async error
+if (typeof chrome !== 'undefined' && chrome.runtime) {
+    window.addEventListener('error', function(e) {
+        console.log('Error caught:', e.error);
+    });
+}
+
+// Initial load
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(loadAcquisitions, 100);
+} else {
+    document.addEventListener('DOMContentLoaded', loadAcquisitions);
+}
