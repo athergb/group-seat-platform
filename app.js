@@ -1,12 +1,12 @@
 // Initialize Supabase
-const supabaseUrl = 'YOUR_SUPABASE_URL_HERE';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY_HERE';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = 'https://ojlxkzkialguthdeiley.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94';
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// DOM Elements
+// ========== GLOBAL VARIABLES ==========
 let acquisitions = [];
 
-// Initialize on page load
+// ========== MAIN INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     loadAcquisitions();
@@ -30,14 +30,13 @@ document.addEventListener('DOMContentLoaded', function() {
     generateSRNumber();
 });
 
-// Initialize form
+// ========== FORM FUNCTIONS ==========
 function initializeForm() {
     generateSRNumber();
     calculateAmounts();
     calculateBalanceTickets();
 }
 
-// Generate SR Number
 function generateSRNumber() {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
@@ -46,7 +45,6 @@ function generateSRNumber() {
     document.getElementById('srNumber').value = `SR${year}${month}${random}`;
 }
 
-// Calculate amounts
 function calculateAmounts() {
     const fare = parseFloat(document.getElementById('fare').value) || 0;
     const taxes = parseFloat(document.getElementById('taxes').value) || 0;
@@ -59,7 +57,6 @@ function calculateAmounts() {
     document.getElementById('payableAmount').value = payable.toFixed(2);
 }
 
-// Calculate balance tickets
 function calculateBalanceTickets() {
     const totalSeats = parseInt(document.getElementById('noOfSeats').value) || 0;
     const issued = parseInt(document.getElementById('ticketsIssued').value) || 0;
@@ -68,7 +65,7 @@ function calculateBalanceTickets() {
     document.getElementById('balanceTickets').value = balance > 0 ? balance : 0;
 }
 
-// Save acquisition
+// ========== DATABASE FUNCTIONS ==========
 async function saveAcquisition() {
     try {
         // Get all form values
@@ -130,26 +127,15 @@ async function saveAcquisition() {
 
         console.log('Saving data:', formData);
 
-        // Save to localStorage (for demo) or Supabase
-        if (supabaseUrl.includes('YOUR_SUPABASE_URL')) {
-            // Demo mode - save to localStorage
-            const savedData = JSON.parse(localStorage.getItem('acquisitions') || '[]');
-            savedData.push(formData);
-            localStorage.setItem('acquisitions', JSON.stringify(savedData));
-            acquisitions = savedData;
-            
-            showSuccess('Saved to local storage (demo mode). Update Supabase credentials to save to database.');
-        } else {
-            // Save to Supabase
-            const { data, error } = await supabase
-                .from('seat_acquisitions')
-                .insert([formData])
-                .select();
-            
-            if (error) throw error;
-            
-            showSuccess('Acquisition saved successfully! SR#: ' + formData.sr_number);
-        }
+        // Save to Supabase using supabaseClient
+        const { data, error } = await supabaseClient
+            .from('seat_acquisitions')
+            .insert([formData])
+            .select();
+        
+        if (error) throw error;
+        
+        showSuccess('Acquisition saved successfully! SR#: ' + formData.sr_number);
         
         // Reset form and reload data
         resetForm();
@@ -162,23 +148,17 @@ async function saveAcquisition() {
     }
 }
 
-// Load acquisitions
 async function loadAcquisitions() {
     try {
-        if (supabaseUrl.includes('YOUR_SUPABASE_URL')) {
-            // Demo mode - load from localStorage
-            acquisitions = JSON.parse(localStorage.getItem('acquisitions') || '[]');
-        } else {
-            // Load from Supabase
-            const { data, error } = await supabase
-                .from('seat_acquisitions')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(10);
-            
-            if (error) throw error;
-            acquisitions = data || [];
-        }
+        // Load from Supabase using supabaseClient
+        const { data, error } = await supabaseClient
+            .from('seat_acquisitions')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10);
+        
+        if (error) throw error;
+        acquisitions = data || [];
         
         updateTable();
         
@@ -189,7 +169,7 @@ async function loadAcquisitions() {
     }
 }
 
-// Update table display
+// ========== UI FUNCTIONS ==========
 function updateTable() {
     const tableBody = document.getElementById('acquisitionsTable');
     
@@ -223,7 +203,6 @@ function updateTable() {
     tableBody.innerHTML = html;
 }
 
-// Update dashboard
 function updateDashboard() {
     if (acquisitions.length === 0) {
         document.getElementById('totalSeats').textContent = '0';
@@ -243,7 +222,6 @@ function updateDashboard() {
     document.getElementById('pendingItems').textContent = pendingCount;
 }
 
-// View details
 function viewDetails(srNumber) {
     const item = acquisitions.find(a => a.sr_number === srNumber);
     if (item) {
@@ -256,13 +234,11 @@ function viewDetails(srNumber) {
     }
 }
 
-// Reset form
 function resetForm() {
     // Reset all form fields
     document.querySelectorAll('#acquireForm input, #acquireForm select, #acquireForm textarea').forEach(element => {
         if (element.id === 'srNumber' || element.id === 'requestDate' || 
             element.id === 'timeLimit' || element.id === 'paymentPercentage') {
-            // Keep these values
             return;
         }
         
@@ -285,19 +261,16 @@ function resetForm() {
     }
 }
 
-// Show login modal
 function showLogin() {
     alert('Login functionality will be added in next phase.\nFor now, you can use the form without login.');
 }
 
-// Show success toast
 function showSuccess(message) {
     document.getElementById('successMessage').textContent = message;
     const toast = new bootstrap.Toast(document.getElementById('successToast'));
     toast.show();
 }
 
-// Show error toast
 function showError(message) {
     document.getElementById('errorMessage').textContent = message;
     const toast = new bootstrap.Toast(document.getElementById('errorToast'));
