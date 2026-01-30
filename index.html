@@ -110,19 +110,27 @@
                                 <div class="mb-3">
                                     <label class="form-label">Investment Type</label>
                                     <select class="form-select" id="investmentType">
-                                        <option value="group_seats">Group Seats</option>
-                                        <option value="charter">Charter</option>
+                                        <option value="Company Investment">Company Investment</option>
+                                        <option value="Agent Investment">Agent Investment</option>
                                         <option value="block_space">Block Space</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">License</label>
-                                    <input type="text" class="form-control" id="license">
+                                    <label class="form-label">IATA</label>
+				    <select class="form-select" id="IATA">	
+                                    	<option value="QFC">QFC</option>
+					<option value="FCT">FCT</option>
+					<option value="AG">AG</option>
+				</select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Branch</label>
-                                    <input type="text" class="form-control" id="branch">
-                                </div>
+				    <select class="form-select" id="Branch">	
+                                    	<option value="HO">HO</option>
+					<option value="LHE">LHE</option>
+					<option value="SKT">SKT</option>
+				    </select>		
+                                    </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -136,13 +144,24 @@
                                 <div class="mb-3">
                                     <label class="form-label">Segment</label>
                                     <select class="form-select" id="segment">
-                                        <option value="domestic">Domestic</option>
-                                        <option value="international">International</option>
+                                        <option value="Umrah">Umrah</option>
+					<option value="Employment">Employment</option>
+					<option value="Hajj">Hajj</option>
+                                        <option value="Tours">Tours</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Airline</label>
-                                    <input type="text" class="form-control" id="airline">
+                                    <select class="form-select" id="Aieline">
+                                        <option value="SV">SV</option>
+					<option value="PA">PA</option>
+					<option value="PF">PF</option>
+                                        <option value="9P">9P</option>
+					<option value="J9">J9</option>
+					<option value="PK">PK</option>
+					<option value="EK">EK</option>
+					<option value="F3">F3</option>
+				</select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">No. of Seats</label>
@@ -270,7 +289,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label class="form-label">EMD Amount ($)</label>
+                                    <label class="form-label">EMD Amount</label>
                                     <input type="number" class="form-control" id="emd2Amount" step="0.01">
                                 </div>
                             </div>
@@ -294,7 +313,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label class="form-label">EMD Amount ($)</label>
+                                    <label class="form-label">EMD Amount</label>
                                     <input type="number" class="form-control" id="emd3Amount" step="0.01">
                                 </div>
                             </div>
