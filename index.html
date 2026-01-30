@@ -375,14 +375,17 @@
                 </div>
 
                 <!-- Submit Buttons -->
-                <div class="mt-4">
-                    <button type="button" class="btn btn-primary btn-lg" onclick="saveAcquisition()">
-                        <i class="bi bi-save me-2"></i>Save Acquisition
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary ms-2" onclick="resetForm()">
-                        <i class="bi bi-arrow-clockwise me-2"></i>Reset Form
-                    </button>
-                </div>
+		<div class="mt-4">
+    			<button type="button" class="btn btn-primary btn-lg" onclick="saveAcquisition()">
+        			<i class="bi bi-save me-2"></i>Save Acquisition
+    		</button>
+    		<button type="button" class="btn btn-outline-secondary ms-2" onclick="resetForm()">
+        		<i class="bi bi-arrow-clockwise me-2"></i>Reset Form
+    		</button>
+    		<button type="button" class="btn btn-outline-warning ms-2" onclick="cancelEdit()" id="cancelEditBtn" style="display: none;">
+        		<i class="bi bi-x-circle me-2"></i>Cancel Edit
+    		</button>
+		</div>
             </div>
         </div>
 

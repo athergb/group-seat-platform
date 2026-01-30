@@ -5,6 +5,7 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // ========== GLOBAL VARIABLES ==========
 let acquisitions = [];
+let editingId = null; // Track which record is being edited
 
 // ========== MAIN INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', function() {
@@ -28,6 +29,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Generate SR number
     generateSRNumber();
+    
+    // Update submit button text
+    updateSubmitButton();
 });
 
 // ========== FORM FUNCTIONS ==========
@@ -38,6 +42,8 @@ function initializeForm() {
 }
 
 function generateSRNumber() {
+    if (editingId) return; // Don't regenerate if editing
+    
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -65,6 +71,22 @@ function calculateBalanceTickets() {
     document.getElementById('balanceTickets').value = balance > 0 ? balance : 0;
 }
 
+function updateSubmitButton() {
+    const submitBtn = document.querySelector('button[onclick="saveAcquisition()"]');
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    
+    if (submitBtn) {
+        if (editingId) {
+            submitBtn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update Acquisition';
+            submitBtn.className = 'btn btn-warning btn-lg';
+            if (cancelBtn) cancelBtn.style.display = 'inline-block';
+        } else {
+            submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Save Acquisition';
+            submitBtn.className = 'btn btn-primary btn-lg';
+            if (cancelBtn) cancelBtn.style.display = 'none';
+        }
+    }
+}
 // ========== DATABASE FUNCTIONS ==========
 async function saveAcquisition() {
     try {
@@ -122,20 +144,36 @@ async function saveAcquisition() {
             status: document.getElementById('overallStatus').value,
             notes: document.getElementById('notes').value || null,
             
-            created_at: new Date().toISOString()
+            updated_at: new Date().toISOString()
         };
 
         console.log('Saving data:', formData);
 
-        // Save to Supabase using supabaseClient
-        const { data, error } = await supabaseClient
-            .from('seat_acquisitions')
-            .insert([formData])
-            .select();
-        
-        if (error) throw error;
-        
-        showSuccess('Acquisition saved successfully! SR#: ' + formData.sr_number);
+        if (editingId) {
+            // UPDATE existing record
+            const { data, error } = await supabaseClient
+                .from('seat_acquisitions')
+                .update(formData)
+                .eq('id', editingId)
+                .select();
+            
+            if (error) throw error;
+            
+            showSuccess('Acquisition updated successfully! SR#: ' + formData.sr_number);
+            editingId = null; // Reset editing mode
+        } else {
+            // INSERT new record
+            formData.created_at = new Date().toISOString();
+            
+            const { data, error } = await supabaseClient
+                .from('seat_acquisitions')
+                .insert([formData])
+                .select();
+            
+            if (error) throw error;
+            
+            showSuccess('Acquisition saved successfully! SR#: ' + formData.sr_number);
+        }
         
         // Reset form and reload data
         resetForm();
@@ -148,9 +186,123 @@ async function saveAcquisition() {
     }
 }
 
+// Load data for editing
+async function editAcquisition(id) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('seat_acquisitions')
+            .select('*')
+            .eq('id', id)
+            .single();
+        
+        if (error) throw error;
+        
+        // Store editing ID
+        editingId = id;
+        
+        // Fill form with data
+        document.getElementById('srNumber').value = data.sr_number;
+        document.getElementById('requestDate').value = data.request_date;
+        document.getElementById('investmentType').value = data.investment_type;
+        document.getElementById('license').value = data.license;
+        document.getElementById('branch').value = data.branch;
+        document.getElementById('airlinePnr').value = data.airline_pnr;
+        document.getElementById('gdsPnr').value = data.gds_pnr || '';
+        document.getElementById('segment').value = data.segment;
+        document.getElementById('airline').value = data.airline;
+        document.getElementById('noOfSeats').value = data.no_of_seats;
+        document.getElementById('outboundDate').value = data.outbound_date || '';
+        document.getElementById('inboundDate').value = data.inbound_date || '';
+        document.getElementById('sector').value = data.sector;
+        
+        // Financial
+        document.getElementById('fare').value = data.fare;
+        document.getElementById('taxes').value = data.taxes;
+        document.getElementById('paymentPercentage').value = data.payment_percentage;
+        document.getElementById('issuanceDate').value = data.issuance_date || '';
+        document.getElementById('timeLimit').value = data.time_limit;
+        
+        // 1st EMD
+        document.getElementById('emdRefundDate').value = data.emd_refund_date || '';
+        document.getElementById('emd1Number').value = data.first_emd_number || '';
+        document.getElementById('emd1Amount').value = data.first_emd_amount || '';
+        document.getElementById('emd1Status').value = data.first_emd_status || '';
+        document.getElementById('emd1TimeLimit').value = data.first_emd_time_limit || '';
+        document.getElementById('emd1IssuanceDate').value = data.first_emd_issuance_date || '';
+        document.getElementById('emd1PaymentPercent').value = data.first_emd_payment_percentage || '';
+        
+        // 2nd EMD
+        document.getElementById('emd2Number').value = data.second_emd_number || '';
+        document.getElementById('emd2Amount').value = data.second_emd_amount || '';
+        document.getElementById('emd2TimeLimit').value = data.second_emd_time_limit || '';
+        
+        // 3rd EMD
+        document.getElementById('emd3Number').value = data.third_emd_number || '';
+        document.getElementById('emd3Amount').value = data.third_emd_amount || '';
+        document.getElementById('emd3TimeLimit').value = data.third_emd_time_limit || '';
+        
+        // Ticketing
+        document.getElementById('ticketingStatus').value = data.ticketing_status;
+        document.getElementById('ticketsIssued').value = data.no_of_tickets_issued;
+        document.getElementById('lastTicketDate').value = data.last_ticket_date || '';
+        
+        // Overall
+        document.getElementById('overallStatus').value = data.status;
+        document.getElementById('notes').value = data.notes || '';
+        
+        // Calculate amounts
+        calculateAmounts();
+        calculateBalanceTickets();
+        
+        // Update button
+        updateSubmitButton();
+        
+        // Scroll to form
+        document.getElementById('acquireForm').scrollIntoView({ behavior: 'smooth' });
+        
+        showSuccess('Editing mode: ' + data.sr_number);
+        
+    } catch (error) {
+        console.error('Error loading for edit:', error);
+        showError('Failed to load for editing: ' + error.message);
+    }
+}
+
+// Delete acquisition
+async function deleteAcquisition(id, srNumber) {
+    if (!confirm(`Are you sure you want to delete acquisition ${srNumber}?\n\nThis action cannot be undone!`)) {
+        return;
+    }
+    
+    try {
+        const { error } = await supabaseClient
+            .from('seat_acquisitions')
+            .delete()
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        // If editing this record, cancel edit mode
+        if (editingId === id) {
+            editingId = null;
+            resetForm();
+            updateSubmitButton();
+        }
+        
+        showSuccess('Acquisition deleted successfully: ' + srNumber);
+        
+        // Reload data
+        loadAcquisitions();
+        updateDashboard();
+        
+    } catch (error) {
+        console.error('Error deleting:', error);
+        showError('Failed to delete: ' + error.message);
+    }
+}
+
 async function loadAcquisitions() {
     try {
-        // Load from Supabase using supabaseClient
         const { data, error } = await supabaseClient
             .from('seat_acquisitions')
             .select('*')
@@ -174,7 +326,7 @@ function updateTable() {
     const tableBody = document.getElementById('acquisitionsTable');
     
     if (acquisitions.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No acquisitions yet. Submit a form above!</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No acquisitions yet. Submit a form above!</td></tr>';
         return;
     }
     
@@ -183,17 +335,24 @@ function updateTable() {
         const statusClass = item.status === 'approved' ? 'status-approved' : 
                           item.status === 'draft' ? 'status-draft' : 'status-pending';
         
+        // Check if this item is being edited
+        const isEditing = editingId === item.id;
+        const editingClass = isEditing ? 'table-warning' : '';
+        
         html += `
-            <tr>
-                <td><strong>${item.sr_number}</strong></td>
+            <tr class="${editingClass}">
+                <td><strong>${item.sr_number}</strong> ${isEditing ? '✏️' : ''}</td>
                 <td>${item.airline_pnr}</td>
                 <td>${item.no_of_seats}</td>
                 <td>${item.fare?.toFixed(2) || '0.00'}</td>
                 <td><span class="status-badge ${statusClass}">${item.status}</span></td>
                 <td>${new Date(item.created_at).toLocaleDateString()}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="viewDetails('${item.sr_number}')">
-                        <i class="bi bi-eye"></i>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editAcquisition('${item.id}')" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteAcquisition('${item.id}', '${item.sr_number}')" title="Delete">
+                        <i class="bi bi-trash"></i>
                     </button>
                 </td>
             </tr>
@@ -235,10 +394,13 @@ function viewDetails(srNumber) {
 }
 
 function resetForm() {
+    // Reset editing mode
+    editingId = null;
+    
     // Reset all form fields
     document.querySelectorAll('#acquireForm input, #acquireForm select, #acquireForm textarea').forEach(element => {
-        if (element.id === 'srNumber' || element.id === 'requestDate' || 
-            element.id === 'timeLimit' || element.id === 'paymentPercentage') {
+        if (element.id === 'requestDate' || element.id === 'timeLimit' || element.id === 'paymentPercentage') {
+            // Keep default values for these
             return;
         }
         
@@ -251,13 +413,42 @@ function resetForm() {
         }
     });
     
+    // Set default dates
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('requestDate').value = today;
+    
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
+    
     // Set default values
-    initializeForm();
+    document.getElementById('paymentPercentage').value = 100;
+    document.getElementById('ticketingStatus').value = 'pending';
+    document.getElementById('overallStatus').value = 'draft';
+    
+    // Generate new SR number
+    generateSRNumber();
+    
+    // Calculate
+    calculateAmounts();
+    calculateBalanceTickets();
+    
+    // Update button
+    updateSubmitButton();
     
     // Reset to first tab
     const firstTab = document.querySelector('#basic-tab');
     if (firstTab) {
         firstTab.click();
+    }
+    
+    // Clear any editing highlights
+    updateTable();
+}
+
+function cancelEdit() {
+    if (editingId && confirm('Cancel editing? Any unsaved changes will be lost.')) {
+        resetForm();
     }
 }
 
