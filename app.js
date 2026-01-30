@@ -1,6 +1,6 @@
 // Initialize Supabase
-const supabaseUrl = 'https://ojlxkzkialguthdeiley.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94';
+const supabaseUrl = 'YOUR_SUPABASE_URL_HERE';
+const supabaseKey = 'YOUR_SUPABASE_ANON_KEY_HERE';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // DOM Elements
@@ -208,7 +208,7 @@ function updateTable() {
                 <td><strong>${item.sr_number}</strong></td>
                 <td>${item.airline_pnr}</td>
                 <td>${item.no_of_seats}</td>
-                <td>$${item.fare?.toFixed(2) || '0.00'}</td>
+                <td>${item.fare?.toFixed(2) || '0.00'}</td>
                 <td><span class="status-badge ${statusClass}">${item.status}</span></td>
                 <td>${new Date(item.created_at).toLocaleDateString()}</td>
                 <td>
@@ -227,7 +227,7 @@ function updateTable() {
 function updateDashboard() {
     if (acquisitions.length === 0) {
         document.getElementById('totalSeats').textContent = '0';
-        document.getElementById('totalRevenue').textContent = '$0';
+        document.getElementById('totalRevenue').textContent = '0.00';
         document.getElementById('totalAcquisitions').textContent = '0';
         document.getElementById('pendingItems').textContent = '0';
         return;
@@ -238,7 +238,7 @@ function updateDashboard() {
     const pendingCount = acquisitions.filter(item => item.status === 'draft').length;
     
     document.getElementById('totalSeats').textContent = totalSeats;
-    document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toFixed(2);
+    document.getElementById('totalRevenue').textContent = totalRevenue.toFixed(2);
     document.getElementById('totalAcquisitions').textContent = acquisitions.length;
     document.getElementById('pendingItems').textContent = pendingCount;
 }
@@ -250,7 +250,7 @@ function viewDetails(srNumber) {
         alert(`Details for ${srNumber}:\n\n` +
               `Airline PNR: ${item.airline_pnr}\n` +
               `Seats: ${item.no_of_seats}\n` +
-              `Fare: $${item.fare}\n` +
+              `Fare: ${item.fare}\n` +
               `Status: ${item.status}\n` +
               `Created: ${new Date(item.created_at).toLocaleString()}`);
     }
