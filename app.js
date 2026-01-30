@@ -9,29 +9,35 @@ let editingId = null;
 
 // ========== MAIN INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('App initialized');
     initializeForm();
     loadAcquisitions();
     
     // Set default dates
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('requestDate').value = today;
+    const dateInput = document.getElementById('requestDate');
+    if (dateInput) dateInput.value = today;
     
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
-    document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
+    const timeLimitInput = document.getElementById('timeLimit');
+    if (timeLimitInput) timeLimitInput.value = nextWeek.toISOString().split('T')[0];
     
     // Auto-calculate events
-    document.getElementById('fare').addEventListener('input', calculateAmounts);
-    document.getElementById('taxes').addEventListener('input', calculateAmounts);
-    document.getElementById('paymentPercentage').addEventListener('input', calculateAmounts);
-    document.getElementById('noOfSeats').addEventListener('input', calculateBalanceTickets);
-    document.getElementById('ticketsIssued').addEventListener('input', calculateBalanceTickets);
+    const fareInput = document.getElementById('fare');
+    const taxesInput = document.getElementById('taxes');
+    const paymentInput = document.getElementById('paymentPercentage');
+    const seatsInput = document.getElementById('noOfSeats');
+    const ticketsInput = document.getElementById('ticketsIssued');
+    
+    if (fareInput) fareInput.addEventListener('input', calculateAmounts);
+    if (taxesInput) taxesInput.addEventListener('input', calculateAmounts);
+    if (paymentInput) paymentInput.addEventListener('input', calculateAmounts);
+    if (seatsInput) seatsInput.addEventListener('input', calculateBalanceTickets);
+    if (ticketsInput) ticketsInput.addEventListener('input', calculateBalanceTickets);
     
     // Generate SR number
     generateSRNumber();
-    
-    // Update submit button text
-    updateSubmitButton();
 });
 
 // ========== FORM FUNCTIONS ==========
@@ -44,152 +50,113 @@ function initializeForm() {
 function generateSRNumber() {
     if (editingId) return;
     
+    const srField = document.getElementById('srNumber');
+    if (!srField) return;
+    
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    document.getElementById('srNumber').value = `SR${year}${month}${random}`;
+    srField.value = `SR${year}${month}${random}`;
 }
 
 function calculateAmounts() {
-    const fare = parseFloat(document.getElementById('fare').value) || 0;
-    const taxes = parseFloat(document.getElementById('taxes').value) || 0;
-    const percentage = parseFloat(document.getElementById('paymentPercentage').value) || 100;
+    const fare = parseFloat(document.getElementById('fare')?.value) || 0;
+    const taxes = parseFloat(document.getElementById('taxes')?.value) || 0;
+    const percentage = parseFloat(document.getElementById('paymentPercentage')?.value) || 100;
     
     const total = fare + taxes;
     const payable = total * (percentage / 100);
     
-    document.getElementById('pnrAmount').value = total.toFixed(2);
-    document.getElementById('payableAmount').value = payable.toFixed(2);
+    const pnrField = document.getElementById('pnrAmount');
+    const payableField = document.getElementById('payableAmount');
+    
+    if (pnrField) pnrField.value = total.toFixed(2);
+    if (payableField) payableField.value = payable.toFixed(2);
 }
 
 function calculateBalanceTickets() {
-    const totalSeats = parseInt(document.getElementById('noOfSeats').value) || 0;
-    const issued = parseInt(document.getElementById('ticketsIssued').value) || 0;
+    const totalSeats = parseInt(document.getElementById('noOfSeats')?.value) || 0;
+    const issued = parseInt(document.getElementById('ticketsIssued')?.value) || 0;
     const balance = totalSeats - issued;
     
-    document.getElementById('balanceTickets').value = balance > 0 ? balance : 0;
-}
-
-function updateSubmitButton() {
-    const submitBtn = document.querySelector('button[onclick="saveAcquisition()"]');
-    const cancelBtn = document.getElementById('cancelEditBtn');
-    
-    if (submitBtn) {
-        if (editingId) {
-            submitBtn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update Acquisition';
-            submitBtn.className = 'btn btn-warning btn-lg';
-            if (cancelBtn) cancelBtn.style.display = 'inline-block';
-        } else {
-            submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Save Acquisition';
-            submitBtn.className = 'btn btn-primary btn-lg';
-            if (cancelBtn) cancelBtn.style.display = 'none';
-        }
-    }
-}
-
-// ========== SAFE VALUE GETTER ==========
-function getFormValue(id, isNumber = false, isDate = false) {
-    const element = document.getElementById(id);
-    if (!element) return null;
-    
-    const value = element.value;
-    
-    // Return empty string for empty text fields
-    if (value === '' && !isNumber && !isDate) return '';
-    
-    // Return null for empty number/date fields
-    if (value === '') return null;
-    
-    if (isNumber) return parseFloat(value) || 0;
-    if (isDate) return value;
-    
-    return value;
+    const balanceField = document.getElementById('balanceTickets');
+    if (balanceField) balanceField.value = balance > 0 ? balance : 0;
 }
 
 // ========== DATABASE FUNCTIONS ==========
 async function saveAcquisition() {
+    console.log('Save acquisition started');
+    
+    // Disable save button to prevent double click
+    const saveBtn = document.querySelector('button[onclick="saveAcquisition()"]');
+    const originalText = saveBtn?.innerHTML;
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Saving...';
+    }
+    
     try {
-        // VALIDATE REQUIRED FIELDS
-        const requiredFields = [
-            { id: 'airlinePnr', name: 'Airline PNR' },
-            { id: 'noOfSeats', name: 'Number of Seats' },
-            { id: 'fare', name: 'Fare' },
-            { id: 'timeLimit', name: 'Time Limit' }
-        ];
-        
-        const missingFields = [];
-        requiredFields.forEach(field => {
-            const value = getFormValue(field.id);
-            if (!value && value !== 0) {
-                missingFields.push(field.name);
-            }
-        });
-        
-        if (missingFields.length > 0) {
-            showError('Please fill required fields: ' + missingFields.join(', '));
-            return;
-        }
-        
-        // Get all form values - ALLOW EMPTY/OPTIONAL FIELDS
+        // Get only BASIC fields (others can be added later via edit)
         const formData = {
-            // Basic Information (some required)
-            sr_number: getFormValue('srNumber'),
-            request_date: getFormValue('requestDate', false, true) || new Date().toISOString().split('T')[0],
-            investment_type: getFormValue('investmentType') || 'group_seats',
-            license: getFormValue('license') || '',
-            branch: getFormValue('branch') || '',
-            airline_pnr: getFormValue('airlinePnr'), // REQUIRED
-            gds_pnr: getFormValue('gdsPnr'),
-            segment: getFormValue('segment') || 'domestic',
-            airline: getFormValue('airline') || '',
-            no_of_seats: getFormValue('noOfSeats', true) || 0, // REQUIRED
-            outbound_date: getFormValue('outboundDate', false, true),
-            inbound_date: getFormValue('inboundDate', false, true),
-            sector: getFormValue('sector') || '',
+            // Basic required fields
+            sr_number: document.getElementById('srNumber')?.value || '',
+            request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
+            airline_pnr: document.getElementById('airlinePnr')?.value || '',
+            no_of_seats: parseInt(document.getElementById('noOfSeats')?.value) || 0,
+            fare: parseFloat(document.getElementById('fare')?.value) || 0,
+            time_limit: document.getElementById('timeLimit')?.value || '',
             
-            // Financial (some required)
-            fare: getFormValue('fare', true) || 0, // REQUIRED
-            taxes: getFormValue('taxes', true) || 0,
-            payable_amount: getFormValue('payableAmount', true) || 0,
-            pnr_amount: getFormValue('pnrAmount', true) || 0,
-            issuance_date: getFormValue('issuanceDate', false, true),
-            time_limit: getFormValue('timeLimit', false, true), // REQUIRED
-            payment_percentage: getFormValue('paymentPercentage', true) || 100,
+            // Optional basic fields
+            investment_type: document.getElementById('investmentType')?.value || 'group_seats',
+            license_number: document.getElementById('license')?.value || '',
+            branch: document.getElementById('branch')?.value || '',
+            gds_pnr: document.getElementById('gdsPnr')?.value || null,
+            segment: document.getElementById('segment')?.value || 'domestic',
+            airline: document.getElementById('airline')?.value || '',
+            outbound_date: document.getElementById('outboundDate')?.value || null,
+            inbound_date: document.getElementById('inboundDate')?.value || null,
+            sector: document.getElementById('sector')?.value || '',
+            taxes: parseFloat(document.getElementById('taxes')?.value) || 0,
+            payable_amount: parseFloat(document.getElementById('payableAmount')?.value) || 0,
+            pnr_amount: parseFloat(document.getElementById('pnrAmount')?.value) || 0,
+            issuance_date: document.getElementById('issuanceDate')?.value || null,
+            payment_percentage: parseFloat(document.getElementById('paymentPercentage')?.value) || 100,
             
-            // 1st EMD Details (ALL OPTIONAL - can fill later)
-            emd_refund_date: getFormValue('emdRefundDate', false, true),
-            first_emd_number: getFormValue('emd1Number'),
-            first_emd_amount: getFormValue('emd1Amount', true),
-            first_emd_status: getFormValue('emd1Status'),
-            first_emd_time_limit: getFormValue('emd1TimeLimit', false, true),
-            first_emd_issuance_date: getFormValue('emd1IssuanceDate', false, true),
-            first_emd_payment_percentage: getFormValue('emd1PaymentPercent', true),
+            // EMD fields - can be empty initially
+            emd_refund_date: document.getElementById('emdRefundDate')?.value || null,
+            first_emd_number: document.getElementById('emd1Number')?.value || null,
+            first_emd_amount: document.getElementById('emd1Amount')?.value ? parseFloat(document.getElementById('emd1Amount').value) : null,
+            first_emd_status: document.getElementById('emd1Status')?.value || null,
+            first_emd_time_limit: document.getElementById('emd1TimeLimit')?.value || null,
+            first_emd_issuance_date: document.getElementById('emd1IssuanceDate')?.value || null,
+            first_emd_payment_percentage: document.getElementById('emd1PaymentPercent')?.value ? parseFloat(document.getElementById('emd1PaymentPercent').value) : null,
             
-            // 2nd EMD Details (ALL OPTIONAL - can fill later)
-            second_emd_number: getFormValue('emd2Number'),
-            second_emd_amount: getFormValue('emd2Amount', true),
-            second_emd_time_limit: getFormValue('emd2TimeLimit', false, true),
+            // More EMD fields
+            second_emd_number: document.getElementById('emd2Number')?.value || null,
+            second_emd_amount: document.getElementById('emd2Amount')?.value ? parseFloat(document.getElementById('emd2Amount').value) : null,
+            second_emd_time_limit: document.getElementById('emd2TimeLimit')?.value || null,
+            third_emd_number: document.getElementById('emd3Number')?.value || null,
+            third_emd_amount: document.getElementById('emd3Amount')?.value ? parseFloat(document.getElementById('emd3Amount').value) : null,
+            third_emd_time_limit: document.getElementById('emd3TimeLimit')?.value || null,
             
-            // 3rd EMD Details (ALL OPTIONAL - can fill later)
-            third_emd_number: getFormValue('emd3Number'),
-            third_emd_amount: getFormValue('emd3Amount', true),
-            third_emd_time_limit: getFormValue('emd3TimeLimit', false, true),
+            // Ticketing
+            ticketing_status: document.getElementById('ticketingStatus')?.value || 'pending',
+            no_of_tickets_issued: parseInt(document.getElementById('ticketsIssued')?.value) || 0,
+            balance_tickets: parseInt(document.getElementById('balanceTickets')?.value) || 0,
+            last_ticket_date: document.getElementById('lastTicketDate')?.value || null,
             
-            // Ticketing Details (ALL OPTIONAL - can fill later)
-            ticketing_status: getFormValue('ticketingStatus') || 'pending',
-            no_of_tickets_issued: getFormValue('ticketsIssued', true) || 0,
-            balance_tickets: getFormValue('balanceTickets', true) || 0,
-            last_ticket_date: getFormValue('lastTicketDate', false, true),
-            
-            // Overall Status
-            status: getFormValue('overallStatus') || 'draft',
-            notes: getFormValue('notes'),
-            
-            updated_at: new Date().toISOString()
+            // Status
+            status: document.getElementById('overallStatus')?.value || 'draft',
+            notes: document.getElementById('notes')?.value || null
         };
 
-        console.log('Saving acquisition:', formData);
+        console.log('Saving data:', formData);
+
+        // Validate required fields
+        if (!formData.sr_number || !formData.airline_pnr || !formData.time_limit) {
+            throw new Error('SR Number, Airline PNR and Time Limit are required');
+        }
 
         if (editingId) {
             // UPDATE existing record
@@ -199,37 +166,48 @@ async function saveAcquisition() {
                 .eq('id', editingId)
                 .select();
             
-            if (error) throw error;
+            if (error) {
+                console.error('Update error:', error);
+                throw error;
+            }
             
             showSuccess('✅ Acquisition updated successfully! SR#: ' + formData.sr_number);
             editingId = null;
         } else {
             // INSERT new record
-            formData.created_at = new Date().toISOString();
-            
             const { data, error } = await supabaseClient
                 .from('seat_acquisitions')
                 .insert([formData])
                 .select();
             
-            if (error) throw error;
+            if (error) {
+                console.error('Insert error:', error);
+                throw error;
+            }
             
             showSuccess('✅ Acquisition saved successfully! SR#: ' + formData.sr_number);
         }
         
-        // Reset form and reload data
+        // Reset and reload
         resetForm();
         loadAcquisitions();
-        updateDashboard();
         
     } catch (error) {
-        console.error('Error saving:', error);
-        showError('❌ Failed to save: ' + error.message);
+        console.error('Error in saveAcquisition:', error);
+        showError('❌ Save failed: ' + (error.message || 'Unknown error'));
+    } finally {
+        // Re-enable save button
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText || '<i class="bi bi-save me-2"></i>Save Acquisition';
+        }
     }
 }
 
 async function editAcquisition(id) {
     try {
+        console.log('Editing acquisition:', id);
+        
         const { data, error } = await supabaseClient
             .from('seat_acquisitions')
             .select('*')
@@ -240,76 +218,81 @@ async function editAcquisition(id) {
         
         editingId = id;
         
-        // Fill form with data - handle null/empty values
-        document.getElementById('srNumber').value = data.sr_number || '';
-        document.getElementById('requestDate').value = data.request_date || '';
-        document.getElementById('investmentType').value = data.investment_type || 'group_seats';
-        document.getElementById('license').value = data.license || '';
-        document.getElementById('branch').value = data.branch || '';
-        document.getElementById('airlinePnr').value = data.airline_pnr || '';
-        document.getElementById('gdsPnr').value = data.gds_pnr || '';
-        document.getElementById('segment').value = data.segment || 'domestic';
-        document.getElementById('airline').value = data.airline || '';
-        document.getElementById('noOfSeats').value = data.no_of_seats || '';
-        document.getElementById('outboundDate').value = data.outbound_date || '';
-        document.getElementById('inboundDate').value = data.inbound_date || '';
-        document.getElementById('sector').value = data.sector || '';
+        // Fill form with existing data
+        const fields = [
+            { id: 'srNumber', value: data.sr_number },
+            { id: 'requestDate', value: data.request_date },
+            { id: 'investmentType', value: data.investment_type },
+            { id: 'license', value: data.license_number || data.license || '' },
+            { id: 'branch', value: data.branch },
+            { id: 'airlinePnr', value: data.airline_pnr },
+            { id: 'gdsPnr', value: data.gds_pnr || '' },
+            { id: 'segment', value: data.segment },
+            { id: 'airline', value: data.airline || '' },
+            { id: 'noOfSeats', value: data.no_of_seats },
+            { id: 'outboundDate', value: data.outbound_date || '' },
+            { id: 'inboundDate', value: data.inbound_date || '' },
+            { id: 'sector', value: data.sector || '' },
+            { id: 'fare', value: data.fare },
+            { id: 'taxes', value: data.taxes || '' },
+            { id: 'paymentPercentage', value: data.payment_percentage || 100 },
+            { id: 'issuanceDate', value: data.issuance_date || '' },
+            { id: 'timeLimit', value: data.time_limit },
+            { id: 'emdRefundDate', value: data.emd_refund_date || '' },
+            { id: 'emd1Number', value: data.first_emd_number || '' },
+            { id: 'emd1Amount', value: data.first_emd_amount || '' },
+            { id: 'emd1Status', value: data.first_emd_status || '' },
+            { id: 'emd1TimeLimit', value: data.first_emd_time_limit || '' },
+            { id: 'emd1IssuanceDate', value: data.first_emd_issuance_date || '' },
+            { id: 'emd1PaymentPercent', value: data.first_emd_payment_percentage || '' },
+            { id: 'emd2Number', value: data.second_emd_number || '' },
+            { id: 'emd2Amount', value: data.second_emd_amount || '' },
+            { id: 'emd2TimeLimit', value: data.second_emd_time_limit || '' },
+            { id: 'emd3Number', value: data.third_emd_number || '' },
+            { id: 'emd3Amount', value: data.third_emd_amount || '' },
+            { id: 'emd3TimeLimit', value: data.third_emd_time_limit || '' },
+            { id: 'ticketingStatus', value: data.ticketing_status || 'pending' },
+            { id: 'ticketsIssued', value: data.no_of_tickets_issued || '' },
+            { id: 'lastTicketDate', value: data.last_ticket_date || '' },
+            { id: 'overallStatus', value: data.status || 'draft' },
+            { id: 'notes', value: data.notes || '' }
+        ];
         
-        // Financial
-        document.getElementById('fare').value = data.fare || '';
-        document.getElementById('taxes').value = data.taxes || '';
-        document.getElementById('paymentPercentage').value = data.payment_percentage || 100;
-        document.getElementById('issuanceDate').value = data.issuance_date || '';
-        document.getElementById('timeLimit').value = data.time_limit || '';
+        fields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element) {
+                element.value = field.value || '';
+            }
+        });
         
-        // 1st EMD (may be empty)
-        document.getElementById('emdRefundDate').value = data.emd_refund_date || '';
-        document.getElementById('emd1Number').value = data.first_emd_number || '';
-        document.getElementById('emd1Amount').value = data.first_emd_amount || '';
-        document.getElementById('emd1Status').value = data.first_emd_status || '';
-        document.getElementById('emd1TimeLimit').value = data.first_emd_time_limit || '';
-        document.getElementById('emd1IssuanceDate').value = data.first_emd_issuance_date || '';
-        document.getElementById('emd1PaymentPercent').value = data.first_emd_payment_percentage || '';
-        
-        // 2nd EMD (may be empty)
-        document.getElementById('emd2Number').value = data.second_emd_number || '';
-        document.getElementById('emd2Amount').value = data.second_emd_amount || '';
-        document.getElementById('emd2TimeLimit').value = data.second_emd_time_limit || '';
-        
-        // 3rd EMD (may be empty)
-        document.getElementById('emd3Number').value = data.third_emd_number || '';
-        document.getElementById('emd3Amount').value = data.third_emd_amount || '';
-        document.getElementById('emd3TimeLimit').value = data.third_emd_time_limit || '';
-        
-        // Ticketing
-        document.getElementById('ticketingStatus').value = data.ticketing_status || 'pending';
-        document.getElementById('ticketsIssued').value = data.no_of_tickets_issued || '';
-        document.getElementById('lastTicketDate').value = data.last_ticket_date || '';
-        
-        // Overall
-        document.getElementById('overallStatus').value = data.status || 'draft';
-        document.getElementById('notes').value = data.notes || '';
-        
-        // Calculate amounts
+        // Calculate derived fields
         calculateAmounts();
         calculateBalanceTickets();
         
-        // Update button
-        updateSubmitButton();
+        // Update button text
+        const saveBtn = document.querySelector('button[onclick="saveAcquisition()"]');
+        if (saveBtn) {
+            saveBtn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update Acquisition';
+            saveBtn.className = 'btn btn-warning btn-lg';
+        }
+        
+        // Show cancel button
+        const cancelBtn = document.getElementById('cancelEditBtn');
+        if (cancelBtn) cancelBtn.style.display = 'inline-block';
         
         // Scroll to form
-        document.getElementById('acquireForm').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('acquireForm')?.scrollIntoView({ behavior: 'smooth' });
         
-        showSuccess('✏️ Editing: ' + data.sr_number + ' - You can now update EMD details');
+        showSuccess('✏️ Editing: ' + data.sr_number);
         
     } catch (error) {
         console.error('Error loading for edit:', error);
-        showError('Failed to load for editing: ' + error.message);
+        showError('Failed to load for editing');
     }
 }
 
 async function deleteAcquisition(id, srNumber) {
-    if (!confirm(`🗑️ Delete ${srNumber}?\n\nFlight cancelled? This cannot be undone!`)) {
+    if (!confirm(`🗑️ Delete ${srNumber}?\n\nThis action cannot be undone!`)) {
         return;
     }
     
@@ -321,24 +304,27 @@ async function deleteAcquisition(id, srNumber) {
         
         if (error) throw error;
         
+        // If editing this record, reset form
         if (editingId === id) {
             editingId = null;
             resetForm();
         }
         
-        showSuccess('🗑️ Deleted: ' + srNumber + ' (Flight cancelled)');
+        showSuccess('🗑️ Deleted: ' + srNumber);
         
+        // Reload data
         loadAcquisitions();
-        updateDashboard();
         
     } catch (error) {
         console.error('Error deleting:', error);
-        showError('Failed to delete: ' + error.message);
+        showError('Failed to delete');
     }
 }
 
 async function loadAcquisitions() {
     try {
+        console.log('Loading acquisitions...');
+        
         const { data, error } = await supabaseClient
             .from('seat_acquisitions')
             .select('*')
@@ -346,12 +332,15 @@ async function loadAcquisitions() {
             .limit(10);
         
         if (error) throw error;
+        
         acquisitions = data || [];
+        console.log('Loaded', acquisitions.length, 'acquisitions');
         
         updateTable();
+        updateDashboard();
         
     } catch (error) {
-        console.error('Error loading:', error);
+        console.error('Error loading acquisitions:', error);
         acquisitions = [];
         updateTable();
     }
@@ -360,43 +349,80 @@ async function loadAcquisitions() {
 // ========== UI FUNCTIONS ==========
 function updateTable() {
     const tableBody = document.getElementById('acquisitionsTable');
+    if (!tableBody) {
+        console.error('Table body not found!');
+        return;
+    }
     
-    if (acquisitions.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No acquisitions yet. Start by saving basic details!</td></tr>';
+    if (!acquisitions || acquisitions.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                    <p class="mt-2 text-muted">No acquisitions yet</p>
+                </td>
+            </tr>
+        `;
         return;
     }
     
     let html = '';
+    
     acquisitions.forEach(item => {
-        const statusClass = item.status === 'approved' ? 'status-approved' : 
-                          item.status === 'draft' ? 'status-draft' : 'status-pending';
+        const srNumber = item.sr_number || 'N/A';
+        const airlinePnr = item.airline_pnr || '';
+        const seats = item.no_of_seats || 0;
+        const fare = item.fare ? parseFloat(item.fare).toFixed(2) : '0.00';
+        const status = item.status || 'draft';
+        const date = item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A';
+        const id = item.id || '';
         
-        const isEditing = editingId === item.id;
-        const editingClass = isEditing ? 'table-warning' : '';
+        // Status styling
+        let statusClass = 'status-draft';
+        let statusText = 'Draft';
+        if (status === 'approved') {
+            statusClass = 'status-approved';
+            statusText = 'Approved';
+        } else if (status === 'pending') {
+            statusClass = 'status-pending';
+            statusText = 'Pending';
+        }
         
-        // Check if EMD details are filled
+        // Check if editing
+        const isEditing = editingId === id;
+        const rowClass = isEditing ? 'table-warning' : '';
+        
+        // Check EMD status
         const hasEMD = item.first_emd_number || item.second_emd_number || item.third_emd_number;
-        const emdBadge = hasEMD ? '<span class="badge bg-success ms-1">EMD</span>' : '<span class="badge bg-secondary ms-1">No EMD</span>';
+        const emdBadge = hasEMD 
+            ? '<span class="badge bg-success ms-1" title="Has EMD">✓</span>' 
+            : '<span class="badge bg-secondary ms-1" title="No EMD yet">…</span>';
         
         html += `
-            <tr class="${editingClass}">
+            <tr class="${rowClass}">
                 <td>
-                    <strong>${item.sr_number}</strong> 
-                    ${isEditing ? '✏️' : ''}
+                    <strong>${srNumber}</strong>
+                    ${isEditing ? '<span class="badge bg-warning ms-1">Editing</span>' : ''}
                     ${emdBadge}
                 </td>
-                <td>${item.airline_pnr}</td>
-                <td>${item.no_of_seats}</td>
-                <td>${item.fare?.toFixed(2) || '0.00'}</td>
-                <td><span class="status-badge ${statusClass}">${item.status}</span></td>
-                <td>${new Date(item.created_at).toLocaleDateString()}</td>
+                <td>${airlinePnr}</td>
+                <td>${seats}</td>
+                <td>${fare}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>${date}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editAcquisition('${item.id}')" title="Edit/Add EMD">
-                        <i class="bi bi-pencil"></i> Edit
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteAcquisition('${item.id}', '${item.sr_number}')" title="Delete">
-                        <i class="bi bi-trash"></i>
-                    </button>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary" 
+                                onclick="editAcquisition('${id}')" 
+                                title="Edit / Add EMD">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" 
+                                onclick="deleteAcquisition('${id}', '${srNumber}')" 
+                                title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -406,11 +432,11 @@ function updateTable() {
 }
 
 function updateDashboard() {
-    if (acquisitions.length === 0) {
-        document.getElementById('totalSeats').textContent = '0';
-        document.getElementById('totalRevenue').textContent = '0.00';
-        document.getElementById('totalAcquisitions').textContent = '0';
-        document.getElementById('pendingItems').textContent = '0';
+    if (!acquisitions || acquisitions.length === 0) {
+        document.getElementById('totalSeats')?.textContent = '0';
+        document.getElementById('totalRevenue')?.textContent = '0.00';
+        document.getElementById('totalAcquisitions')?.textContent = '0';
+        document.getElementById('pendingItems')?.textContent = '0';
         return;
     }
     
@@ -418,34 +444,31 @@ function updateDashboard() {
     const totalRevenue = acquisitions.reduce((sum, item) => sum + (item.payable_amount || 0), 0);
     const pendingCount = acquisitions.filter(item => item.status === 'draft').length;
     
-    document.getElementById('totalSeats').textContent = totalSeats;
-    document.getElementById('totalRevenue').textContent = totalRevenue.toFixed(2);
-    document.getElementById('totalAcquisitions').textContent = acquisitions.length;
-    document.getElementById('pendingItems').textContent = pendingCount;
+    document.getElementById('totalSeats')?.textContent = totalSeats;
+    document.getElementById('totalRevenue')?.textContent = totalRevenue.toFixed(2);
+    document.getElementById('totalAcquisitions')?.textContent = acquisitions.length;
+    document.getElementById('pendingItems')?.textContent = pendingCount;
 }
 
-// ========== RESET FORM ==========
 function resetForm() {
     console.log('Resetting form...');
     
-    if (editingId && !confirm('Cancel editing and reset form?')) {
-        return;
-    }
-    
+    // Exit edit mode
     editingId = null;
     
     // Generate new SR number
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    document.getElementById('srNumber').value = `SR${year}${month}${random}`;
+    generateSRNumber();
     
-    // Clear ONLY required fields, keep optional empty
+    // Clear form fields
     const clearIds = [
         'license', 'branch', 'airlinePnr', 'gdsPnr', 'airline',
         'noOfSeats', 'outboundDate', 'inboundDate', 'sector',
-        'fare', 'taxes', 'issuanceDate'
+        'fare', 'taxes', 'issuanceDate',
+        'emdRefundDate', 'emd1Number', 'emd1Amount', 'emd1TimeLimit', 
+        'emd1IssuanceDate', 'emd1PaymentPercent',
+        'emd2Number', 'emd2Amount', 'emd2TimeLimit',
+        'emd3Number', 'emd3Amount', 'emd3TimeLimit',
+        'ticketsIssued', 'lastTicketDate', 'notes'
     ];
     
     clearIds.forEach(id => {
@@ -453,9 +476,10 @@ function resetForm() {
         if (element) element.value = '';
     });
     
-    // Reset selects to defaults
+    // Reset selects
     document.getElementById('investmentType').value = 'group_seats';
     document.getElementById('segment').value = 'domestic';
+    document.getElementById('emd1Status').value = '';
     document.getElementById('ticketingStatus').value = 'pending';
     document.getElementById('overallStatus').value = 'draft';
     document.getElementById('paymentPercentage').value = 100;
@@ -469,15 +493,24 @@ function resetForm() {
     document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
     
     // Clear calculated fields
-    document.getElementById('payableAmount').value = '';
-    document.getElementById('pnrAmount').value = '';
-    document.getElementById('balanceTickets').value = '';
+    calculateAmounts();
+    calculateBalanceTickets();
     
-    // Update UI
-    updateSubmitButton();
+    // Reset button
+    const saveBtn = document.querySelector('button[onclick="saveAcquisition()"]');
+    if (saveBtn) {
+        saveBtn.innerHTML = '<i class="bi bi-save me-2"></i>Save Acquisition';
+        saveBtn.className = 'btn btn-primary btn-lg';
+    }
+    
+    // Hide cancel button
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    
+    // Update table
     updateTable();
     
-    showSuccess('✅ Form reset. Fill basic details first, EMD can be added later.');
+    showSuccess('✅ Form reset. Ready for new entry.');
 }
 
 function cancelEdit() {
@@ -486,21 +519,27 @@ function cancelEdit() {
     }
 }
 
-function showLogin() {
-    alert('Login will be added later.');
-}
-
 function showSuccess(message) {
-    document.getElementById('successMessage').textContent = message;
-    const toast = new bootstrap.Toast(document.getElementById('successToast'));
-    toast.show();
+    const successToast = document.getElementById('successToast');
+    const successMessage = document.getElementById('successMessage');
+    
+    if (successMessage) successMessage.textContent = message;
+    if (successToast) {
+        const toast = new bootstrap.Toast(successToast);
+        toast.show();
+    }
 }
 
 function showError(message) {
-    document.getElementById('errorMessage').textContent = message;
-    const toast = new bootstrap.Toast(document.getElementById('errorToast'));
-    toast.show();
+    const errorToast = document.getElementById('errorToast');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    if (errorMessage) errorMessage.textContent = message;
+    if (errorToast) {
+        const toast = new bootstrap.Toast(errorToast);
+        toast.show();
+    }
 }
 
 // Initialize
-updateDashboard();
+loadAcquisitions();
