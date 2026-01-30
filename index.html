@@ -7,18 +7,276 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        .navbar-brand { font-weight: bold; color: #0d6efd !important; }
-        .card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .form-control, .form-select { border-radius: 8px; padding: 10px; }
-        .btn-primary { background-color: #0d6efd; border: none; padding: 10px 20px; border-radius: 8px; }
-        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; }
-        .status-draft { background-color: #ffc107; color: #000; }
-        .status-approved { background-color: #198754; color: white; }
-        .status-pending { background-color: #0dcaf0; color: white; }
-        .tab-content { border: 1px solid #dee2e6; border-top: none; padding: 20px; }
-        .nav-tabs .nav-link.active { background-color: #fff; border-color: #dee2e6 #dee2e6 #fff; }
-    </style>
+    /* ========== GLOBAL STYLES ========== */
+    body { 
+        background-color: #f8f9fa; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding-bottom: 50px;
+    }
+    
+    /* ========== NAVBAR ========== */
+    .navbar-brand { 
+        font-weight: bold; 
+        color: #0d6efd !important; 
+        font-size: 1.3rem;
+    }
+    .navbar {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 0.8rem 0;
+    }
+    
+    /* ========== CARDS ========== */
+    .card { 
+        border-radius: 12px; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        margin-bottom: 24px;
+        border: 1px solid #e9ecef;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+    }
+    
+    /* ========== FORM ELEMENTS ========== */
+    .form-control, .form-select { 
+        border-radius: 8px; 
+        padding: 10px 14px;
+        border: 1px solid #ced4da;
+        transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #495057;
+    }
+    
+    /* ========== BUTTONS ========== */
+    .btn-primary { 
+        background-color: #0d6efd; 
+        border: none; 
+        padding: 10px 24px; 
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+    }
+    .btn-outline-secondary {
+        border: 2px solid #6c757d;
+        font-weight: 500;
+    }
+    .btn-outline-warning {
+        border: 2px solid #ffc107;
+        font-weight: 500;
+    }
+    .btn-lg {
+        padding: 12px 28px;
+        font-size: 1.1rem;
+    }
+    
+    /* ========== ACTION BUTTONS (Edit/Delete) ========== */
+    .btn-group-sm > .btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+    }
+    .btn-outline-primary {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+    .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(13, 110, 253, 0.2);
+    }
+    .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(220, 53, 69, 0.2);
+    }
+    
+    /* ========== STATUS BADGES ========== */
+    .status-badge { 
+        padding: 5px 12px; 
+        border-radius: 20px; 
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 80px;
+        text-align: center;
+    }
+    .status-draft { 
+        background-color: #fff3cd; 
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    .status-approved { 
+        background-color: #d1e7dd; 
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+    .status-pending { 
+        background-color: #cff4fc; 
+        color: #055160;
+        border: 1px solid #b6effb;
+    }
+    
+    /* ========== TABLE STYLING ========== */
+    .table {
+        margin-bottom: 0;
+    }
+    .table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #495057;
+        padding: 1rem;
+        white-space: nowrap;
+    }
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-top: 1px solid #e9ecef;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    .table-warning {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+        border-left: 4px solid #ffc107;
+    }
+    
+    /* ========== TABS ========== */
+    .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 0;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.8rem 1.5rem;
+        margin-bottom: -2px;
+        border-radius: 8px 8px 0 0;
+    }
+    .nav-tabs .nav-link:hover {
+        color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    .nav-tabs .nav-link.active { 
+        background-color: #fff; 
+        border: 2px solid #dee2e6;
+        border-bottom-color: #fff;
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    .tab-content { 
+        border: 2px solid #dee2e6; 
+        border-top: none; 
+        padding: 24px;
+        background-color: white;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    /* ========== DASHBOARD CARDS ========== */
+    .dashboard-card {
+        border-radius: 10px;
+        color: white;
+        padding: 1.5rem;
+        height: 100%;
+        transition: transform 0.3s;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+    }
+    .dashboard-card i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        opacity: 0.9;
+    }
+    .dashboard-card h5 {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    .dashboard-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+    
+    /* ========== BADGES ========== */
+    .badge {
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+        border-radius: 10px;
+    }
+    .bg-success-light {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+    .bg-secondary-light {
+        background-color: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+    }
+    
+    /* ========== TOAST NOTIFICATIONS ========== */
+    .toast {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border: none;
+    }
+    .toast-header {
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+    }
+    
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .btn-lg {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+        .nav-tabs .nav-link {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+        .table-responsive {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+    }
+    
+    /* ========== MISC ========== */
+    .text-muted-light {
+        color: #adb5bd;
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .shadow-sm {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    }
+</style>
 </head>
 <body>
     <!-- Navigation -->
@@ -393,32 +651,41 @@
         </div>
 
         <!-- Recent Acquisitions Table -->
-        <div class="card mt-4">
-            <div class="card-header bg-light">
-                <h4 class="mb-0"><i class="bi bi-list-ul me-2"></i>Recent Acquisitions</h4>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>SR #</th>
-                                <th>Airline PNR</th>
-                                <th>Seats</th>
-                                <th>Fare</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="acquisitionsTable">
-                            <tr><td colspan="7" class="text-center">No data yet. Submit a form above!</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<div class="card mt-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><i class="bi bi-table me-2"></i>Recent Acquisitions</h4>
+        <span class="badge bg-primary" id="tableCount">0 records</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th width="15%">SR #</th>
+                        <th width="15%">Airline PNR</th>
+                        <th width="10%">Seats</th>
+                        <th width="12%">Fare</th>
+                        <th width="12%">Status</th>
+                        <th width="15%">Date</th>
+                        <th width="21%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="acquisitionsTable">
+                    <!-- Data will be loaded here by JavaScript -->
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-inbox display-6"></i>
+                                <p class="mt-2">No acquisitions yet</p>
+                                <small>Save your first acquisition above</small>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
     <!-- Toast Notifications -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
