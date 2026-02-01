@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QFC Group - Sell Seats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: bold; color: #1a365d !important; }
+        .card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 24px; border: none; }
+        .form-control, .form-select { border-radius: 8px; padding: 10px 14px; }
+        .form-control:focus, .form-select:focus { border-color: #86b7fe; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15); }
+        .btn-primary { background-color: #1a365d; border-color: #1a365d; }
+        .btn-primary:hover { background-color: #2d4a8c; border-color: #2d4a8c; }
+        .calculation-card { border-left: 4px solid #1a365d; background: #f8f9fa; }
+        .required::after { content: " *"; color: #dc3545; }
+        .alert-fixed {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
+                <span class="fw-bold">QFC Group Pvt Ltd</span>
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+                <a class="nav-link" href="groups.html"><i class="bi bi-people me-1"></i>Groups</a>
+                <a class="nav-link active" href="#"><i class="bi bi-cart-plus me-1"></i>Sell Seats</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <a href="groups.html" class="btn btn-outline-secondary mb-3">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Groups
+                </a>
+                <h2 class="fw-bold text-dark">Sell Seats to Agent</h2>
+                <p class="text-muted" id="groupInfo">Loading group information...</p>
+            </div>
+        </div>
+
+        <!-- Group Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Group Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="groupDetails">
+                    <div class="col-md-3 text-center">
+                        <div class="airline-logo mb-3" style="width: 80px; height: 80px; margin: 0 auto; background: #f8f9fa; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <span id="airlineCode" class="fw-bold fs-4">--</span>
+                        </div>
+                        <h6 id="airlineName">Loading...</h6>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">SR Number</small>
+                                <strong id="srNumber">--</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Airline PNR</small>
+                                <strong id="airlinePnr">--</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Available Seats</small>
+                                <strong class="text-success" id="availableSeats">0</strong>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Outbound Flight</small>
+                                <strong id="outboundFlight">--</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Inbound Flight</small>
+                                <strong id="inboundFlight">--</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Sector</small>
+                                <strong id="sector">--</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sale Form -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-cart-plus me-2"></i>Sale Details</h5>
+            </div>
+            <div class="card-body">
+                <form id="saleForm">
+                    <div class="row">
+                        <!-- Agent Information -->
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Agent Information</h6>
+                            <div class="mb-3">
+                                <label class="form-label required">Agent Name</label>
+                                <input type="text" class="form-control" id="agentName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Company Name</label>
+                                <input type="text" class="form-control" id="agentCompany">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">License Number</label>
+                                <input type="text" class="form-control" id="licenseNumber" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">Contact Phone</label>
+                                <input type="tel" class="form-control" id="agentPhone" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="agentEmail">
+                            </div>
+                        </div>
+
+                        <!-- Sale Information -->
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Sale Information</h6>
+                            <div class="mb-3">
+                                <label class="form-label required">Sale Date</label>
+                                <input type="date" class="form-control" id="saleDate" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">Seats Sold</label>
+                                <input type="number" class="form-control" id="seatsSold" 
+                                       min="1" max="100" required 
+                                       oninput="calculateSaleAmount()">
+                                <small class="text-muted">Maximum available: <span id="maxSeats">0</span> seats</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">Sale Price per Seat</label>
+                                <input type="number" class="form-control" id="salePrice" 
+                                       step="0.01" required 
+                                       oninput="calculateSaleAmount()">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Commission %</label>
+                                <input type="number" class="form-control" id="commissionPercentage" 
+                                       value="0" min="0" max="100" step="0.1"
+                                       oninput="calculateSaleAmount()">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Payment Status</label>
+                                <select class="form-select" id="paymentStatus">
+                                    <option value="pending">Pending</option>
+                                    <option value="partial">Partial</option>
+                                    <option value="paid">Paid</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculation Summary -->
+                    <div class="card calculation-card mt-4">
+                        <div class="card-body">
+                            <h6 class="mb-3">Sale Calculation</h6>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Total Sale Amount</small>
+                                    <h4 id="totalSaleAmount" class="text-primary">0.00</h4>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Commission Amount</small>
+                                    <h5 id="commissionAmount" class="text-info">0.00</h5>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Net Amount</small>
+                                    <h4 id="netAmount" class="text-success">0.00</h4>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Status</small>
+                                    <span id="saleStatus" class="badge bg-warning">Pending Calculation</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-3 mt-4">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" rows="3" placeholder="Any special instructions or notes..."></textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-primary btn-lg" id="saveSaleButton">
+                            <i class="bi bi-check-circle me-2"></i>Save Sale
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg ms-2" id="cancelButton">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Supabase Configuration
+        const supabaseUrl = 'https://ojlxkzkialguthdeiley.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let currentGroup = null;
+        let editSaleId = null;
+        const groupId = localStorage.getItem('sellGroupId');
+        const editSaleIdFromStorage = localStorage.getItem('editSaleId');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Sell Seats Page - Initializing...');
+            
+            // Set today's date as default sale date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('saleDate').value = today;
+            
+            if (!groupId) {
+                showAlert('No group selected. Redirecting to groups page.', 'warning');
+                setTimeout(() => window.location.href = 'groups.html', 2000);
+                return;
+            }
+            
+            try {
+                await loadGroupDetails();
+                
+                if (editSaleIdFromStorage) {
+                    editSaleId = editSaleIdFromStorage;
+                    await loadSaleForEditing();
+                }
+                
+                setupEventListeners();
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showAlert('Failed to initialize page: ' + error.message, 'danger');
+            }
+        });
+
+        // Load group details
+        async function loadGroupDetails() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('seat_acquisitions')
+                    .select('*')
+                    .eq('id', groupId)
+                    .single();
+                
+                if (error) throw error;
+                
+                currentGroup = data;
+                displayGroupInfo();
+                
+            } catch (error) {
+                console.error('Error loading group details:', error);
+                showAlert('Failed to load group information', 'danger');
+                setTimeout(() => window.location.href = 'groups.html', 2000);
+            }
+        }
+
+        // Display group information
+        function displayGroupInfo() {
+            if (!currentGroup) return;
+            
+            document.getElementById('groupInfo').textContent = 
+                `Selling seats from ${currentGroup.airline || ''} - ${currentGroup.sector || ''}`;
+            
+            document.getElementById('airlineCode').textContent = currentGroup.airline || '--';
+            document.getElementById('airlineName').textContent = getAirlineName(currentGroup.airline);
+            document.getElementById('srNumber').textContent = currentGroup.sr_number || '--';
+            document.getElementById('airlinePnr').textContent = currentGroup.airline_pnr || '--';
+            document.getElementById('outboundFlight').textContent = currentGroup.outbound_flight || '--';
+            document.getElementById('inboundFlight').textContent = currentGroup.inbound_flight || '--';
+            document.getElementById('sector').textContent = currentGroup.sector || '--';
+            
+            // Load existing sales to calculate available seats
+            loadExistingSales();
+        }
+
+        // Load existing sales for this group
+        async function loadExistingSales() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('agent_sales')
+                    .select('seats_sold')
+                    .eq('group_id', groupId);
+                
+                if (error) {
+                    // Table might not exist yet
+                    console.log('No sales found or table not created yet');
+                    updateAvailableSeats(0);
+                    return;
+                }
+                
+                const totalSold = data.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0);
+                updateAvailableSeats(totalSold);
+                
+            } catch (error) {
+                console.error('Error loading sales:', error);
+                updateAvailableSeats(0);
+            }
+        }
+
+        // Update available seats display
+        function updateAvailableSeats(totalSold) {
+            const totalSeats = currentGroup.no_of_seats || 0;
+            const availableSeats = Math.max(0, totalSeats - totalSold);
+            
+            document.getElementById('availableSeats').textContent = availableSeats;
+            document.getElementById('maxSeats').textContent = availableSeats;
+            
+            // Update max attribute on seats sold input
+            const seatsSoldInput = document.getElementById('seatsSold');
+            if (seatsSoldInput) {
+                seatsSoldInput.max = availableSeats;
+                seatsSoldInput.setAttribute('data-max', availableSeats);
+            }
+            
+            // If no seats available, disable form
+            if (availableSeats === 0 && !editSaleId) {
+                disableForm('No seats available for sale');
+            }
+        }
+
+        // Get airline name
+        function getAirlineName(code) {
+            const airlines = {
+                'SV': 'Saudi Airlines',
+                'PA': 'Airblue',
+                'PK': 'Pakistan Airlines',
+                'EK': 'Emirates',
+                'F3': 'Flyadeal',
+                'PF': 'Palestine Airlines',
+                '9P': 'PIA',
+                'J9': 'Jazeera Airways'
+            };
+            return airlines[code] || code;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Save sale button
+            document.getElementById('saveSaleButton').addEventListener('click', saveSale);
+            
+            // Cancel button
+            document.getElementById('cancelButton').addEventListener('click', cancelSale);
+            
+            // Real-time calculation triggers
+            document.getElementById('seatsSold').addEventListener('input', calculateSaleAmount);
+            document.getElementById('salePrice').addEventListener('input', calculateSaleAmount);
+            document.getElementById('commissionPercentage').addEventListener('input', calculateSaleAmount);
+        }
+
+        // Calculate sale amount
+        // Update the calculateSaleAmount function
+function calculateSaleAmount() {
+    try {
+        const seatsSold = parseFloat(document.getElementById('seatsSold').value) || 0;
+        const salePrice = parseFloat(document.getElementById('salePrice').value) || 0;
+        const commissionPercent = parseFloat(document.getElementById('commissionPercentage').value) || 0;
+        
+        // Validate seats sold doesn't exceed available
+        const maxSeats = parseInt(document.getElementById('maxSeats').textContent) || 0;
+        if (seatsSold > maxSeats && !editSaleId) {
+            showAlert(`Cannot sell more than ${maxSeats} available seats`, 'warning');
+            document.getElementById('seatsSold').value = maxSeats;
+            return calculateSaleAmount(); // Recalculate with corrected value
+        }
+        
+        // Calculate amounts
+        const totalSale = seatsSold * salePrice;
+        const commissionAmount = totalSale * (commissionPercent / 100);
+        const netAmount = totalSale - commissionAmount;
+        
+        // Format numbers with thousand separators
+        const formatNumber = (num) => {
+            return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        };
+        
+        // Update display with formatted numbers
+        document.getElementById('totalSaleAmount').textContent = formatNumber(totalSale);
+        document.getElementById('commissionAmount').textContent = formatNumber(commissionAmount);
+        document.getElementById('netAmount').textContent = formatNumber(netAmount);
+        
+        // Update status
+        const statusBadge = document.getElementById('saleStatus');
+        if (totalSale > 0) {
+            statusBadge.textContent = 'Ready to Save';
+            statusBadge.className = 'badge bg-success';
+        } else {
+            statusBadge.textContent = 'Enter Sale Details';
+            statusBadge.className = 'badge bg-warning';
+        }
+        
+    } catch (error) {
+        console.error('Calculation error:', error);
+    }
+}
+
+        // Save sale to Supabase
+        async function saveSale() {
+            console.log('Saving sale...');
+            
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
+            
+            // Disable button and show loading
+            const saveButton = document.getElementById('saveSaleButton');
+            const originalText = saveButton.innerHTML;
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            
+            try {
+                // Get form values
+                const saleData = {
+                    group_id: groupId,
+                    agent_name: document.getElementById('agentName').value.trim(),
+                    agent_company: document.getElementById('agentCompany').value.trim(),
+                    license_number: document.getElementById('licenseNumber').value.trim(),
+                    agent_phone: document.getElementById('agentPhone').value.trim(),
+                    agent_email: document.getElementById('agentEmail').value.trim(),
+                    sale_date: document.getElementById('saleDate').value,
+                    seats_sold: parseInt(document.getElementById('seatsSold').value),
+                    sale_price: parseFloat(document.getElementById('salePrice').value),
+                    commission_percentage: parseFloat(document.getElementById('commissionPercentage').value) || 0,
+                    payment_status: document.getElementById('paymentStatus').value,
+                    notes: document.getElementById('notes').value.trim(),
+                    created_at: new Date().toISOString()
+                };
+                
+                // Calculate derived fields
+                const totalSale = saleData.seats_sold * saleData.sale_price;
+                saleData.total_amount = totalSale;
+                saleData.commission_amount = totalSale * (saleData.commission_percentage / 100);
+                saleData.net_amount = totalSale - saleData.commission_amount;
+                
+                console.log('Saving sale data:', saleData);
+                
+                if (editSaleId) {
+                    // Update existing sale
+                    const { data, error } = await supabaseClient
+                        .from('agent_sales')
+                        .update(saleData)
+                        .eq('id', editSaleId)
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    showAlert('✅ Sale updated successfully!', 'success');
+                    localStorage.removeItem('editSaleId');
+                    
+                } else {
+                    // Create new sale
+                    const { data, error } = await supabaseClient
+                        .from('agent_sales')
+                        .insert([saleData])
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    showAlert('✅ Sale saved successfully!', 'success');
+                }
+                
+                // Redirect back to group details
+                setTimeout(() => {
+                    localStorage.setItem('currentGroupId', groupId);
+                    window.location.href = 'group-details.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error saving sale:', error);
+                showAlert('❌ Error saving sale: ' + error.message, 'danger');
+            } finally {
+                // Re-enable button
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalText;
+            }
+        }
+
+        // Validate form
+        function validateForm() {
+            const requiredFields = ['agentName', 'licenseNumber', 'agentPhone', 'seatsSold', 'salePrice'];
+            let isValid = true;
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            // Validate seats sold
+            const seatsSold = parseInt(document.getElementById('seatsSold').value);
+            const maxSeats = parseInt(document.getElementById('maxSeats').textContent);
+            
+            if (seatsSold < 1) {
+                showAlert('Please enter at least 1 seat', 'warning');
+                isValid = false;
+            }
+            
+            if (!editSaleId && seatsSold > maxSeats) {
+                showAlert(`Cannot sell more than ${maxSeats} available seats`, 'warning');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                showAlert('Please fill in all required fields correctly', 'warning');
+            }
+            
+            return isValid;
+        }
+
+        // Load sale for editing
+        async function loadSaleForEditing() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('agent_sales')
+                    .select('*')
+                    .eq('id', editSaleId)
+                    .single();
+                
+                if (error) throw error;
+                
+                // Populate form fields
+                document.getElementById('agentName').value = data.agent_name || '';
+                document.getElementById('agentCompany').value = data.agent_company || '';
+                document.getElementById('licenseNumber').value = data.license_number || '';
+                document.getElementById('agentPhone').value = data.agent_phone || '';
+                document.getElementById('agentEmail').value = data.agent_email || '';
+                document.getElementById('saleDate').value = data.sale_date || new Date().toISOString().split('T')[0];
+                document.getElementById('seatsSold').value = data.seats_sold || 1;
+                document.getElementById('salePrice').value = data.sale_price || '';
+                document.getElementById('commissionPercentage').value = data.commission_percentage || 0;
+                document.getElementById('paymentStatus').value = data.payment_status || 'pending';
+                document.getElementById('notes').value = data.notes || '';
+                
+                // Update button text
+                document.getElementById('saveSaleButton').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update Sale';
+                
+                // Recalculate
+                calculateSaleAmount();
+                
+                showAlert('Loading sale for editing...', 'info');
+                
+            } catch (error) {
+                console.error('Error loading sale for editing:', error);
+                showAlert('Failed to load sale for editing', 'warning');
+                editSaleId = null;
+                localStorage.removeItem('editSaleId');
+            }
+        }
+
+        // Cancel sale
+        function cancelSale() {
+            if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
+                localStorage.removeItem('editSaleId');
+                localStorage.setItem('currentGroupId', groupId);
+                window.location.href = 'group-details.html';
+            }
+        }
+
+        // Disable form
+        function disableForm(message) {
+            const form = document.getElementById('saleForm');
+            const inputs = form.querySelectorAll('input, select, textarea, button');
+            
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+            
+            document.getElementById('saveSaleButton').innerHTML = '<i class="bi bi-slash-circle me-2"></i>' + message;
+            showAlert(message, 'warning');
+        }
+
+        // Show alert
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-fixed alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Make functions available globally
+        window.calculateSaleAmount = calculateSaleAmount;
+        window.saveSale = saveSale;
+        window.cancelSale = cancelSale;
+    </script>
+</body>
+</html>
