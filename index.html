@@ -334,7 +334,7 @@
             <div class="col-md-3">
                 <div class="card bg-success text-white">
                     <div class="card-body">
-                        <h5><i class="bi bi-cash-stack"></i> Revenue</h5>
+                        <h5><i class="bi bi-cash-stack"></i> Investment</h5>
                         <h2 id="totalRevenue">0.00</h2>
                     </div>
                 </div>
@@ -1085,7 +1085,7 @@
             }
             
             const totalSeats = acquisitions.reduce((sum, item) => sum + (item.no_of_seats || 0), 0);
-            const totalRevenue = acquisitions.reduce((sum, item) => sum + (item.payable_amount || 0), 0);
+            const totalRevenue = acquisitions.reduce((sum, item) => sum + (item.pnr_amount || 0), 0);
             const pendingCount = acquisitions.filter(item => item.status === 'draft' || item.status === 'submitted').length;
             
             document.getElementById('totalSeats').textContent = totalSeats;
