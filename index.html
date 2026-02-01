@@ -247,6 +247,35 @@
         font-weight: 600;
     }
     
+    /* ========== FLIGHT SPECIFIC STYLES ========== */
+    .flight-times {
+        background-color: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border-left: 3px solid #1a365d;
+        margin-bottom: 1rem;
+    }
+    .flight-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+    .flight-field {
+        background: #f8f9fa;
+        padding: 8px;
+        border-radius: 6px;
+    }
+    .flight-field label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 3px;
+    }
+    .flight-field .value {
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
     /* ========== RESPONSIVE ========== */
     @media (max-width: 768px) {
         .container {
@@ -264,6 +293,9 @@
         .table-responsive {
             border-radius: 8px;
             border: 1px solid #dee2e6;
+        }
+        .flight-info-grid {
+            grid-template-columns: 1fr;
         }
     }
     
@@ -299,25 +331,82 @@
         height: 1rem;
         border-width: 0.2em;
     }
+    
+    /* Date format helper */
+    .format-hint {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 3px;
+    }
+    
+    /* Time input formatting */
+    .time-format-example {
+        font-size: 0.8rem;
+        color: #28a745;
+        font-family: monospace;
+        background: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 5px;
+    }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
-                <div class="d-inline-block">
-                    <div class="qfc-brand">QFC Group Pvt Ltd</div>
-                    <div class="qfc-subtitle">Group Seat Platform</div>
-                </div>
-            </a>
-            <div class="navbar-nav">
-                <a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Dashboard</a>
-                <a class="nav-link" href="#acquireForm"><i class="bi bi-plus-circle me-1"></i>Acquire Seats</a>
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
+            <div class="d-inline-block">
+                <div class="qfc-brand">QFC Group Pvt Ltd</div>
+                <div class="qfc-subtitle">Group Seat Platform</div>
             </div>
+        </a>
+        
+        <!-- Mobile toggle button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Navigation Links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="index.html">
+                        <i class="bi bi-house-door me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="groups.html">
+                        <i class="bi bi-people me-1"></i>Flight Groups
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#acquireForm">
+                        <i class="bi bi-plus-circle me-1"></i>Acquire Seats
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-gear me-1"></i>More
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="sell-seats.html">
+                            <i class="bi bi-cart-plus me-2"></i>Sell Seats
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="bi bi-bar-chart me-2"></i>Reports
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="bi bi-person-circle me-2"></i>Agents
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -366,6 +455,9 @@
                 <ul class="nav nav-tabs" id="formTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Basic Info</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="flight-tab" data-bs-toggle="tab" data-bs-target="#flight" type="button" role="tab">Flight Details</button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab">Financial</button>
@@ -438,14 +530,14 @@
                                     <label class="form-label required">Airline</label>
                                     <select class="form-select" id="airline" required>
                                         <option value="">Select Airline</option>
-                                        <option value="SV">SV</option>
-                                        <option value="PA">PA</option>
-                                        <option value="PF">PF</option>
-                                        <option value="9P">9P</option>
-                                        <option value="J9">J9</option>
-                                        <option value="PK">PK</option>
-                                        <option value="EK">EK</option>
-                                        <option value="F3">F3</option>
+                                        <option value="SV">Saudi Airlines (SV)</option>
+                                        <option value="PA">Airblue (PA)</option>
+                                        <option value="PK">Pakistan Airlines (PK)</option>
+                                        <option value="EK">Emirates (EK)</option>
+                                        <option value="F3">Flyadeal (F3)</option>
+                                        <option value="PF">Palestine Airlines (PF)</option>
+                                        <option value="9P">PIA (9P)</option>
+                                        <option value="J9">Jazeera Airways (J9)</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
@@ -457,22 +549,64 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label class="form-label">Outbound Date</label>
-                                    <input type="date" class="form-control" id="outboundDate">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label class="form-label">Inbound Date</label>
-                                    <input type="date" class="form-control" id="inboundDate">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
                                     <label class="form-label">Sector</label>
-                                    <input type="text" class="form-control" id="sector" placeholder="e.g., JFK-LAX">
+                                    <input type="text" class="form-control" id="sector" placeholder="e.g., ISB-JED">
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Flight Details Tab -->
+                    <div class="tab-pane fade" id="flight" role="tabpanel">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Outbound Flight</h5>
+                                <div class="flight-info-grid">
+                                    <div class="flight-field">
+                                        <label class="form-label">Flight Date</label>
+                                        <input type="date" class="form-control" id="outboundDate">
+                                        <div class="format-hint">Will be stored as: 01-MAR-26</div>
+                                    </div>
+                                    <div class="flight-field">
+                                        <label class="form-label">Flight Number</label>
+                                        <input type="text" class="form-control" id="outboundFlight" 
+                                               placeholder="e.g., SV723">
+                                    </div>
+                                    <div class="flight-field" style="grid-column: span 2;">
+                                        <label class="form-label">Departure & Arrival Times</label>
+                                        <input type="text" class="form-control" id="outboundTimes" 
+                                               placeholder="e.g., ISB 0700 JED 1100">
+                                        <div class="format-hint">Format: [Departure Airport] [Time] [Arrival Airport] [Time]</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5>Inbound Flight</h5>
+                                <div class="flight-info-grid">
+                                    <div class="flight-field">
+                                        <label class="form-label">Flight Date</label>
+                                        <input type="date" class="form-control" id="inboundDate">
+                                        <div class="format-hint">Will be stored as: 15-MAR-26</div>
+                                    </div>
+                                    <div class="flight-field">
+                                        <label class="form-label">Flight Number</label>
+                                        <input type="text" class="form-control" id="inboundFlight" 
+                                               placeholder="e.g., SV724">
+                                    </div>
+                                    <div class="flight-field" style="grid-column: span 2;">
+                                        <label class="form-label">Departure & Arrival Times</label>
+                                        <input type="text" class="form-control" id="inboundTimes" 
+                                               placeholder="e.g., JED 0200 ISB 0500">
+                                        <div class="format-hint">Format: [Departure Airport] [Time] [Arrival Airport] [Time]</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Note:</strong> Use calendar picker for dates. Dates will be automatically stored as 01-MAR-26 format.
                         </div>
                     </div>
 
@@ -725,7 +859,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- ALL JAVASCRIPT CODE INLINE (to avoid loading issues) -->
+    <!-- JavaScript Code -->
     <script>
         // ========== GLOBAL VARIABLES ==========
         let acquisitions = [];
@@ -749,32 +883,17 @@
                 }
                 
                 // Set default dates
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('requestDate').value = today;
-                
-                const nextWeek = new Date();
-                nextWeek.setDate(nextWeek.getDate() + 7);
-                document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
-                
-                // Generate initial SR number
-                generateSRNumber();
+                initializeForm();
                 
                 // Setup event listeners
                 setupEventListeners();
                 
-		document.getElementById('noOfSeats')?.addEventListener('input', calculateAmounts);
-
                 // Initialize calculations
                 calculateAmounts();
                 calculateBalanceTickets();
                 
                 // Load existing data
                 loadAcquisitions();
-                
-                // Make functions globally available
-                window.saveAcquisition = saveAcquisition;
-                window.resetForm = resetForm;
-                window.cancelEdit = cancelEdit;
                 
                 console.log('App initialized successfully!');
                 
@@ -783,6 +902,110 @@
                 showError('Failed to initialize application: ' + error.message);
             }
         });
+        
+        function initializeForm() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('requestDate').value = today;
+            
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
+            
+            // Generate initial SR number
+            generateSRNumber();
+            
+            // Add input formatting for time fields
+            setupInputFormatting();
+        }
+        
+        function setupInputFormatting() {
+            // Time input formatting (ISB 0700 JED 1100)
+            const timeInputs = document.querySelectorAll('input[placeholder*="ISB 0700"]');
+            timeInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value.toUpperCase();
+                    
+                    // Auto-capitalize and add spaces
+                    value = value.replace(/[^A-Z0-9\s]/g, '');
+                    
+                    // Auto-format: airport code + space + time + space
+                    if (value.length === 3 && !value.endsWith(' ')) {
+                        value = value + ' ';
+                    }
+                    if (value.length === 8 && value.charAt(7) !== ' ') {
+                        value = value.substring(0, 7) + ' ' + value.charAt(7);
+                    }
+                    if (value.length === 12 && value.charAt(11) !== ' ') {
+                        value = value.substring(0, 11) + ' ' + value.charAt(11);
+                    }
+                    
+                    // Limit length
+                    if (value.length > 17) {
+                        value = value.substring(0, 17);
+                    }
+                    
+                    e.target.value = value;
+                });
+            });
+        }
+        
+        // ========== DATE FORMATTING FUNCTIONS ==========
+        
+        // Function to convert date from YYYY-MM-DD (calendar) to DD-MMM-YY format
+        function convertDateToDisplayFormat(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+                
+                const day = String(date.getDate()).padStart(2, '0');
+                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                   'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                const month = monthNames[date.getMonth()];
+                const year = String(date.getFullYear()).slice(-2);
+                
+                return `${day}-${month}-${year}`;
+            } catch (error) {
+                console.error('Error converting date:', error);
+                return dateString;
+            }
+        }
+        
+        // Function to convert date from DD-MMM-YY to YYYY-MM-DD for calendar input
+        function convertDisplayToDateInput(dateString) {
+            if (!dateString) return '';
+            
+            // If already in YYYY-MM-DD format, return as is
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                return dateString;
+            }
+            
+            // Try to parse DD-MMM-YY format
+            try {
+                const parts = dateString.split('-');
+                if (parts.length !== 3) return dateString;
+                
+                const day = parts[0];
+                const monthStr = parts[1].toUpperCase();
+                const year = parts[2];
+                
+                // Convert year to full year (20XX)
+                const fullYear = year.length === 2 ? '20' + year : year;
+                
+                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                   'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                const monthIndex = monthNames.indexOf(monthStr);
+                
+                if (monthIndex === -1) return dateString;
+                
+                const month = String(monthIndex + 1).padStart(2, '0');
+                return `${fullYear}-${month}-${day}`;
+            } catch (error) {
+                console.error('Error converting date for input:', error);
+                return dateString;
+            }
+        }
         
         // ========== EVENT LISTENERS SETUP ==========
         function setupEventListeners() {
@@ -812,7 +1035,7 @@
             document.getElementById('ticketsIssued')?.addEventListener('input', calculateBalanceTickets);
         }
         
-        // ========== FORM FUNCTIONS ==========
+        // ========== HELPER FUNCTIONS ==========
         function generateSRNumber() {
             if (editingId) return;
             
@@ -827,30 +1050,30 @@
         }
         
         function calculateAmounts() {
-    try {
-        const fare = parseFloat(document.getElementById('fare')?.value) || 0;
-        const taxes = parseFloat(document.getElementById('taxes')?.value) || 0;
-        const percentage = parseFloat(document.getElementById('paymentPercentage')?.value) || 100;
-        const seats = parseInt(document.getElementById('noOfSeats')?.value) || 1;
-        
-        // Calculate total per seat
-        const totalPerSeat = fare + taxes;
-        
-        // Calculate total PNR amount (fare + taxes) × number of seats
-        const totalPnrAmount = totalPerSeat * seats;
-        
-        // Calculate payable amount based on percentage
-        const payable = totalPnrAmount * (percentage / 100);
-        
-        const pnrField = document.getElementById('pnrAmount');
-        const payableField = document.getElementById('payableAmount');
-        
-        if (pnrField) pnrField.value = totalPnrAmount.toFixed(2);
-        if (payableField) payableField.value = payable.toFixed(2);
-    } catch (error) {
-        console.error('Error in calculateAmounts:', error);
-    }
-}
+            try {
+                const fare = parseFloat(document.getElementById('fare')?.value) || 0;
+                const taxes = parseFloat(document.getElementById('taxes')?.value) || 0;
+                const percentage = parseFloat(document.getElementById('paymentPercentage')?.value) || 100;
+                const seats = parseInt(document.getElementById('noOfSeats')?.value) || 1;
+                
+                // Calculate total per seat
+                const totalPerSeat = fare + taxes;
+                
+                // Calculate total PNR amount (fare + taxes) × number of seats
+                const totalPnrAmount = totalPerSeat * seats;
+                
+                // Calculate payable amount based on percentage
+                const payable = totalPnrAmount * (percentage / 100);
+                
+                const pnrField = document.getElementById('pnrAmount');
+                const payableField = document.getElementById('payableAmount');
+                
+                if (pnrField) pnrField.value = totalPnrAmount.toFixed(2);
+                if (payableField) payableField.value = payable.toFixed(2);
+            } catch (error) {
+                console.error('Error in calculateAmounts:', error);
+            }
+        }
         
         function calculateBalanceTickets() {
             try {
@@ -881,6 +1104,22 @@
                 return;
             }
             
+            // Validate time formats
+            const outboundTimes = document.getElementById('outboundTimes')?.value;
+            const inboundTimes = document.getElementById('inboundTimes')?.value;
+            
+            const timePattern = /^[A-Z]{3}\s+\d{4}\s+[A-Z]{3}\s+\d{4}$/;
+            
+            if (outboundTimes && !timePattern.test(outboundTimes.toUpperCase())) {
+                showError('Please enter Outbound Times in correct format: ISB 0700 JED 1100');
+                return;
+            }
+            
+            if (inboundTimes && !timePattern.test(inboundTimes.toUpperCase())) {
+                showError('Please enter Inbound Times in correct format: JED 0200 ISB 0500');
+                return;
+            }
+            
             // Disable save button and show loading
             const saveButton = document.getElementById('saveButton');
             const originalText = saveButton?.innerHTML;
@@ -890,6 +1129,19 @@
             }
             
             try {
+                // Get date values from calendar inputs
+                const outboundDateInput = document.getElementById('outboundDate')?.value;
+                const inboundDateInput = document.getElementById('inboundDate')?.value;
+                
+                // Convert dates to DD-MMM-YY format for storage
+                const outboundDateFormatted = outboundDateInput ? convertDateToDisplayFormat(outboundDateInput) : null;
+                const inboundDateFormatted = inboundDateInput ? convertDateToDisplayFormat(inboundDateInput) : null;
+                
+                console.log('Date conversion:', {
+                    outbound: { input: outboundDateInput, formatted: outboundDateFormatted },
+                    inbound: { input: inboundDateInput, formatted: inboundDateFormatted }
+                });
+                
                 // Get form data
                 const formData = {
                     sr_number: document.getElementById('srNumber')?.value || '',
@@ -904,8 +1156,13 @@
                     gds_pnr: document.getElementById('gdsPnr')?.value || null,
                     segment: document.getElementById('segment')?.value || 'Umrah',
                     airline: airline,
-                    outbound_date: document.getElementById('outboundDate')?.value || null,
-                    inbound_date: document.getElementById('inboundDate')?.value || null,
+                    // Store dates in DD-MMM-YY format
+                    outbound_date: outboundDateFormatted,
+                    inbound_date: inboundDateFormatted,
+                    outbound_flight: document.getElementById('outboundFlight')?.value || null,
+                    inbound_flight: document.getElementById('inboundFlight')?.value || null,
+                    outbound_times: outboundTimes ? outboundTimes.toUpperCase() : null,
+                    inbound_times: inboundTimes ? inboundTimes.toUpperCase() : null,
                     sector: document.getElementById('sector')?.value || '',
                     taxes: parseFloat(document.getElementById('taxes')?.value) || 0,
                     payable_amount: parseFloat(document.getElementById('payableAmount')?.value) || 0,
@@ -1103,6 +1360,7 @@
             // Clear form fields
             const fieldsToClear = [
                 'airlinePnr', 'gdsPnr', 'noOfSeats', 'outboundDate', 'inboundDate',
+                'outboundFlight', 'inboundFlight', 'outboundTimes', 'inboundTimes',
                 'sector', 'fare', 'taxes', 'issuanceDate', 'emdRefundDate',
                 'emd1Number', 'emd1Amount', 'emd1TimeLimit', 'emd1IssuanceDate', 'emd1PaymentPercent',
                 'emd2Number', 'emd2Amount', 'emd2TimeLimit', 'emd3Number', 'emd3Amount', 'emd3TimeLimit',
@@ -1163,6 +1421,15 @@
                 
                 editingId = id;
                 
+                // Convert dates from DD-MMM-YY to YYYY-MM-DD for calendar input
+                const outboundDateForInput = item.outbound_date ? convertDisplayToDateInput(item.outbound_date) : '';
+                const inboundDateForInput = item.inbound_date ? convertDisplayToDateInput(item.inbound_date) : '';
+                
+                console.log('Editing dates:', {
+                    stored: { outbound: item.outbound_date, inbound: item.inbound_date },
+                    converted: { outbound: outboundDateForInput, inbound: inboundDateForInput }
+                });
+                
                 // Fill form with item data
                 const fields = [
                     { id: 'srNumber', value: item.sr_number },
@@ -1175,8 +1442,12 @@
                     { id: 'segment', value: item.segment },
                     { id: 'airline', value: item.airline },
                     { id: 'noOfSeats', value: item.no_of_seats },
-                    { id: 'outboundDate', value: item.outbound_date },
-                    { id: 'inboundDate', value: item.inbound_date },
+                    { id: 'outboundDate', value: outboundDateForInput },
+                    { id: 'inboundDate', value: inboundDateForInput },
+                    { id: 'outboundFlight', value: item.outbound_flight },
+                    { id: 'inboundFlight', value: item.inbound_flight },
+                    { id: 'outboundTimes', value: item.outbound_times },
+                    { id: 'inboundTimes', value: item.inbound_times },
                     { id: 'sector', value: item.sector },
                     { id: 'fare', value: item.fare },
                     { id: 'taxes', value: item.taxes },
@@ -1218,6 +1489,10 @@
                 document.getElementById('saveButton').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update';
                 document.getElementById('saveButton').className = 'btn btn-warning btn-lg';
                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
+                
+                // Switch to flight tab to show the dates
+                const flightTab = document.querySelector('#flight-tab');
+                if (flightTab) flightTab.click();
                 
                 // Scroll to form
                 document.getElementById('acquireForm').scrollIntoView({ behavior: 'smooth' });
@@ -1295,8 +1570,6 @@
         window.cancelEdit = cancelEdit;
         window.editItem = editItem;
         window.deleteItem = deleteItem;
-        
-        console.log('All JavaScript functions loaded and available');
     </script>
 </body>
 </html>
