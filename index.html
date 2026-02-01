@@ -58,15 +58,16 @@
     
     /* ========== BUTTONS ========== */
     .btn-primary { 
-        background-color: #0d6efd; 
-        border: none; 
+        background-color: #1a365d;
+        border-color: #1a365d;
         padding: 10px 24px; 
         border-radius: 8px;
         font-weight: 500;
         transition: all 0.2s;
     }
     .btn-primary:hover {
-        background-color: #0b5ed7;
+        background-color: #2d4a8c;
+        border-color: #2d4a8c;
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
     }
@@ -83,7 +84,7 @@
         font-size: 1.1rem;
     }
     
-    /* ========== ACTION BUTTONS (Edit/Delete) ========== */
+    /* ========== ACTION BUTTONS ========== */
     .btn-group-sm > .btn {
         padding: 0.3rem 0.6rem;
         font-size: 0.85rem;
@@ -266,78 +267,57 @@
         }
     }
     
-    /* ========== MISC ========== */
-    .text-muted-light {
-        color: #adb5bd;
+    /* ========== QFC BRANDING ========== */
+    .qfc-brand {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: 700;
+        color: #1a365d;
     }
-    .cursor-pointer {
-        cursor: pointer;
+    .qfc-subtitle {
+        font-size: 10px;
+        color: #6c757d;
+        letter-spacing: 0.5px;
+        font-weight: 400;
     }
-    .shadow-sm {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    .card-header.bg-light {
+        border-left: 4px solid #1a365d;
     }
-
-    /* QFC Branding Styles */
-.qfc-brand {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-weight: 700;
-    color: #1a365d;
-}
-
-.qfc-subtitle {
-    font-size: 10px;
-    color: #6c757d;
-    letter-spacing: 0.5px;
-    font-weight: 400;
-}
-
-/* Logo styling */
-.navbar-brand img {
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Card headers with QFC colors */
-.card-header.bg-light {
-    background-color: #f8f9fa !important;
-    border-left: 4px solid #1a365d;
-}
-
-/* Primary button color matching QFC */
-.btn-primary {
-    background-color: #1a365d;
-    border-color: #1a365d;
-}
-.btn-primary:hover {
-    background-color: #2d4a8c;
-    border-color: #2d4a8c;
-}
-
-/* Dashboard cards with QFC colors */
-.bg-primary { background-color: #1a365d !important; }
-.bg-success { background-color: #2e8b57 !important; }
-.bg-info { background-color: #17a2b8 !important; }
-.bg-warning { background-color: #ffc107 !important; }
-</style>
+    .bg-primary { background-color: #1a365d !important; }
+    .bg-success { background-color: #2e8b57 !important; }
+    .bg-info { background-color: #17a2b8 !important; }
+    .bg-warning { background-color: #ffc107 !important; }
+    
+    /* Required field indicator */
+    .required::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    /* Loading spinner */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.2em;
+    }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-    <div class="container">
-        <a class="navbar-brand" href="#">
-            <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
-            <div class="d-inline-block">
-                <div class="qfc-brand">QFC Group Pvt Ltd</div>
-                <div class="qfc-subtitle">Group Seat Platform</div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
+                <div class="d-inline-block">
+                    <div class="qfc-brand">QFC Group Pvt Ltd</div>
+                    <div class="qfc-subtitle">Group Seat Platform</div>
+                </div>
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Dashboard</a>
+                <a class="nav-link" href="#acquireForm"><i class="bi bi-plus-circle me-1"></i>Acquire Seats</a>
             </div>
-        </a>
-        <div class="navbar-nav">
-            <a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Dashboard</a>
-            <a class="nav-link" href="#acquireForm"><i class="bi bi-plus-circle me-1"></i>Acquire Seats</a>
-            <button class="btn btn-outline-primary ms-3" onclick="showLogin()">Login</button>
         </div>
-    </div>
-</nav>
+    </nav>
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -385,16 +365,16 @@
             <div class="card-body">
                 <ul class="nav nav-tabs" id="formTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button">Basic Info</button>
+                        <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Basic Info</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button">Financial</button>
+                        <button class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab">Financial</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="emd-tab" data-bs-toggle="tab" data-bs-target="#emd" type="button">EMD Details</button>
+                        <button class="nav-link" id="emd-tab" data-bs-toggle="tab" data-bs-target="#emd" type="button" role="tab">EMD Details</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="ticketing-tab" data-bs-toggle="tab" data-bs-target="#ticketing" type="button">Ticketing</button>
+                        <button class="nav-link" id="ticketing-tab" data-bs-toggle="tab" data-bs-target="#ticketing" type="button" role="tab">Ticketing</button>
                     </li>
                 </ul>
                 
@@ -420,25 +400,25 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">IATA</label>
-				    <select class="form-select" id="IATA">	
-                                    	<option value="QFC">QFC</option>
-					<option value="FCT">FCT</option>
-					<option value="AG">AG</option>
-				</select>
+                                    <label class="form-label">License/IATA</label>
+                                    <select class="form-select" id="license">
+                                        <option value="QFC">QFC</option>
+                                        <option value="FCT">FCT</option>
+                                        <option value="AG">AG</option>
+                                    </select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Branch</label>
-				    <select class="form-select" id="Branch">	
-                                    	<option value="HO">HO</option>
-					<option value="LHE">LHE</option>
-					<option value="SKT">SKT</option>
-				    </select>		
-                                    </div>
+                                    <select class="form-select" id="branch">
+                                        <option value="HO">HO</option>
+                                        <option value="LHE">LHE</option>
+                                        <option value="SKT">SKT</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Airline PNR</label>
+                                    <label class="form-label required">Airline PNR</label>
                                     <input type="text" class="form-control" id="airlinePnr" required>
                                 </div>
                                 <div class="mb-3">
@@ -449,26 +429,27 @@
                                     <label class="form-label">Segment</label>
                                     <select class="form-select" id="segment">
                                         <option value="Umrah">Umrah</option>
-					<option value="Employment">Employment</option>
-					<option value="Hajj">Hajj</option>
+                                        <option value="Employment">Employment</option>
+                                        <option value="Hajj">Hajj</option>
                                         <option value="Tours">Tours</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Airline</label>
-                                    <select class="form-select" id="Aieline">
+                                    <label class="form-label required">Airline</label>
+                                    <select class="form-select" id="airline" required>
+                                        <option value="">Select Airline</option>
                                         <option value="SV">SV</option>
-					<option value="PA">PA</option>
-					<option value="PF">PF</option>
+                                        <option value="PA">PA</option>
+                                        <option value="PF">PF</option>
                                         <option value="9P">9P</option>
-					<option value="J9">J9</option>
-					<option value="PK">PK</option>
-					<option value="EK">EK</option>
-					<option value="F3">F3</option>
-				</select>
+                                        <option value="J9">J9</option>
+                                        <option value="PK">PK</option>
+                                        <option value="EK">EK</option>
+                                        <option value="F3">F3</option>
+                                    </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">No. of Seats</label>
+                                    <label class="form-label required">No. of Seats</label>
                                     <input type="number" class="form-control" id="noOfSeats" required min="1">
                                 </div>
                             </div>
@@ -500,12 +481,12 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Fare</label>
+                                    <label class="form-label required">Fare</label>
                                     <input type="number" class="form-control" id="fare" step="0.01" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Taxes</label>
-                                    <input type="number" class="form-control" id="taxes" step="0.01" required>
+                                    <input type="number" class="form-control" id="taxes" step="0.01">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Payable Amount</label>
@@ -522,7 +503,7 @@
                                     <input type="date" class="form-control" id="issuanceDate">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Time Limit</label>
+                                    <label class="form-label required">Time Limit</label>
                                     <input type="date" class="form-control" id="timeLimit" required>
                                 </div>
                                 <div class="mb-3">
@@ -679,59 +660,48 @@
                 </div>
 
                 <!-- Submit Buttons -->
-		<div class="mt-4">
-    			<button type="button" class="btn btn-primary btn-lg" onclick="saveAcquisition()">
-        			<i class="bi bi-save me-2"></i>Save Acquisition
-    		</button>
-    		<button type="button" class="btn btn-outline-secondary ms-2" onclick="resetForm()">
-        		<i class="bi bi-arrow-clockwise me-2"></i>Reset Form
-    		</button>
-    		<button type="button" class="btn btn-outline-warning ms-2" onclick="cancelEdit()" id="cancelEditBtn" style="display: none;">
-        		<i class="bi bi-x-circle me-2"></i>Cancel Edit
-    		</button>
-		<button type="button" class="btn btn-outline-warning ms-2" onclick="cancelEdit()" id="cancelEditBtn" style="display: none;">
-        		<i class="bi bi-x-circle me-2"></i>Cancel Edit
-   	 	</button>
-		</div>
+                <div class="mt-4">
+                    <button type="button" class="btn btn-primary btn-lg" id="saveButton">
+                        <i class="bi bi-save me-2"></i>Save Acquisition
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary ms-2" id="resetButton">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Reset Form
+                    </button>
+                    <button type="button" class="btn btn-outline-warning ms-2" id="cancelEditBtn" style="display: none;">
+                        <i class="bi bi-x-circle me-2"></i>Cancel Edit
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- Recent Acquisitions Table -->
-<div class="card mt-4">
-    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-        <h4 class="mb-0"><i class="bi bi-table me-2"></i>Recent Acquisitions</h4>
-        <span class="badge bg-primary" id="tableCount">0 records</span>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th width="15%">SR #</th>
-                        <th width="15%">Airline PNR</th>
-                        <th width="10%">Seats</th>
-                        <th width="12%">Fare</th>
-                        <th width="12%">Status</th>
-                        <th width="15%">Date</th>
-                        <th width="21%">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="acquisitionsTable">
-                    <!-- Data will be loaded here by JavaScript -->
-                    <tr>
-                        <td colspan="7" class="text-center py-5">
-                            <div class="text-muted">
-                                <i class="bi bi-inbox display-6"></i>
-                                <p class="mt-2">No acquisitions yet</p>
-                                <small>Save your first acquisition above</small>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="card mt-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-table me-2"></i>Recent Acquisitions</h4>
+                <span class="badge bg-primary" id="tableCount">0 records</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="15%">SR #</th>
+                                <th width="15%">Airline PNR</th>
+                                <th width="10%">Seats</th>
+                                <th width="12%">Fare</th>
+                                <th width="12%">Status</th>
+                                <th width="15%">Date</th>
+                                <th width="21%">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="acquisitionsTable">
+                            <!-- Data loaded by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Toast Notifications -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
@@ -754,6 +724,579 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js"></script>
+    
+    <!-- ALL JAVASCRIPT CODE INLINE (to avoid loading issues) -->
+    <script>
+        // ========== GLOBAL VARIABLES ==========
+        let acquisitions = [];
+        let editingId = null;
+        let supabaseClient = null;
+        
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('QFC Group Platform - Initializing...');
+            
+            try {
+                // Initialize Supabase
+                const supabaseUrl = 'https://ojlxkzkialguthdeiley.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94';
+                
+                if (window.supabase) {
+                    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+                    console.log('Supabase initialized successfully');
+                } else {
+                    console.error('Supabase library not loaded');
+                }
+                
+                // Set default dates
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('requestDate').value = today;
+                
+                const nextWeek = new Date();
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
+                
+                // Generate initial SR number
+                generateSRNumber();
+                
+                // Setup event listeners
+                setupEventListeners();
+                
+		document.getElementById('noOfSeats')?.addEventListener('input', calculateAmounts);
+
+                // Initialize calculations
+                calculateAmounts();
+                calculateBalanceTickets();
+                
+                // Load existing data
+                loadAcquisitions();
+                
+                // Make functions globally available
+                window.saveAcquisition = saveAcquisition;
+                window.resetForm = resetForm;
+                window.cancelEdit = cancelEdit;
+                
+                console.log('App initialized successfully!');
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError('Failed to initialize application: ' + error.message);
+            }
+        });
+        
+        // ========== EVENT LISTENERS SETUP ==========
+        function setupEventListeners() {
+            // Save button
+            const saveButton = document.getElementById('saveButton');
+            if (saveButton) {
+                saveButton.addEventListener('click', saveAcquisition);
+            }
+            
+            // Reset button
+            const resetButton = document.getElementById('resetButton');
+            if (resetButton) {
+                resetButton.addEventListener('click', resetForm);
+            }
+            
+            // Cancel edit button
+            const cancelButton = document.getElementById('cancelEditBtn');
+            if (cancelButton) {
+                cancelButton.addEventListener('click', cancelEdit);
+            }
+            
+            // Auto-calculation events
+            document.getElementById('fare')?.addEventListener('input', calculateAmounts);
+            document.getElementById('taxes')?.addEventListener('input', calculateAmounts);
+            document.getElementById('paymentPercentage')?.addEventListener('input', calculateAmounts);
+            document.getElementById('noOfSeats')?.addEventListener('input', calculateBalanceTickets);
+            document.getElementById('ticketsIssued')?.addEventListener('input', calculateBalanceTickets);
+        }
+        
+        // ========== FORM FUNCTIONS ==========
+        function generateSRNumber() {
+            if (editingId) return;
+            
+            const srField = document.getElementById('srNumber');
+            if (!srField) return;
+            
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            srField.value = `SR${year}${month}${random}`;
+        }
+        
+        function calculateAmounts() {
+    try {
+        const fare = parseFloat(document.getElementById('fare')?.value) || 0;
+        const taxes = parseFloat(document.getElementById('taxes')?.value) || 0;
+        const percentage = parseFloat(document.getElementById('paymentPercentage')?.value) || 100;
+        const seats = parseInt(document.getElementById('noOfSeats')?.value) || 1;
+        
+        // Calculate total per seat
+        const totalPerSeat = fare + taxes;
+        
+        // Calculate total PNR amount (fare + taxes) × number of seats
+        const totalPnrAmount = totalPerSeat * seats;
+        
+        // Calculate payable amount based on percentage
+        const payable = totalPnrAmount * (percentage / 100);
+        
+        const pnrField = document.getElementById('pnrAmount');
+        const payableField = document.getElementById('payableAmount');
+        
+        if (pnrField) pnrField.value = totalPnrAmount.toFixed(2);
+        if (payableField) payableField.value = payable.toFixed(2);
+    } catch (error) {
+        console.error('Error in calculateAmounts:', error);
+    }
+}
+        
+        function calculateBalanceTickets() {
+            try {
+                const totalSeats = parseInt(document.getElementById('noOfSeats')?.value) || 0;
+                const issued = parseInt(document.getElementById('ticketsIssued')?.value) || 0;
+                const balance = totalSeats - issued;
+                
+                const balanceField = document.getElementById('balanceTickets');
+                if (balanceField) balanceField.value = balance > 0 ? balance : 0;
+            } catch (error) {
+                console.error('Error in calculateBalanceTickets:', error);
+            }
+        }
+        
+        // ========== MAIN SAVE FUNCTION ==========
+        async function saveAcquisition() {
+            console.log('Saving acquisition...');
+            
+            // Validate required fields
+            const airlinePnr = document.getElementById('airlinePnr')?.value;
+            const noOfSeats = document.getElementById('noOfSeats')?.value;
+            const fare = document.getElementById('fare')?.value;
+            const timeLimit = document.getElementById('timeLimit')?.value;
+            const airline = document.getElementById('airline')?.value;
+            
+            if (!airlinePnr || !noOfSeats || !fare || !timeLimit || !airline) {
+                showError('Please fill in all required fields (*)');
+                return;
+            }
+            
+            // Disable save button and show loading
+            const saveButton = document.getElementById('saveButton');
+            const originalText = saveButton?.innerHTML;
+            if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...';
+            }
+            
+            try {
+                // Get form data
+                const formData = {
+                    sr_number: document.getElementById('srNumber')?.value || '',
+                    request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
+                    airline_pnr: airlinePnr,
+                    no_of_seats: parseInt(noOfSeats) || 0,
+                    fare: parseFloat(fare) || 0,
+                    time_limit: timeLimit,
+                    investment_type: document.getElementById('investmentType')?.value || 'Company Investment',
+                    license_number: document.getElementById('license')?.value || 'QFC',
+                    branch: document.getElementById('branch')?.value || 'HO',
+                    gds_pnr: document.getElementById('gdsPnr')?.value || null,
+                    segment: document.getElementById('segment')?.value || 'Umrah',
+                    airline: airline,
+                    outbound_date: document.getElementById('outboundDate')?.value || null,
+                    inbound_date: document.getElementById('inboundDate')?.value || null,
+                    sector: document.getElementById('sector')?.value || '',
+                    taxes: parseFloat(document.getElementById('taxes')?.value) || 0,
+                    payable_amount: parseFloat(document.getElementById('payableAmount')?.value) || 0,
+                    pnr_amount: parseFloat(document.getElementById('pnrAmount')?.value) || 0,
+                    issuance_date: document.getElementById('issuanceDate')?.value || null,
+                    payment_percentage: parseFloat(document.getElementById('paymentPercentage')?.value) || 100,
+                    emd_refund_date: document.getElementById('emdRefundDate')?.value || null,
+                    first_emd_number: document.getElementById('emd1Number')?.value || null,
+                    first_emd_amount: document.getElementById('emd1Amount')?.value ? parseFloat(document.getElementById('emd1Amount').value) : null,
+                    first_emd_status: document.getElementById('emd1Status')?.value || null,
+                    first_emd_time_limit: document.getElementById('emd1TimeLimit')?.value || null,
+                    first_emd_issuance_date: document.getElementById('emd1IssuanceDate')?.value || null,
+                    first_emd_payment_percentage: document.getElementById('emd1PaymentPercent')?.value ? parseFloat(document.getElementById('emd1PaymentPercent').value) : null,
+                    second_emd_number: document.getElementById('emd2Number')?.value || null,
+                    second_emd_amount: document.getElementById('emd2Amount')?.value ? parseFloat(document.getElementById('emd2Amount').value) : null,
+                    second_emd_time_limit: document.getElementById('emd2TimeLimit')?.value || null,
+                    third_emd_number: document.getElementById('emd3Number')?.value || null,
+                    third_emd_amount: document.getElementById('emd3Amount')?.value ? parseFloat(document.getElementById('emd3Amount').value) : null,
+                    third_emd_time_limit: document.getElementById('emd3TimeLimit')?.value || null,
+                    ticketing_status: document.getElementById('ticketingStatus')?.value || 'pending',
+                    no_of_tickets_issued: parseInt(document.getElementById('ticketsIssued')?.value) || 0,
+                    balance_tickets: parseInt(document.getElementById('balanceTickets')?.value) || 0,
+                    last_ticket_date: document.getElementById('lastTicketDate')?.value || null,
+                    status: document.getElementById('overallStatus')?.value || 'draft',
+                    notes: document.getElementById('notes')?.value || null,
+                    created_at: new Date().toISOString()
+                };
+                
+                console.log('Saving data:', formData);
+                
+                if (editingId) {
+                    // Update existing record
+                    const { data, error } = await supabaseClient
+                        .from('seat_acquisitions')
+                        .update(formData)
+                        .eq('id', editingId)
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    showSuccess('✅ Updated successfully! SR#: ' + formData.sr_number);
+                    editingId = null;
+                } else {
+                    // Insert new record
+                    const { data, error } = await supabaseClient
+                        .from('seat_acquisitions')
+                        .insert([formData])
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    showSuccess('✅ Saved successfully! SR#: ' + formData.sr_number);
+                }
+                
+                // Reset form and reload data
+                resetForm();
+                await loadAcquisitions();
+                
+            } catch (error) {
+                console.error('Save error:', error);
+                showError('❌ Error saving: ' + (error.message || 'Please check console for details'));
+            } finally {
+                // Re-enable save button
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = originalText;
+                }
+            }
+        }
+        
+        // ========== OTHER FUNCTIONS ==========
+        async function loadAcquisitions() {
+            try {
+                if (!supabaseClient) {
+                    console.log('Supabase not initialized, using localStorage');
+                    // Fallback to localStorage
+                    const savedData = localStorage.getItem('qfc_acquisitions');
+                    acquisitions = savedData ? JSON.parse(savedData) : [];
+                    updateTable();
+                    updateDashboard();
+                    return;
+                }
+                
+                const { data, error } = await supabaseClient
+                    .from('seat_acquisitions')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                
+                if (error) throw error;
+                
+                acquisitions = data || [];
+                updateTable();
+                updateDashboard();
+                
+                // Also save to localStorage as backup
+                localStorage.setItem('qfc_acquisitions', JSON.stringify(acquisitions));
+                
+            } catch (error) {
+                console.error('Load error:', error);
+                // Fallback to localStorage
+                const savedData = localStorage.getItem('qfc_acquisitions');
+                acquisitions = savedData ? JSON.parse(savedData) : [];
+                updateTable();
+                updateDashboard();
+                showError('Using offline data. Please check internet connection.');
+            }
+        }
+        
+        function updateTable() {
+            const tableBody = document.getElementById('acquisitionsTable');
+            const tableCount = document.getElementById('tableCount');
+            
+            if (!acquisitions || acquisitions.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-inbox display-6"></i>
+                                <p class="mt-2">No acquisitions yet</p>
+                                <small>Save your first acquisition above</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                if (tableCount) tableCount.textContent = '0 records';
+                return;
+            }
+            
+            let html = '';
+            acquisitions.forEach(item => {
+                const id = item.id || '';
+                const isEditing = editingId === id;
+                const rowClass = isEditing ? 'table-warning' : '';
+                
+                let statusClass = 'status-draft';
+                if (item.status === 'approved') statusClass = 'status-approved';
+                if (item.status === 'submitted') statusClass = 'status-pending';
+                
+                html += `
+                    <tr class="${rowClass}">
+                        <td><strong>${item.sr_number || ''}</strong></td>
+                        <td>${item.airline_pnr || ''}</td>
+                        <td>${item.no_of_seats || 0}</td>
+                        <td>${item.fare ? parseFloat(item.fare).toFixed(2) : '0.00'}</td>
+                        <td><span class="status-badge ${statusClass}">${item.status || 'draft'}</span></td>
+                        <td>${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="editItem('${id}')" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="deleteItem('${id}', '${item.sr_number}')" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+            if (tableCount) tableCount.textContent = `${acquisitions.length} records`;
+            
+            // Make edit/delete functions available
+            window.editItem = editItem;
+            window.deleteItem = deleteItem;
+        }
+        
+        function updateDashboard() {
+            if (!acquisitions || acquisitions.length === 0) {
+                document.getElementById('totalSeats').textContent = '0';
+                document.getElementById('totalRevenue').textContent = '0.00';
+                document.getElementById('totalAcquisitions').textContent = '0';
+                document.getElementById('pendingItems').textContent = '0';
+                return;
+            }
+            
+            const totalSeats = acquisitions.reduce((sum, item) => sum + (item.no_of_seats || 0), 0);
+            const totalRevenue = acquisitions.reduce((sum, item) => sum + (item.payable_amount || 0), 0);
+            const pendingCount = acquisitions.filter(item => item.status === 'draft' || item.status === 'submitted').length;
+            
+            document.getElementById('totalSeats').textContent = totalSeats;
+            document.getElementById('totalRevenue').textContent = totalRevenue.toFixed(2);
+            document.getElementById('totalAcquisitions').textContent = acquisitions.length;
+            document.getElementById('pendingItems').textContent = pendingCount;
+        }
+        
+        function resetForm() {
+            editingId = null;
+            
+            // Generate new SR number
+            generateSRNumber();
+            
+            // Clear form fields
+            const fieldsToClear = [
+                'airlinePnr', 'gdsPnr', 'noOfSeats', 'outboundDate', 'inboundDate',
+                'sector', 'fare', 'taxes', 'issuanceDate', 'emdRefundDate',
+                'emd1Number', 'emd1Amount', 'emd1TimeLimit', 'emd1IssuanceDate', 'emd1PaymentPercent',
+                'emd2Number', 'emd2Amount', 'emd2TimeLimit', 'emd3Number', 'emd3Amount', 'emd3TimeLimit',
+                'ticketsIssued', 'lastTicketDate', 'notes'
+            ];
+            
+            fieldsToClear.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.value = '';
+            });
+            
+            // Reset select fields to defaults
+            document.getElementById('investmentType').value = 'Company Investment';
+            document.getElementById('license').value = 'QFC';
+            document.getElementById('branch').value = 'HO';
+            document.getElementById('segment').value = 'Umrah';
+            document.getElementById('airline').value = '';
+            document.getElementById('emd1Status').value = '';
+            document.getElementById('ticketingStatus').value = 'pending';
+            document.getElementById('overallStatus').value = 'draft';
+            document.getElementById('paymentPercentage').value = '100';
+            
+            // Set default dates
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('requestDate').value = today;
+            
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
+            
+            // Recalculate
+            calculateAmounts();
+            calculateBalanceTickets();
+            
+            // Update UI buttons
+            document.getElementById('saveButton').innerHTML = '<i class="bi bi-save me-2"></i>Save Acquisition';
+            document.getElementById('saveButton').className = 'btn btn-primary btn-lg';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            
+            // Update table
+            updateTable();
+            
+            showSuccess('Form reset successfully');
+        }
+        
+        function cancelEdit() {
+            resetForm();
+        }
+        
+        async function editItem(id) {
+            try {
+                // Find item in local array first
+                const item = acquisitions.find(item => item.id == id);
+                if (!item) {
+                    showError('Item not found');
+                    return;
+                }
+                
+                editingId = id;
+                
+                // Fill form with item data
+                const fields = [
+                    { id: 'srNumber', value: item.sr_number },
+                    { id: 'requestDate', value: item.request_date },
+                    { id: 'investmentType', value: item.investment_type },
+                    { id: 'license', value: item.license_number },
+                    { id: 'branch', value: item.branch },
+                    { id: 'airlinePnr', value: item.airline_pnr },
+                    { id: 'gdsPnr', value: item.gds_pnr },
+                    { id: 'segment', value: item.segment },
+                    { id: 'airline', value: item.airline },
+                    { id: 'noOfSeats', value: item.no_of_seats },
+                    { id: 'outboundDate', value: item.outbound_date },
+                    { id: 'inboundDate', value: item.inbound_date },
+                    { id: 'sector', value: item.sector },
+                    { id: 'fare', value: item.fare },
+                    { id: 'taxes', value: item.taxes },
+                    { id: 'paymentPercentage', value: item.payment_percentage },
+                    { id: 'issuanceDate', value: item.issuance_date },
+                    { id: 'timeLimit', value: item.time_limit },
+                    { id: 'emdRefundDate', value: item.emd_refund_date },
+                    { id: 'emd1Number', value: item.first_emd_number },
+                    { id: 'emd1Amount', value: item.first_emd_amount },
+                    { id: 'emd1Status', value: item.first_emd_status },
+                    { id: 'emd1TimeLimit', value: item.first_emd_time_limit },
+                    { id: 'emd1IssuanceDate', value: item.first_emd_issuance_date },
+                    { id: 'emd1PaymentPercent', value: item.first_emd_payment_percentage },
+                    { id: 'emd2Number', value: item.second_emd_number },
+                    { id: 'emd2Amount', value: item.second_emd_amount },
+                    { id: 'emd2TimeLimit', value: item.second_emd_time_limit },
+                    { id: 'emd3Number', value: item.third_emd_number },
+                    { id: 'emd3Amount', value: item.third_emd_amount },
+                    { id: 'emd3TimeLimit', value: item.third_emd_time_limit },
+                    { id: 'ticketingStatus', value: item.ticketing_status },
+                    { id: 'ticketsIssued', value: item.no_of_tickets_issued },
+                    { id: 'lastTicketDate', value: item.last_ticket_date },
+                    { id: 'overallStatus', value: item.status },
+                    { id: 'notes', value: item.notes }
+                ];
+                
+                fields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    if (element && field.value !== null && field.value !== undefined) {
+                        element.value = field.value;
+                    }
+                });
+                
+                // Recalculate
+                calculateAmounts();
+                calculateBalanceTickets();
+                
+                // Update UI
+                document.getElementById('saveButton').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update';
+                document.getElementById('saveButton').className = 'btn btn-warning btn-lg';
+                document.getElementById('cancelEditBtn').style.display = 'inline-block';
+                
+                // Scroll to form
+                document.getElementById('acquireForm').scrollIntoView({ behavior: 'smooth' });
+                
+                showSuccess('Editing: ' + item.sr_number);
+                
+            } catch (error) {
+                console.error('Edit error:', error);
+                showError('Failed to load for editing');
+            }
+        }
+        
+        async function deleteItem(id, srNumber) {
+            if (!confirm(`Are you sure you want to delete ${srNumber}? This action cannot be undone.`)) return;
+            
+            try {
+                if (supabaseClient) {
+                    const { error } = await supabaseClient
+                        .from('seat_acquisitions')
+                        .delete()
+                        .eq('id', id);
+                    
+                    if (error) throw error;
+                }
+                
+                // Remove from local array
+                acquisitions = acquisitions.filter(item => item.id != id);
+                
+                // Update localStorage
+                localStorage.setItem('qfc_acquisitions', JSON.stringify(acquisitions));
+                
+                // If we were editing this item, cancel edit
+                if (editingId == id) {
+                    resetForm();
+                }
+                
+                // Update UI
+                updateTable();
+                updateDashboard();
+                
+                showSuccess('Deleted: ' + srNumber);
+                
+            } catch (error) {
+                console.error('Delete error:', error);
+                showError('Failed to delete');
+            }
+        }
+        
+        // ========== NOTIFICATION FUNCTIONS ==========
+        function showSuccess(message) {
+            const successToast = document.getElementById('successToast');
+            const successMessage = document.getElementById('successMessage');
+            
+            if (successMessage) successMessage.textContent = message;
+            if (successToast) {
+                const toast = new bootstrap.Toast(successToast);
+                toast.show();
+            }
+        }
+        
+        function showError(message) {
+            const errorToast = document.getElementById('errorToast');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (errorMessage) errorMessage.textContent = message;
+            if (errorToast) {
+                const toast = new bootstrap.Toast(errorToast);
+                toast.show();
+            }
+        }
+        
+        // Make functions globally available
+        window.saveAcquisition = saveAcquisition;
+        window.resetForm = resetForm;
+        window.cancelEdit = cancelEdit;
+        window.editItem = editItem;
+        window.deleteItem = deleteItem;
+        
+        console.log('All JavaScript functions loaded and available');
+    </script>
 </body>
 </html>
