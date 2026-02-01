@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QFC Group - Reports Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: bold; color: #1a365d !important; }
+        .card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 24px; border: none; }
+        .report-card { border-left: 4px solid; transition: transform 0.2s; }
+        .report-card:hover { transform: translateY(-3px); }
+        .report-card.acquisitions { border-left-color: #1a365d; }
+        .report-card.sales { border-left-color: #198754; }
+        .btn-export { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+        .btn-filter { background-color: #6c757d; color: white; }
+        .dataTables_wrapper { padding: 0 !important; }
+        .dt-buttons .btn { border-radius: 6px !important; }
+        .alert-fixed {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        .date-range { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .stat-badge { font-size: 0.85rem; padding: 5px 10px; border-radius: 20px; }
+        table.dataTable { border-collapse: collapse !important; }
+        .dataTables_length select { padding: 5px 10px; border-radius: 4px; }
+        .dataTables_filter input { padding: 5px 10px; border-radius: 4px; border: 1px solid #ced4da; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
+                <div class="d-inline-block">
+                    <div class="qfc-brand">QFC Group Pvt Ltd</div>
+                    <div class="qfc-subtitle">Reports Dashboard</div>
+                </div>
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+                <a class="nav-link" href="groups.html"><i class="bi bi-people me-1"></i>Groups</a>
+                <a class="nav-link active" href="#"><i class="bi bi-bar-chart me-1"></i>Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="fw-bold text-dark"><i class="bi bi-bar-chart-fill me-2"></i>Reports Dashboard</h2>
+                <p class="text-muted">Generate and export detailed reports for acquisitions and sales</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary" onclick="refreshAllReports()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Refresh All
+                </button>
+            </div>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-calendar-range me-2"></i>Date Range Filter</h5>
+            </div>
+            <div class="card-body">
+                <div class="row date-range">
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Airline</label>
+                        <select class="form-select" id="filterAirline">
+                            <option value="">All Airlines</option>
+                            <option value="SV">Saudi Airlines (SV)</option>
+                            <option value="PA">Airblue (PA)</option>
+                            <option value="PK">Pakistan Airlines (PK)</option>
+                            <option value="EK">Emirates (EK)</option>
+                            <option value="F3">Flyadeal (F3)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-filter w-100" onclick="applyFilters()">
+                            <i class="bi bi-funnel me-2"></i>Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report 1: Acquisitions Report -->
+        <div class="card report-card acquisitions mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Acquisitions Report</h5>
+                <div>
+                    <span class="badge bg-light text-dark me-2" id="acqCount">0 records</span>
+                    <button class="btn btn-sm btn-export" onclick="exportAcquisitionsExcel()">
+                        <i class="bi bi-file-excel me-1"></i>Export to Excel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Summary Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <small class="text-muted d-block">Total Seats</small>
+                            <h3 id="totalSeatsStats">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <small class="text-muted d-block">Total Investment</small>
+                            <h3 id="totalInvestment">0.00</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <small class="text-muted d-block">Active Groups</small>
+                            <h3 id="activeGroups">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <small class="text-muted d-block">Avg. Fare</small>
+                            <h3 id="averageFare">0.00</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acquisitions Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped" id="acquisitionsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>SR #</th>
+                                <th>Date</th>
+                                <th>Airline</th>
+                                <th>Airline PNR</th>
+                                <th>Seats</th>
+                                <th>Sector</th>
+                                <th>Outbound Date</th>
+                                <th>Inbound Date</th>
+                                <th>Outbound Flight</th>
+                                <th>Inbound Flight</th>
+                                <th>Fare</th>
+                                <th>Taxes</th>
+                                <th>PNR Amount</th>
+                                <th>Time Limit</th>
+                                <th>Segment</th>
+                                <th>Status</th>
+                                <th>Branch</th>
+                            </tr>
+                        </thead>
+                        <tbody id="acquisitionsTableBody">
+                            <!-- Data loaded by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report 2: Sales Report -->
+        <div class="card report-card sales">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-cash-stack me-2"></i>Sales to Agents Report</h5>
+                <div>
+                    <span class="badge bg-light text-dark me-2" id="salesCount">0 records</span>
+                    <button class="btn btn-sm btn-export" onclick="exportSalesExcel()">
+                        <i class="bi bi-file-excel me-1"></i>Export to Excel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Summary Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <small class="text-muted d-block">Total Sales</small>
+                            <h3 id="totalSalesAmount">0.00</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <small class="text-muted d-block">Total Seats Sold</small>
+                            <h3 id="totalSeatsSold">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <small class="text-muted d-block">Total Commission</small>
+                            <h3 id="totalCommission">0.00</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <small class="text-muted d-block">Net Revenue</small>
+                            <h3 id="netRevenue">0.00</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped" id="salesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sale Date</th>
+                                <th>Agent Name</th>
+                                <th>Company</th>
+                                <th>License No.</th>
+                                <th>Contact</th>
+                                <th>Group SR #</th>
+                                <th>Airline</th>
+                                <th>Sector</th>
+                                <th>Seats Sold</th>
+                                <th>Sale Price</th>
+                                <th>Total Amount</th>
+                                <th>Commission %</th>
+                                <th>Commission Amount</th>
+                                <th>Net Amount</th>
+                                <th>Payment Status</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody">
+                            <!-- Data loaded by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries - CORRECT ORDER IS IMPORTANT -->
+    <!-- 1. jQuery FIRST (DataTables depends on it) -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    
+    <!-- 2. Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 3. DataTables Core -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    
+    <!-- 4. DataTables Bootstrap Integration -->
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    
+    <!-- 5. DataTables Buttons -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    
+    <!-- 6. DataTables Buttons Bootstrap Integration -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    
+    <!-- 7. Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <!-- 8. DataTables HTML5 Export -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    
+    <!-- 9. DataTables Print -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    
+    <!-- 10. Excel Library -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- 11. Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- 12. Our Custom Script -->
+    <script>
+        // Supabase Configuration
+        const supabaseUrl = 'https://ojlxkzkialguthdeiley.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let allAcquisitions = [];
+        let allSales = [];
+        let filteredAcquisitions = [];
+        let filteredSales = [];
+        
+        // Initialize DataTables
+        let acquisitionsTable = null;
+        let salesTable = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Reports Dashboard - Initializing...');
+            
+            // Set default dates (last 30 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+            
+            // Load data
+            loadAllData();
+        });
+
+        // Load all data
+        async function loadAllData() {
+            try {
+                await Promise.all([
+                    loadAcquisitions(),
+                    loadSales()
+                ]);
+                
+                applyFilters();
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showAlert('Failed to load report data', 'danger');
+            }
+        }
+
+        // Load acquisitions data
+        async function loadAcquisitions() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('seat_acquisitions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                allAcquisitions = data || [];
+                console.log('Acquisitions loaded:', allAcquisitions.length);
+                
+            } catch (error) {
+                console.error('Error loading acquisitions:', error);
+                allAcquisitions = [];
+            }
+        }
+
+        // Load sales data
+        async function loadSales() {
+            try {
+                const { data: salesData, error: salesError } = await supabaseClient
+                    .from('agent_sales')
+                    .select('*')
+                    .order('sale_date', { ascending: false });
+                
+                if (salesError) {
+                    // Table might not exist
+                    console.log('Sales table not found or empty');
+                    allSales = [];
+                    return;
+                }
+                
+                // Also load acquisition data for group details
+                const { data: groupsData, error: groupsError } = await supabaseClient
+                    .from('seat_acquisitions')
+                    .select('id, sr_number, airline, sector');
+                
+                if (!groupsError) {
+                    // Merge sales with group data
+                    allSales = salesData.map(sale => {
+                        const group = groupsData.find(g => g.id === sale.group_id);
+                        return {
+                            ...sale,
+                            group_sr_number: group?.sr_number || 'N/A',
+                            group_airline: group?.airline || 'N/A',
+                            group_sector: group?.sector || 'N/A'
+                        };
+                    });
+                } else {
+                    allSales = salesData;
+                }
+                
+                console.log('Sales loaded:', allSales.length);
+                
+            } catch (error) {
+                console.error('Error loading sales:', error);
+                allSales = [];
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const airline = document.getElementById('filterAirline').value;
+            
+            // Filter acquisitions
+            filteredAcquisitions = allAcquisitions.filter(item => {
+                let match = true;
+                
+                // Date filter
+                if (startDate && endDate) {
+                    const itemDate = item.created_at ? item.created_at.split('T')[0] : '';
+                    if (itemDate < startDate || itemDate > endDate) {
+                        match = false;
+                    }
+                }
+                
+                // Airline filter
+                if (airline && item.airline !== airline) {
+                    match = false;
+                }
+                
+                return match;
+            });
+            
+            // Filter sales
+            filteredSales = allSales.filter(sale => {
+                let match = true;
+                
+                // Date filter
+                if (startDate && endDate && sale.sale_date) {
+                    if (sale.sale_date < startDate || sale.sale_date > endDate) {
+                        match = false;
+                    }
+                }
+                
+                // Airline filter
+                if (airline && sale.group_airline !== airline) {
+                    match = false;
+                }
+                
+                return match;
+            });
+            
+            // Update displays
+            updateAcquisitionsDisplay();
+            updateSalesDisplay();
+            
+            // Initialize DataTables after data is loaded and displayed
+            setTimeout(initializeDataTables, 100);
+            
+            showAlert(`Filters applied: ${filteredAcquisitions.length} acquisitions, ${filteredSales.length} sales`, 'success');
+        }
+
+        // Update acquisitions display
+        function updateAcquisitionsDisplay() {
+            const tableBody = document.getElementById('acquisitionsTableBody');
+            document.getElementById('acqCount').textContent = `${filteredAcquisitions.length} records`;
+            
+            if (filteredAcquisitions.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="17" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="bi bi-inbox display-6"></i>
+                                <p class="mt-2">No acquisition data found</p>
+                                <small>Try adjusting your filters or create some acquisitions first</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                
+                // Reset stats
+                document.getElementById('totalSeatsStats').textContent = '0';
+                document.getElementById('totalInvestment').textContent = '0.00';
+                document.getElementById('activeGroups').textContent = '0';
+                document.getElementById('averageFare').textContent = '0.00';
+                
+                return;
+            }
+            
+            // Calculate stats
+            const totalSeats = filteredAcquisitions.reduce((sum, item) => sum + (item.no_of_seats || 0), 0);
+            const totalInvestment = filteredAcquisitions.reduce((sum, item) => sum + (item.pnr_amount || 0), 0);
+            const activeGroups = filteredAcquisitions.filter(item => item.status === 'approved' || item.status === 'active').length;
+            const averageFare = filteredAcquisitions.length > 0 
+                ? filteredAcquisitions.reduce((sum, item) => sum + (item.fare || 0), 0) / filteredAcquisitions.length 
+                : 0;
+            
+            // Update stats
+            document.getElementById('totalSeatsStats').textContent = formatNumber(totalSeats);
+            document.getElementById('totalInvestment').textContent = formatCurrency(totalInvestment);
+            document.getElementById('activeGroups').textContent = activeGroups;
+            document.getElementById('averageFare').textContent = formatCurrency(averageFare);
+            
+            // Build table rows
+            let html = '';
+            filteredAcquisitions.forEach(item => {
+                html += `
+                    <tr>
+                        <td><strong>${item.sr_number || 'N/A'}</strong></td>
+                        <td>${item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}</td>
+                        <td><span class="badge bg-primary">${item.airline || 'N/A'}</span></td>
+                        <td>${item.airline_pnr || 'N/A'}</td>
+                        <td>${item.no_of_seats || 0}</td>
+                        <td>${item.sector || 'N/A'}</td>
+                        <td>${formatDateForDisplay(item.outbound_date)}</td>
+                        <td>${formatDateForDisplay(item.inbound_date)}</td>
+                        <td>${item.outbound_flight || 'N/A'}</td>
+                        <td>${item.inbound_flight || 'N/A'}</td>
+                        <td>${formatCurrency(item.fare || 0)}</td>
+                        <td>${formatCurrency(item.taxes || 0)}</td>
+                        <td><strong>${formatCurrency(item.pnr_amount || 0)}</strong></td>
+                        <td>${item.time_limit || 'N/A'}</td>
+                        <td><span class="stat-badge bg-info">${item.segment || 'N/A'}</span></td>
+                        <td><span class="stat-badge ${getStatusClass(item.status)}">${item.status || 'draft'}</span></td>
+                        <td>${item.branch || 'HO'}</td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+
+        // Update sales display
+        function updateSalesDisplay() {
+            const tableBody = document.getElementById('salesTableBody');
+            document.getElementById('salesCount').textContent = `${filteredSales.length} records`;
+            
+            if (filteredSales.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="16" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="bi bi-cart-x display-6"></i>
+                                <p class="mt-2">No sales data found</p>
+                                <small>Try adjusting your filters or sell some seats first</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                
+                // Reset stats
+                document.getElementById('totalSalesAmount').textContent = '0.00';
+                document.getElementById('totalSeatsSold').textContent = '0';
+                document.getElementById('totalCommission').textContent = '0.00';
+                document.getElementById('netRevenue').textContent = '0.00';
+                
+                return;
+            }
+            
+            // Calculate stats
+            const totalSalesAmount = filteredSales.reduce((sum, sale) => sum + (sale.total_amount || 0), 0);
+            const totalSeatsSold = filteredSales.reduce((sum, sale) => sum + (sale.seats_sold || 0), 0);
+            const totalCommission = filteredSales.reduce((sum, sale) => sum + (sale.commission_amount || 0), 0);
+            const netRevenue = totalSalesAmount - totalCommission;
+            
+            // Update stats
+            document.getElementById('totalSalesAmount').textContent = formatCurrency(totalSalesAmount);
+            document.getElementById('totalSeatsSold').textContent = formatNumber(totalSeatsSold);
+            document.getElementById('totalCommission').textContent = formatCurrency(totalCommission);
+            document.getElementById('netRevenue').textContent = formatCurrency(netRevenue);
+            
+            // Build table rows
+            let html = '';
+            filteredSales.forEach(sale => {
+                const totalAmount = (sale.seats_sold || 0) * (sale.sale_price || 0);
+                const commissionAmount = totalAmount * ((sale.commission_percentage || 0) / 100);
+                const netAmount = totalAmount - commissionAmount;
+                
+                html += `
+                    <tr>
+                        <td>${sale.sale_date || new Date(sale.created_at).toLocaleDateString()}</td>
+                        <td><strong>${sale.agent_name || 'N/A'}</strong></td>
+                        <td>${sale.agent_company || 'N/A'}</td>
+                        <td>${sale.license_number || 'N/A'}</td>
+                        <td>
+                            <small class="d-block">${sale.agent_phone || 'N/A'}</small>
+                            <small class="text-muted">${sale.agent_email || ''}</small>
+                        </td>
+                        <td><strong>${sale.group_sr_number || 'N/A'}</strong></td>
+                        <td><span class="badge bg-primary">${sale.group_airline || 'N/A'}</span></td>
+                        <td>${sale.group_sector || 'N/A'}</td>
+                        <td><span class="badge bg-success">${sale.seats_sold || 0}</span></td>
+                        <td>${formatCurrency(sale.sale_price || 0)}</td>
+                        <td><strong>${formatCurrency(totalAmount)}</strong></td>
+                        <td>${sale.commission_percentage || 0}%</td>
+                        <td>${formatCurrency(commissionAmount)}</td>
+                        <td><strong class="text-success">${formatCurrency(netAmount)}</strong></td>
+                        <td><span class="stat-badge ${getPaymentStatusClass(sale.payment_status)}">${sale.payment_status || 'pending'}</span></td>
+                        <td><small class="text-muted">${sale.notes || ''}</small></td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+
+        // Initialize DataTables
+        function initializeDataTables() {
+            // Destroy existing instances if they exist
+            if (acquisitionsTable) {
+                acquisitionsTable.destroy();
+            }
+            if (salesTable) {
+                salesTable.destroy();
+            }
+            
+            // Initialize Acquisitions DataTable
+            acquisitionsTable = $('#acquisitionsTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
+                dom: '<"row"<"col-md-6"l><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                }
+            });
+            
+            // Initialize Sales DataTable
+            salesTable = $('#salesTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
+                dom: '<"row"<"col-md-6"l><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                }
+            });
+        }
+
+        // Export Acquisitions to Excel
+        function exportAcquisitionsExcel() {
+            if (filteredAcquisitions.length === 0) {
+                showAlert('No acquisition data to export', 'warning');
+                return;
+            }
+            
+            // Prepare data for Excel
+            const exportData = filteredAcquisitions.map(item => ({
+                'SR Number': item.sr_number || '',
+                'Date': item.created_at ? new Date(item.created_at).toLocaleDateString() : '',
+                'Airline': item.airline || '',
+                'Airline PNR': item.airline_pnr || '',
+                'GDS PNR': item.gds_pnr || '',
+                'Seats': item.no_of_seats || 0,
+                'Sector': item.sector || '',
+                'Outbound Date': formatDateForDisplay(item.outbound_date),
+                'Inbound Date': formatDateForDisplay(item.inbound_date),
+                'Outbound Flight': item.outbound_flight || '',
+                'Inbound Flight': item.inbound_flight || '',
+                'Outbound Times': item.outbound_times || '',
+                'Inbound Times': item.inbound_times || '',
+                'Fare': item.fare || 0,
+                'Taxes': item.taxes || 0,
+                'PNR Amount': item.pnr_amount || 0,
+                'Payable Amount': item.payable_amount || 0,
+                'Time Limit': item.time_limit || '',
+                'Segment': item.segment || '',
+                'Investment Type': item.investment_type || '',
+                'License': item.license_number || '',
+                'Branch': item.branch || '',
+                'Status': item.status || '',
+                'Notes': item.notes || ''
+            }));
+            
+            // Create worksheet
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Acquisitions');
+            
+            // Generate filename with timestamp
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-');
+            const filename = `QFC_Acquisitions_Report_${timestamp}.xlsx`;
+            
+            // Export to Excel
+            XLSX.writeFile(wb, filename);
+            
+            showAlert('Acquisitions report exported to Excel successfully!', 'success');
+        }
+
+        // Export Sales to Excel
+        function exportSalesExcel() {
+            if (filteredSales.length === 0) {
+                showAlert('No sales data to export', 'warning');
+                return;
+            }
+            
+            // Prepare data for Excel
+            const exportData = filteredSales.map(sale => {
+                const totalAmount = (sale.seats_sold || 0) * (sale.sale_price || 0);
+                const commissionAmount = totalAmount * ((sale.commission_percentage || 0) / 100);
+                const netAmount = totalAmount - commissionAmount;
+                
+                return {
+                    'Sale Date': sale.sale_date || new Date(sale.created_at).toLocaleDateString(),
+                    'Agent Name': sale.agent_name || '',
+                    'Agent Company': sale.agent_company || '',
+                    'License Number': sale.license_number || '',
+                    'Contact Phone': sale.agent_phone || '',
+                    'Email': sale.agent_email || '',
+                    'Group SR Number': sale.group_sr_number || '',
+                    'Airline': sale.group_airline || '',
+                    'Sector': sale.group_sector || '',
+                    'Seats Sold': sale.seats_sold || 0,
+                    'Sale Price Per Seat': sale.sale_price || 0,
+                    'Total Sale Amount': totalAmount,
+                    'Commission %': sale.commission_percentage || 0,
+                    'Commission Amount': commissionAmount,
+                    'Net Amount': netAmount,
+                    'Payment Status': sale.payment_status || '',
+                    'Notes': sale.notes || ''
+                };
+            });
+            
+            // Create worksheet
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Sales');
+            
+            // Generate filename with timestamp
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-');
+            const filename = `QFC_Sales_Report_${timestamp}.xlsx`;
+            
+            // Export to Excel
+            XLSX.writeFile(wb, filename);
+            
+            showAlert('Sales report exported to Excel successfully!', 'success');
+        }
+
+        // Helper functions
+        function formatCurrency(number) {
+            if (isNaN(number) || number === null) return '0.00';
+            
+            const rounded = Math.round(number * 100) / 100;
+            const parts = rounded.toFixed(2).split('.');
+            const wholePart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            
+            return `${wholePart}.${parts[1] || '00'}`;
+        }
+
+        function formatNumber(number) {
+            if (isNaN(number) || number === null) return '0';
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function formatDateForDisplay(dateStr) {
+            if (!dateStr) return 'N/A';
+            if (/^\d{2}-[A-Z]{3}-\d{2}$/.test(dateStr.toUpperCase())) {
+                return dateStr.toUpperCase();
+            }
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                return date.toLocaleDateString();
+            } catch (error) {
+                return dateStr;
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status?.toLowerCase()) {
+                case 'approved':
+                case 'active':
+                    return 'bg-success';
+                case 'pending':
+                case 'submitted':
+                    return 'bg-warning';
+                case 'draft':
+                    return 'bg-secondary';
+                default:
+                    return 'bg-light text-dark';
+            }
+        }
+
+        function getPaymentStatusClass(status) {
+            switch(status?.toLowerCase()) {
+                case 'paid':
+                    return 'bg-success';
+                case 'partial':
+                    return 'bg-info';
+                case 'pending':
+                    return 'bg-warning';
+                default:
+                    return 'bg-light text-dark';
+            }
+        }
+
+        function refreshAllReports() {
+            showAlert('Refreshing reports...', 'info');
+            loadAllData();
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-fixed alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Make functions available globally
+        window.exportAcquisitionsExcel = exportAcquisitionsExcel;
+        window.exportSalesExcel = exportSalesExcel;
+        window.applyFilters = applyFilters;
+        window.refreshAllReports = refreshAllReports;
+    </script>
+</body>
+</html>
