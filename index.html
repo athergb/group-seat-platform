@@ -1524,17 +1524,15 @@
         
         async function initializeSupabase() {
             try {
-                // Replace with your actual Supabase credentials
-                const SUPABASE_URL = 'https://ojlxkzkialguthdeiley.supabase.co'; // ← Replace with your URL
-                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94
-                '; // ← Replace with your anon key
+                // ====== IMPORTANT: REPLACE THESE WITH YOUR ACTUAL CREDENTIALS ======
+                const SUPABASE_URL = 'https://your-project-id.supabase.co'; // ← CHANGE THIS
+                const SUPABASE_ANON_KEY = 'your-anon-key-here'; // ← CHANGE THIS
+                // ===================================================================
                 
                 console.log('Initializing Supabase...');
                 
-                // Only initialize if credentials are not placeholders
-                if (SUPABASE_URL && SUPABASE_ANON_KEY && 
-                    !SUPABASE_URL.includes('your-project') && 
-                    !SUPABASE_ANON_KEY.includes('your-anon-key')) {
+                // Always try to initialize if credentials are provided
+                if (SUPABASE_URL && SUPABASE_ANON_KEY) {
                     
                     // Create Supabase client
                     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1550,12 +1548,14 @@
                         if (error) {
                             console.warn('Supabase connection test failed:', error.message);
                             supabaseClient = null;
+                            console.warn('Using localStorage instead');
                         } else {
-                            console.log('Supabase connection successful');
+                            console.log('✅ Supabase connection successful');
                         }
                     } catch (testError) {
                         console.warn('Supabase test error:', testError.message);
                         supabaseClient = null;
+                        console.warn('Using localStorage instead');
                     }
                 } else {
                     console.warn('Supabase credentials not configured. Using localStorage.');
@@ -1564,6 +1564,7 @@
             } catch (error) {
                 console.error('Error initializing Supabase:', error);
                 supabaseClient = null;
+                console.warn('Using localStorage instead');
             }
         }
         
@@ -1808,8 +1809,8 @@
         
         function mapImportToForm(record, keepOriginalSR, index) {
             const mapping = {
-                'SR Number': 'original_sr_number',
-                'Original SR Number': 'original_sr_number',
+                'SR Number': 'sr_number',
+                'Original SR Number': 'sr_number',
                 'Request Date': 'request_date',
                 'Airline PNR': 'airline_pnr',
                 'GDS PNR': 'gds_pnr',
@@ -1818,7 +1819,7 @@
                 'No of Seats': 'no_of_seats',
                 'Sector': 'sector',
                 'Investment Type': 'investment_type',
-                'License': 'license_number',
+                'License': 'license',
                 'Branch': 'branch',
                 'Outbound Date': 'outbound_date',
                 'Outbound Flight': 'outbound_flight',
@@ -1826,18 +1827,6 @@
                 'Inbound Date': 'inbound_date',
                 'Inbound Flight': 'inbound_flight',
                 'Inbound Times': 'inbound_times',
-                'Outbound 1 Date': 'outbound1_date',
-                'Outbound 1 Flight': 'outbound1_flight',
-                'Outbound 1 Times': 'outbound1_times',
-                'Outbound 2 Date': 'outbound2_date',
-                'Outbound 2 Flight': 'outbound2_flight',
-                'Outbound 2 Times': 'outbound2_times',
-                'Inbound 1 Date': 'inbound1_date',
-                'Inbound 1 Flight': 'inbound1_flight',
-                'Inbound 1 Times': 'inbound1_times',
-                'Inbound 2 Date': 'inbound2_date',
-                'Inbound 2 Flight': 'inbound2_flight',
-                'Inbound 2 Times': 'inbound2_times',
                 'Fare': 'fare',
                 'Taxes': 'taxes',
                 'Issuance Date': 'issuance_date',
@@ -1872,20 +1861,18 @@
             
             if (keepOriginalSR && record['SR Number']) {
                 mappedData.sr_number = record['SR Number'];
-                mappedData.original_sr_number = record['SR Number'];
             } else {
                 mappedData.sr_number = generateSRNumberFromData(record, index);
-                if (record['SR Number']) mappedData.original_sr_number = record['SR Number'];
             }
             
             mappedData.created_at = new Date().toISOString();
-            mappedData.is_imported = true;
+            mappedData.updated_at = new Date().toISOString();
             return mappedData;
         }
         
         function fillFormWithData(record, keepOriginalSR) {
             try {
-                const originalSR = record['SR Number'] || record['original_sr_number'];
+                const originalSR = record['SR Number'] || record['sr_number'];
                 if (keepOriginalSR && originalSR) {
                     const srNumber = document.getElementById('srNumber');
                     if (srNumber) srNumber.value = originalSR;
@@ -1905,8 +1892,8 @@
                     else toggleFlightSegments(2);
                 }
                 
-                // Fill other fields based on current segment layout
-                const fieldMapping = currentSegments === 2 ? {
+                // Fill other fields
+                const fieldMapping = {
                     'requestDate': formatDateForInput(record['Request Date'] || record['request_date']),
                     'airlinePnr': record['Airline PNR'] || record['airline_pnr'],
                     'gdsPnr': record['GDS PNR'] || record['gds_pnr'],
@@ -1914,59 +1901,8 @@
                     'noOfSeats': record['No of Seats'] || record['no_of_seats'],
                     'sector': record['Sector'] || record['sector'],
                     'investmentType': record['Investment Type'] || record['investment_type'],
-                    'license': record['License'] || record['license_number'],
+                    'license': record['License'] || record['license'],
                     'branch': record['Branch'] || record['branch'],
-                    'outboundDate': formatDateForInput(record['Outbound Date'] || record['outbound_date'] || record['Outbound 1 Date'] || record['outbound1_date']),
-                    'outboundFlight': record['Outbound Flight'] || record['outbound_flight'] || record['Outbound 1 Flight'] || record['outbound1_flight'],
-                    'outboundTimes': record['Outbound Times'] || record['outbound_times'] || record['Outbound 1 Times'] || record['outbound1_times'],
-                    'inboundDate': formatDateForInput(record['Inbound Date'] || record['inbound_date'] || record['Inbound 1 Date'] || record['inbound1_date']),
-                    'inboundFlight': record['Inbound Flight'] || record['inbound_flight'] || record['Inbound 1 Flight'] || record['inbound1_flight'],
-                    'inboundTimes': record['Inbound Times'] || record['inbound_times'] || record['Inbound 1 Times'] || record['inbound1_times'],
-                    'fare': record['Fare'] || record['fare'],
-                    'taxes': record['Taxes'] || record['taxes'],
-                    'issuanceDate': formatDateForInput(record['Issuance Date'] || record['issuance_date']),
-                    'timeLimit': formatDateForInput(record['Time Limit'] || record['time_limit']),
-                    'paymentPercentage': record['Payment Percentage'] || record['payment_percentage'],
-                    'emd1Number': record['EMD 1 Number'] || record['first_emd_number'],
-                    'emd1Amount': record['EMD 1 Amount'] || record['first_emd_amount'],
-                    'emd1Status': record['EMD 1 Status'] || record['first_emd_status'],
-                    'emd1TimeLimit': formatDateForInput(record['EMD 1 Time Limit'] || record['first_emd_time_limit']),
-                    'emd1IssuanceDate': formatDateForInput(record['EMD 1 Issuance Date'] || record['first_emd_issuance_date']),
-                    'emd1PaymentPercent': record['EMD 1 Payment %'] || record['first_emd_payment_percentage'],
-                    'emd2Number': record['EMD 2 Number'] || record['second_emd_number'],
-                    'emd2Amount': record['EMD 2 Amount'] || record['second_emd_amount'],
-                    'emd2TimeLimit': formatDateForInput(record['EMD 2 Time Limit'] || record['second_emd_time_limit']),
-                    'emd3Number': record['EMD 3 Number'] || record['third_emd_number'],
-                    'emd3Amount': record['EMD 3 Amount'] || record['third_emd_amount'],
-                    'emd3TimeLimit': formatDateForInput(record['EMD 3 Time Limit'] || record['third_emd_time_limit']),
-                    'emdRefundDate': formatDateForInput(record['EMD Refund Date'] || record['emd_refund_date']),
-                    'ticketingStatus': record['Ticketing Status'] || record['ticketing_status'],
-                    'ticketsIssued': record['Tickets Issued'] || record['no_of_tickets_issued'],
-                    'lastTicketDate': formatDateForInput(record['Last Ticket Date'] || record['last_ticket_date']),
-                    'overallStatus': record['Status'] || record['status'],
-                    'notes': record['Notes'] || record['notes']
-                } : {
-                    'requestDate': formatDateForInput(record['Request Date'] || record['request_date']),
-                    'airlinePnr': record['Airline PNR'] || record['airline_pnr'],
-                    'gdsPnr': record['GDS PNR'] || record['gds_pnr'],
-                    'segment': record['Segment'] || record['segment'],
-                    'noOfSeats': record['No of Seats'] || record['no_of_seats'],
-                    'sector': record['Sector'] || record['sector'],
-                    'investmentType': record['Investment Type'] || record['investment_type'],
-                    'license': record['License'] || record['license_number'],
-                    'branch': record['Branch'] || record['branch'],
-                    'outbound1Date': formatDateForInput(record['Outbound 1 Date'] || record['outbound1_date'] || record['Outbound Date'] || record['outbound_date']),
-                    'outbound1Flight': record['Outbound 1 Flight'] || record['outbound1_flight'] || record['Outbound Flight'] || record['outbound_flight'],
-                    'outbound1Times': record['Outbound 1 Times'] || record['outbound1_times'] || record['Outbound Times'] || record['outbound_times'],
-                    'outbound2Date': formatDateForInput(record['Outbound 2 Date'] || record['outbound2_date']),
-                    'outbound2Flight': record['Outbound 2 Flight'] || record['outbound2_flight'],
-                    'outbound2Times': record['Outbound 2 Times'] || record['outbound2_times'],
-                    'inbound1Date': formatDateForInput(record['Inbound 1 Date'] || record['inbound1_date'] || record['Inbound Date'] || record['inbound_date']),
-                    'inbound1Flight': record['Inbound 1 Flight'] || record['inbound1_flight'] || record['Inbound Flight'] || record['inbound_flight'],
-                    'inbound1Times': record['Inbound 1 Times'] || record['inbound1_times'] || record['Inbound Times'] || record['inbound_times'],
-                    'inbound2Date': formatDateForInput(record['Inbound 2 Date'] || record['inbound2_date']),
-                    'inbound2Flight': record['Inbound 2 Flight'] || record['inbound2_flight'],
-                    'inbound2Times': record['Inbound 2 Times'] || record['inbound2_times'],
                     'fare': record['Fare'] || record['fare'],
                     'taxes': record['Taxes'] || record['taxes'],
                     'issuanceDate': formatDateForInput(record['Issuance Date'] || record['issuance_date']),
@@ -1991,6 +1927,24 @@
                     'overallStatus': record['Status'] || record['status'],
                     'notes': record['Notes'] || record['notes']
                 };
+                
+                // Flight data - use 2-segment fields or first segments for 4-segment
+                if (currentSegments === 2) {
+                    fieldMapping['outboundDate'] = formatDateForInput(record['Outbound Date'] || record['outbound_date']);
+                    fieldMapping['inboundDate'] = formatDateForInput(record['Inbound Date'] || record['inbound_date']);
+                    fieldMapping['outboundFlight'] = record['Outbound Flight'] || record['outbound_flight'];
+                    fieldMapping['inboundFlight'] = record['Inbound Flight'] || record['inbound_flight'];
+                    fieldMapping['outboundTimes'] = record['Outbound Times'] || record['outbound_times'];
+                    fieldMapping['inboundTimes'] = record['Inbound Times'] || record['inbound_times'];
+                } else {
+                    // For 4 segments, use first segments
+                    fieldMapping['outboundDate'] = formatDateForInput(record['Outbound 1 Date'] || record['outbound_date']);
+                    fieldMapping['inboundDate'] = formatDateForInput(record['Inbound 1 Date'] || record['inbound_date']);
+                    fieldMapping['outboundFlight'] = record['Outbound 1 Flight'] || record['outbound_flight'];
+                    fieldMapping['inboundFlight'] = record['Inbound 1 Flight'] || record['inbound_flight'];
+                    fieldMapping['outboundTimes'] = record['Outbound 1 Times'] || record['outbound_times'];
+                    fieldMapping['inboundTimes'] = record['Inbound 1 Times'] || record['inbound_times'];
+                }
                 
                 Object.keys(fieldMapping).forEach(fieldId => {
                     const element = document.getElementById(fieldId);
@@ -2069,18 +2023,6 @@
                     'Inbound Date': '2025-03-15',
                     'Inbound Flight': 'SV724',
                     'Inbound Times': 'JED 0200 ISB 0500',
-                    'Outbound 1 Date': '',
-                    'Outbound 1 Flight': '',
-                    'Outbound 1 Times': '',
-                    'Outbound 2 Date': '',
-                    'Outbound 2 Flight': '',
-                    'Outbound 2 Times': '',
-                    'Inbound 1 Date': '',
-                    'Inbound 1 Flight': '',
-                    'Inbound 1 Times': '',
-                    'Inbound 2 Date': '',
-                    'Inbound 2 Flight': '',
-                    'Inbound 2 Times': '',
                     'Fare': '500.00',
                     'Taxes': '50.00',
                     'Issuance Date': '2025-01-02',
@@ -2192,14 +2134,13 @@
             try {
                 const formData = {
                     sr_number: document.getElementById('srNumber')?.value || '',
-                    original_sr_number: document.getElementById('originalSrNumber')?.value || null,
                     request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
                     airline_pnr: airlinePnr,
                     no_of_seats: parseInt(noOfSeats) || 0,
                     fare: parseFloat(fare) || 0,
                     time_limit: timeLimit,
                     investment_type: document.getElementById('investmentType')?.value || 'Company Investment',
-                    license_number: document.getElementById('license')?.value || 'QFC',
+                    license: document.getElementById('license')?.value || 'QFC',
                     branch: document.getElementById('branch')?.value || 'HO',
                     gds_pnr: document.getElementById('gdsPnr')?.value || null,
                     segment: document.getElementById('segment')?.value || 'Umrah',
@@ -2229,31 +2170,30 @@
                     last_ticket_date: document.getElementById('lastTicketDate')?.value || null,
                     status: document.getElementById('overallStatus')?.value || 'draft',
                     notes: document.getElementById('notes')?.value || null,
-                    flight_segments: currentSegments,
-                    created_at: new Date().toISOString()
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 };
                 
+                // Flight data based on segments
                 if (currentSegments === 2) {
-                    formData.outbound_date = convertDateToDisplayFormat(document.getElementById('outboundDate')?.value);
+                    formData.outbound_date = document.getElementById('outboundDate')?.value || null;
+                    formData.inbound_date = document.getElementById('inboundDate')?.value || null;
                     formData.outbound_flight = document.getElementById('outboundFlight')?.value || null;
-                    formData.outbound_times = document.getElementById('outboundTimes')?.value ? document.getElementById('outboundTimes').value.toUpperCase() : null;
-                    formData.inbound_date = convertDateToDisplayFormat(document.getElementById('inboundDate')?.value);
                     formData.inbound_flight = document.getElementById('inboundFlight')?.value || null;
-                    formData.inbound_times = document.getElementById('inboundTimes')?.value ? document.getElementById('inboundTimes').value.toUpperCase() : null;
+                    formData.outbound_times = document.getElementById('outboundTimes')?.value || null;
+                    formData.inbound_times = document.getElementById('inboundTimes')?.value || null;
                 } else {
-                    formData.outbound1_date = convertDateToDisplayFormat(document.getElementById('outbound1Date')?.value);
-                    formData.outbound1_flight = document.getElementById('outbound1Flight')?.value || null;
-                    formData.outbound1_times = document.getElementById('outbound1Times')?.value ? document.getElementById('outbound1Times').value.toUpperCase() : null;
-                    formData.outbound2_date = convertDateToDisplayFormat(document.getElementById('outbound2Date')?.value);
-                    formData.outbound2_flight = document.getElementById('outbound2Flight')?.value || null;
-                    formData.outbound2_times = document.getElementById('outbound2Times')?.value ? document.getElementById('outbound2Times').value.toUpperCase() : null;
-                    formData.inbound1_date = convertDateToDisplayFormat(document.getElementById('inbound1Date')?.value);
-                    formData.inbound1_flight = document.getElementById('inbound1Flight')?.value || null;
-                    formData.inbound1_times = document.getElementById('inbound1Times')?.value ? document.getElementById('inbound1Times').value.toUpperCase() : null;
-                    formData.inbound2_date = convertDateToDisplayFormat(document.getElementById('inbound2Date')?.value);
-                    formData.inbound2_flight = document.getElementById('inbound2Flight')?.value || null;
-                    formData.inbound2_times = document.getElementById('inbound2Times')?.value ? document.getElementById('inbound2Times').value.toUpperCase() : null;
+                    // For 4 segments, use first segments
+                    formData.outbound_date = document.getElementById('outbound1Date')?.value || null;
+                    formData.inbound_date = document.getElementById('inbound1Date')?.value || null;
+                    formData.outbound_flight = document.getElementById('outbound1Flight')?.value || null;
+                    formData.inbound_flight = document.getElementById('inbound1Flight')?.value || null;
+                    formData.outbound_times = document.getElementById('outbound1Times')?.value || null;
+                    formData.inbound_times = document.getElementById('inbound1Times')?.value || null;
                 }
+                
+                console.log('Saving data to:', supabaseClient ? 'Supabase' : 'localStorage');
+                console.log('Form data:', formData);
                 
                 if (editingId) {
                     if (supabaseClient) {
@@ -2281,7 +2221,7 @@
                             .insert([formData]);
                         
                         if (error) throw error;
-                        showSuccess('✅ Saved successfully! SR#: ' + formData.sr_number);
+                        showSuccess('✅ Saved to Supabase! SR#: ' + formData.sr_number);
                     } else {
                         // Save to localStorage
                         const newId = 'local_' + Date.now();
@@ -2370,14 +2310,11 @@
                 if (item.status === 'approved') statusClass = 'status-approved';
                 if (item.status === 'submitted') statusClass = 'status-pending';
                 const srNumber = item.sr_number || '';
-                const originalSR = item.original_sr_number ? 
-                    `<br><small class="text-muted">Original: ${item.original_sr_number}</small>` : '';
                 
                 html += `
                     <tr class="${rowClass}">
                         <td>
                             <strong>${srNumber}</strong>
-                            ${originalSR}
                         </td>
                         <td>${item.airline_pnr || ''}</td>
                         <td>${item.no_of_seats || 0}</td>
@@ -2461,7 +2398,6 @@
                 // Fill form with item data
                 const fields = {
                     'srNumber': item.sr_number || '',
-                    'originalSrNumber': item.original_sr_number || '',
                     'requestDate': formatDateForInput(item.request_date),
                     'airlinePnr': item.airline_pnr || '',
                     'gdsPnr': item.gds_pnr || '',
@@ -2470,7 +2406,7 @@
                     'noOfSeats': item.no_of_seats || '',
                     'sector': item.sector || '',
                     'investmentType': item.investment_type || 'Company Investment',
-                    'license': item.license_number || 'QFC',
+                    'license': item.license || 'QFC',
                     'branch': item.branch || 'HO',
                     'fare': item.fare || '',
                     'taxes': item.taxes || '',
@@ -2497,52 +2433,22 @@
                     'notes': item.notes || ''
                 };
                 
+                // Flight data
+                if (item.outbound_date || item.inbound_date) {
+                    // Assume 2 segments if we have outbound/inbound data
+                    fields['outboundDate'] = formatDateForInput(item.outbound_date);
+                    fields['inboundDate'] = formatDateForInput(item.inbound_date);
+                    fields['outboundFlight'] = item.outbound_flight || '';
+                    fields['inboundFlight'] = item.inbound_flight || '';
+                    fields['outboundTimes'] = item.outbound_times || '';
+                    fields['inboundTimes'] = item.inbound_times || '';
+                    toggleFlightSegments(2);
+                }
+                
                 Object.keys(fields).forEach(fieldId => {
                     const element = document.getElementById(fieldId);
                     if (element) element.value = fields[fieldId];
                 });
-                
-                // Set flight segments based on data
-                const flightSegments = item.flight_segments || 2;
-                currentSegments = flightSegments;
-                toggleFlightSegments(flightSegments);
-                
-                // Fill flight data based on segments
-                if (flightSegments === 2) {
-                    const flightFields2 = {
-                        'outboundDate': formatDateForInput(item.outbound_date),
-                        'outboundFlight': item.outbound_flight || '',
-                        'outboundTimes': item.outbound_times || '',
-                        'inboundDate': formatDateForInput(item.inbound_date),
-                        'inboundFlight': item.inbound_flight || '',
-                        'inboundTimes': item.inbound_times || ''
-                    };
-                    
-                    Object.keys(flightFields2).forEach(fieldId => {
-                        const element = document.getElementById(fieldId);
-                        if (element) element.value = flightFields2[fieldId];
-                    });
-                } else {
-                    const flightFields4 = {
-                        'outbound1Date': formatDateForInput(item.outbound1_date),
-                        'outbound1Flight': item.outbound1_flight || '',
-                        'outbound1Times': item.outbound1_times || '',
-                        'outbound2Date': formatDateForInput(item.outbound2_date),
-                        'outbound2Flight': item.outbound2_flight || '',
-                        'outbound2Times': item.outbound2_times || '',
-                        'inbound1Date': formatDateForInput(item.inbound1_date),
-                        'inbound1Flight': item.inbound1_flight || '',
-                        'inbound1Times': item.inbound1_times || '',
-                        'inbound2Date': formatDateForInput(item.inbound2_date),
-                        'inbound2Flight': item.inbound2_flight || '',
-                        'inbound2Times': item.inbound2_times || ''
-                    };
-                    
-                    Object.keys(flightFields4).forEach(fieldId => {
-                        const element = document.getElementById(fieldId);
-                        if (element) element.value = flightFields4[fieldId];
-                    });
-                }
                 
                 calculateAmounts();
                 calculateBalanceTickets();
@@ -2581,6 +2487,9 @@
                         .eq('id', id);
                     
                     if (error) throw error;
+                    showSuccess(`Acquisition ${srNumber} deleted from Supabase`);
+                } else {
+                    showSuccess(`Acquisition ${srNumber} deleted from localStorage`);
                 }
                 
                 // Remove from local array
@@ -2592,8 +2501,6 @@
                 // Update UI
                 updateTable();
                 updateDashboard();
-                
-                showSuccess(`Acquisition ${srNumber} deleted successfully`);
                 
             } catch (error) {
                 console.error('Error deleting item:', error);
