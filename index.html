@@ -2512,28 +2512,16 @@
         // ========== INITIALIZATION ==========
         
         // Make toggleFlightSegments globally accessible
-        window.toggleFlightSegments = toggleFlightSegments;
-        
         document.addEventListener('DOMContentLoaded', async function() {
             try {
                 console.log('Initializing application...');
                 
                 // Initialize Supabase
                 await initializeSupabase();
-                
-                // Initialize form
                 initializeForm();
-                
-                // Setup event listeners
                 setupEventListeners();
-                
-                // Setup import event listeners
                 setupImportEventListeners();
-                
-                // Load existing data
                 await loadAcquisitions();
-                
-                // Initialize segment toggle
                 toggleFlightSegments(2);
                 
                 console.log('Application initialized successfully');
