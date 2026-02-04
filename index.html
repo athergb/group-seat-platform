@@ -1002,935 +1002,933 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- JavaScript Code -->
-    <script>
-        // ========== GLOBAL VARIABLES ==========
-        let acquisitions = [];
-        let editingId = null;
-        let supabaseClient = null;
+<script>
+    // ========== GLOBAL VARIABLES ==========
+    let acquisitions = [];
+    let editingId = null;
+    let supabaseClient = null;
+    
+    // ========== FLIGHT SEGMENTS TOGGLE FUNCTION ==========
+    function toggleFlightSegments() {
+        const segments = document.getElementById('flightSegments').value;
+        const isDirect = segments === '2';
         
-        // ========== FLIGHT SEGMENTS TOGGLE FUNCTION ==========
-        function toggleFlightSegments() {
-            console.log('Toggle function called');
-            const segments = document.getElementById('flightSegments').value;
-            const isDirect = segments === '2';
-            
-            console.log('Segments:', segments, 'Is direct:', isDirect);
-            
-            // Toggle outbound sections
-            const directOutbound = document.getElementById('directOutbound');
-            const connectingOutbound = document.getElementById('connectingOutbound');
-            
-            const directInbound = document.getElementById('directInbound');
-            const connectingInbound = document.getElementById('connectingInbound');
-            
-            if (directOutbound) directOutbound.style.display = isDirect ? 'block' : 'none';
-            if (connectingOutbound) connectingOutbound.style.display = isDirect ? 'none' : 'block';
-            if (directInbound) directInbound.style.display = isDirect ? 'block' : 'none';
-            if (connectingInbound) connectingInbound.style.display = isDirect ? 'none' : 'block';
-            
-            // Clear fields when switching
-            if (isDirect) {
-                // Clear connecting flight fields
-                ['outbound1', 'outbound2', 'inbound1', 'inbound2'].forEach(prefix => {
-                    ['Date', 'Flight', 'Times'].forEach(suffix => {
-                        const elem = document.getElementById(prefix + suffix);
-                        if (elem) elem.value = '';
-                    });
+        // Toggle outbound sections
+        const directOutbound = document.getElementById('directOutbound');
+        const connectingOutbound = document.getElementById('connectingOutbound');
+        const directInbound = document.getElementById('directInbound');
+        const connectingInbound = document.getElementById('connectingInbound');
+        
+        if (directOutbound) directOutbound.style.display = isDirect ? 'block' : 'none';
+        if (connectingOutbound) connectingOutbound.style.display = isDirect ? 'none' : 'block';
+        if (directInbound) directInbound.style.display = isDirect ? 'block' : 'none';
+        if (connectingInbound) connectingInbound.style.display = isDirect ? 'none' : 'block';
+        
+        // Clear fields when switching
+        if (isDirect) {
+            // Clear connecting flight fields
+            ['outbound1', 'outbound2', 'inbound1', 'inbound2'].forEach(prefix => {
+                ['Date', 'Flight', 'Times'].forEach(suffix => {
+                    const elem = document.getElementById(prefix + suffix);
+                    if (elem) elem.value = '';
                 });
-            } else {
-                // Clear direct flight fields
-                ['outbound', 'inbound'].forEach(prefix => {
-                    ['Date', 'Flight', 'Times'].forEach(suffix => {
-                        const elem = document.getElementById(prefix + suffix);
-                        if (elem) elem.value = '';
-                    });
-                });
-            }
-        }
-        
-        // ========== INITIALIZATION ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('QFC Group Platform - Initializing...');
-            
-            try {
-                // Initialize Supabase
-                const supabaseUrl = 'https://ojlxkzkialguthdeiley.supabase.co';
-                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94';
-                
-                if (window.supabase) {
-                    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-                    console.log('Supabase initialized successfully');
-                } else {
-                    console.error('Supabase library not loaded');
-                }
-                
-                // Set default dates
-                initializeForm();
-                
-                // Initialize flight segments
-                toggleFlightSegments();
-                
-                // Setup event listeners
-                setupEventListeners();
-                
-                // Initialize calculations
-                calculateAmounts();
-                calculateBalanceTickets();
-                
-                // Load existing data
-                loadAcquisitions();
-                
-                console.log('App initialized successfully!');
-                
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showError('Failed to initialize application: ' + error.message);
-            }
-        });
-        
-        function initializeForm() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('requestDate').value = today;
-            
-            const nextWeek = new Date();
-            nextWeek.setDate(nextWeek.getDate() + 7);
-            document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
-            
-            // Generate initial SR number
-            generateSRNumber();
-            
-            // Add input formatting for time fields
-            setupInputFormatting();
-        }
-        
-        function setupInputFormatting() {
-            // Time input formatting (ISB 0700 JED 1100)
-            const timeInputs = document.querySelectorAll('input[placeholder*="ISB 0700"]');
-            timeInputs.forEach(input => {
-                input.addEventListener('input', function(e) {
-                    let value = e.target.value.toUpperCase();
-                    
-                    // Auto-capitalize and add spaces
-                    value = value.replace(/[^A-Z0-9\s]/g, '');
-                    
-                    // Auto-format: airport code + space + time + space
-                    if (value.length === 3 && !value.endsWith(' ')) {
-                        value = value + ' ';
-                    }
-                    if (value.length === 8 && value.charAt(7) !== ' ') {
-                        value = value.substring(0, 7) + ' ' + value.charAt(7);
-                    }
-                    if (value.length === 12 && value.charAt(11) !== ' ') {
-                        value = value.substring(0, 11) + ' ' + value.charAt(11);
-                    }
-                    
-                    // Limit length
-                    if (value.length > 17) {
-                        value = value.substring(0, 17);
-                    }
-                    
-                    e.target.value = value;
+            });
+        } else {
+            // Clear direct flight fields
+            ['outbound', 'inbound'].forEach(prefix => {
+                ['Date', 'Flight', 'Times'].forEach(suffix => {
+                    const elem = document.getElementById(prefix + suffix);
+                    if (elem) elem.value = '';
                 });
             });
         }
+    }
+    
+    // ========== DATE FORMATTING FUNCTIONS ==========
+    function convertDateToDisplayFormat(dateString) {
+        if (!dateString) return '';
         
-        // ========== DATE FORMATTING FUNCTIONS ==========
-        
-        // Function to convert date from YYYY-MM-DD (calendar) to DD-MMM-YY format
-        function convertDateToDisplayFormat(dateString) {
-            if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
             
-            try {
-                const date = new Date(dateString);
-                if (isNaN(date.getTime())) return dateString;
+            const day = String(date.getDate()).padStart(2, '0');
+            const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                               'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const month = monthNames[date.getMonth()];
+            const year = String(date.getFullYear()).slice(-2);
+            
+            return `${day}-${month}-${year}`;
+        } catch (error) {
+            console.error('Error converting date:', error);
+            return dateString;
+        }
+    }
+    
+    function convertDisplayToDateInput(dateString) {
+        if (!dateString) return '';
+        
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+            return dateString;
+        }
+        
+        try {
+            const parts = dateString.split('-');
+            if (parts.length !== 3) return dateString;
+            
+            const day = parts[0];
+            const monthStr = parts[1].toUpperCase();
+            const year = parts[2];
+            
+            const fullYear = year.length === 2 ? '20' + year : year;
+            
+            const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                               'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const monthIndex = monthNames.indexOf(monthStr);
+            
+            if (monthIndex === -1) return dateString;
+            
+            const month = String(monthIndex + 1).padStart(2, '0');
+            return `${fullYear}-${month}-${day}`;
+        } catch (error) {
+            console.error('Error converting date for input:', error);
+            return dateString;
+        }
+    }
+    
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('QFC Group Platform - Initializing...');
+        
+        try {
+            // Initialize Supabase
+            const supabaseUrl = 'https://ojlxkzkialguthdeiley.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94';
+            
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+                console.log('Supabase initialized successfully');
+            } else {
+                console.error('Supabase library not loaded');
+            }
+            
+            // Set default dates
+            initializeForm();
+            
+            // Initialize flight segments
+            toggleFlightSegments();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Initialize calculations
+            calculateAmounts();
+            calculateBalanceTickets();
+            
+            // Load existing data
+            loadAcquisitions();
+            
+            console.log('App initialized successfully!');
+            
+        } catch (error) {
+            console.error('Initialization error:', error);
+            showError('Failed to initialize application: ' + error.message);
+        }
+    });
+    
+    function initializeForm() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('requestDate').value = today;
+        
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
+        
+        // Generate initial SR number
+        generateSRNumber();
+        
+        // Add input formatting for time fields
+        setupInputFormatting();
+    }
+    
+    function setupInputFormatting() {
+        const timeInputs = document.querySelectorAll('input[placeholder*="ISB 0700"]');
+        timeInputs.forEach(input => {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.toUpperCase();
+                value = value.replace(/[^A-Z0-9\s]/g, '');
                 
-                const day = String(date.getDate()).padStart(2, '0');
-                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
-                                   'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-                const month = monthNames[date.getMonth()];
-                const year = String(date.getFullYear()).slice(-2);
+                if (value.length === 3 && !value.endsWith(' ')) {
+                    value = value + ' ';
+                }
+                if (value.length === 8 && value.charAt(7) !== ' ') {
+                    value = value.substring(0, 7) + ' ' + value.charAt(7);
+                }
+                if (value.length === 12 && value.charAt(11) !== ' ') {
+                    value = value.substring(0, 11) + ' ' + value.charAt(11);
+                }
                 
-                return `${day}-${month}-${year}`;
-            } catch (error) {
-                console.error('Error converting date:', error);
-                return dateString;
+                if (value.length > 17) {
+                    value = value.substring(0, 17);
+                }
+                
+                e.target.value = value;
+            });
+        });
+    }
+    
+    // ========== EVENT LISTENERS SETUP ==========
+    function setupEventListeners() {
+        // Save button
+        const saveButton = document.getElementById('saveButton');
+        if (saveButton) {
+            saveButton.addEventListener('click', saveAcquisition);
+        }
+        
+        // Reset button
+        const resetButton = document.getElementById('resetButton');
+        if (resetButton) {
+            resetButton.addEventListener('click', resetForm);
+        }
+        
+        // Cancel edit button
+        const cancelButton = document.getElementById('cancelEditBtn');
+        if (cancelButton) {
+            cancelButton.addEventListener('click', cancelEdit);
+        }
+        
+        // Auto-calculation events
+        document.getElementById('fare')?.addEventListener('input', calculateAmounts);
+        document.getElementById('taxes')?.addEventListener('input', calculateAmounts);
+        document.getElementById('paymentPercentage')?.addEventListener('input', calculateAmounts);
+        document.getElementById('noOfSeats')?.addEventListener('input', calculateBalanceTickets);
+        document.getElementById('ticketsIssued')?.addEventListener('input', calculateBalanceTickets);
+    }
+    
+    // ========== HELPER FUNCTIONS ==========
+    function generateSRNumber() {
+        if (editingId) return;
+        
+        const srField = document.getElementById('srNumber');
+        if (!srField) return;
+        
+        const date = new Date();
+        const year = date.getFullYear().toString().slice(-2);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        srField.value = `SR${year}${month}${random}`;
+    }
+    
+    function calculateAmounts() {
+        try {
+            const fare = parseFloat(document.getElementById('fare')?.value) || 0;
+            const taxes = parseFloat(document.getElementById('taxes')?.value) || 0;
+            const percentage = parseFloat(document.getElementById('paymentPercentage')?.value) || 100;
+            const seats = parseInt(document.getElementById('noOfSeats')?.value) || 1;
+            
+            const totalPerSeat = fare + taxes;
+            const totalPnrAmount = totalPerSeat * seats;
+            const payable = totalPnrAmount * (percentage / 100);
+            
+            const pnrField = document.getElementById('pnrAmount');
+            const payableField = document.getElementById('payableAmount');
+            
+            if (pnrField) pnrField.value = totalPnrAmount.toFixed(2);
+            if (payableField) payableField.value = payable.toFixed(2);
+        } catch (error) {
+            console.error('Error in calculateAmounts:', error);
+        }
+    }
+    
+    function calculateBalanceTickets() {
+        try {
+            const totalSeats = parseInt(document.getElementById('noOfSeats')?.value) || 0;
+            const issued = parseInt(document.getElementById('ticketsIssued')?.value) || 0;
+            const balance = totalSeats - issued;
+            
+            const balanceField = document.getElementById('balanceTickets');
+            if (balanceField) balanceField.value = balance > 0 ? balance : 0;
+        } catch (error) {
+            console.error('Error in calculateBalanceTickets:', error);
+        }
+    }
+    
+    // ========== FORM VALIDATION ==========
+    function validateForm() {
+        const errors = [];
+        
+        // Airline PNR validation
+        const airlinePnr = document.getElementById('airlinePnr').value.trim();
+        if (!airlinePnr || airlinePnr.length < 5) {
+            errors.push('Airline PNR must be at least 5 characters');
+        }
+        
+        // Number of seats validation
+        const seats = parseInt(document.getElementById('noOfSeats').value);
+        if (seats < 1 || seats > 1000) {
+            errors.push('Number of seats must be between 1 and 1000');
+        }
+        
+        // Date validation
+        const timeLimit = document.getElementById('timeLimit').value;
+        if (new Date(timeLimit) < new Date()) {
+            errors.push('Time Limit must be in the future');
+        }
+        
+        // Flight date validation
+        const segments = document.getElementById('flightSegments').value;
+        
+        if (segments === '2') {
+            const outboundDate = document.getElementById('outboundDate').value;
+            const inboundDate = document.getElementById('inboundDate').value;
+            
+            if (outboundDate && inboundDate) {
+                if (new Date(inboundDate) <= new Date(outboundDate)) {
+                    errors.push('Inbound date must be after outbound date');
+                }
+            }
+        } else {
+            const outbound1Date = document.getElementById('outbound1Date').value;
+            const inbound2Date = document.getElementById('inbound2Date').value;
+            
+            if (outbound1Date && inbound2Date) {
+                if (new Date(inbound2Date) <= new Date(outbound1Date)) {
+                    errors.push('Return date must be after departure date');
+                }
             }
         }
         
-        // Function to convert date from DD-MMM-YY to YYYY-MM-DD for calendar input
-        function convertDisplayToDateInput(dateString) {
-            if (!dateString) return '';
+        // Fare validation - REMOVED THE 100,000 LIMIT
+        const fare = parseFloat(document.getElementById('fare').value);
+        if (fare <= 0) {
+            errors.push('Fare must be greater than 0');
+        }
+        // Removed: if (fare > 100000) check
+        
+        // Time format validation
+        const segmentsValue = document.getElementById('flightSegments').value;
+        
+        if (segmentsValue === '2') {
+            const outboundTimes = document.getElementById('outboundTimes')?.value;
+            const inboundTimes = document.getElementById('inboundTimes')?.value;
             
-            // If already in YYYY-MM-DD format, return as is
-            if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-                return dateString;
+            const timePattern = /^[A-Z]{3}\s+\d{4}\s+[A-Z]{3}\s+\d{4}$/;
+            
+            if (outboundTimes && !timePattern.test(outboundTimes.toUpperCase())) {
+                errors.push('Outbound Times format: e.g., ISB 0700 JED 1100');
             }
             
-            // Try to parse DD-MMM-YY format
-            try {
-                const parts = dateString.split('-');
-                if (parts.length !== 3) return dateString;
-                
-                const day = parts[0];
-                const monthStr = parts[1].toUpperCase();
-                const year = parts[2];
-                
-                // Convert year to full year (20XX)
-                const fullYear = year.length === 2 ? '20' + year : year;
-                
-                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
-                                   'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-                const monthIndex = monthNames.indexOf(monthStr);
-                
-                if (monthIndex === -1) return dateString;
-                
-                const month = String(monthIndex + 1).padStart(2, '0');
-                return `${fullYear}-${month}-${day}`;
-            } catch (error) {
-                console.error('Error converting date for input:', error);
-                return dateString;
+            if (inboundTimes && !timePattern.test(inboundTimes.toUpperCase())) {
+                errors.push('Inbound Times format: e.g., JED 0200 ISB 0500');
+            }
+        } else {
+            const outbound1Times = document.getElementById('outbound1Times')?.value;
+            const inbound2Times = document.getElementById('inbound2Times')?.value;
+            
+            const timePattern = /^[A-Z]{3}\s+\d{4}\s+[A-Z]{3}\s+\d{4}$/;
+            
+            if (outbound1Times && !timePattern.test(outbound1Times.toUpperCase())) {
+                errors.push('First Outbound Segment Times format: e.g., ISB 2200 DXB 0100');
+            }
+            
+            if (inbound2Times && !timePattern.test(inbound2Times.toUpperCase())) {
+                errors.push('Last Inbound Segment Times format: e.g., DXB 2200 ISB 0200');
             }
         }
         
-        // ========== EVENT LISTENERS SETUP ==========
-        function setupEventListeners() {
-            // Save button
-            const saveButton = document.getElementById('saveButton');
-            if (saveButton) {
-                saveButton.addEventListener('click', saveAcquisition);
-            }
-            
-            // Reset button
-            const resetButton = document.getElementById('resetButton');
-            if (resetButton) {
-                resetButton.addEventListener('click', resetForm);
-            }
-            
-            // Cancel edit button
-            const cancelButton = document.getElementById('cancelEditBtn');
-            if (cancelButton) {
-                cancelButton.addEventListener('click', cancelEdit);
-            }
-            
-            // Auto-calculation events
-            document.getElementById('fare')?.addEventListener('input', calculateAmounts);
-            document.getElementById('taxes')?.addEventListener('input', calculateAmounts);
-            document.getElementById('paymentPercentage')?.addEventListener('input', calculateAmounts);
-            document.getElementById('noOfSeats')?.addEventListener('input', calculateBalanceTickets);
-            document.getElementById('ticketsIssued')?.addEventListener('input', calculateBalanceTickets);
+        return errors;
+    }
+    
+    // ========== MAIN SAVE FUNCTION ==========
+    async function saveAcquisition() {
+        console.log('Saving acquisition...');
+        
+        // Validate form
+        const validationErrors = validateForm();
+        if (validationErrors.length > 0) {
+            showError(validationErrors.join('<br>'));
+            return;
         }
         
-        // ========== HELPER FUNCTIONS ==========
-        function generateSRNumber() {
-            if (editingId) return;
-            
-            const srField = document.getElementById('srNumber');
-            if (!srField) return;
-            
-            const date = new Date();
-            const year = date.getFullYear().toString().slice(-2);
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            srField.value = `SR${year}${month}${random}`;
+        // Disable save button and show loading
+        const saveButton = document.getElementById('saveButton');
+        const originalText = saveButton?.innerHTML;
+        if (saveButton) {
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...';
         }
         
-        function calculateAmounts() {
-            try {
-                const fare = parseFloat(document.getElementById('fare')?.value) || 0;
-                const taxes = parseFloat(document.getElementById('taxes')?.value) || 0;
-                const percentage = parseFloat(document.getElementById('paymentPercentage')?.value) || 100;
-                const seats = parseInt(document.getElementById('noOfSeats')?.value) || 1;
-                
-                // Calculate total per seat
-                const totalPerSeat = fare + taxes;
-                
-                // Calculate total PNR amount (fare + taxes) × number of seats
-                const totalPnrAmount = totalPerSeat * seats;
-                
-                // Calculate payable amount based on percentage
-                const payable = totalPnrAmount * (percentage / 100);
-                
-                const pnrField = document.getElementById('pnrAmount');
-                const payableField = document.getElementById('payableAmount');
-                
-                if (pnrField) pnrField.value = totalPnrAmount.toFixed(2);
-                if (payableField) payableField.value = payable.toFixed(2);
-            } catch (error) {
-                console.error('Error in calculateAmounts:', error);
-            }
-        }
-        
-        function calculateBalanceTickets() {
-            try {
-                const totalSeats = parseInt(document.getElementById('noOfSeats')?.value) || 0;
-                const issued = parseInt(document.getElementById('ticketsIssued')?.value) || 0;
-                const balance = totalSeats - issued;
-                
-                const balanceField = document.getElementById('balanceTickets');
-                if (balanceField) balanceField.value = balance > 0 ? balance : 0;
-            } catch (error) {
-                console.error('Error in calculateBalanceTickets:', error);
-            }
-        }
-        
-        // ========== FORM VALIDATION ==========
-        function validateForm() {
-            const errors = [];
-            
-            // Airline PNR validation
-            const airlinePnr = document.getElementById('airlinePnr').value.trim();
-            if (!airlinePnr || airlinePnr.length < 5) {
-                errors.push('Airline PNR must be at least 5 characters');
-            }
-            
-            // Number of seats validation
-            const seats = parseInt(document.getElementById('noOfSeats').value);
-            if (seats < 1 || seats > 1000) {
-                errors.push('Number of seats must be between 1 and 1000');
-            }
-            
-            // Date validation
-            const timeLimit = document.getElementById('timeLimit').value;
-            if (new Date(timeLimit) < new Date()) {
-                errors.push('Time Limit must be in the future');
-            }
-            
-            // Flight date validation
+        try {
+            // Get flight segment type
             const segments = document.getElementById('flightSegments').value;
+            const isDirect = segments === '2';
             
-            if (segments === '2') {
-                // Direct flight validation
-                const outboundDate = document.getElementById('outboundDate').value;
-                const inboundDate = document.getElementById('inboundDate').value;
+            // Prepare flight data based on segment type
+            let outboundDate, inboundDate;
+            let outbound1Date, inbound1Date, outbound1Flight, inbound1Flight, outbound1Times, inbound1Times;
+            let outbound2Date, inbound2Date, outbound2Flight, inbound2Flight, outbound2Times, inbound2Times;
+            
+            if (isDirect) {
+                // Direct flight data
+                outboundDate = document.getElementById('outboundDate')?.value;
+                inboundDate = document.getElementById('inboundDate')?.value;
                 
-                if (outboundDate && inboundDate) {
-                    if (new Date(inboundDate) <= new Date(outboundDate)) {
-                        errors.push('Inbound date must be after outbound date');
-                    }
-                }
+                // For direct flights, use inbound1_flight and outbound1_flight columns
+                outbound1Flight = document.getElementById('outboundFlight')?.value;
+                inbound1Flight = document.getElementById('inboundFlight')?.value;
+                outbound1Times = document.getElementById('outboundTimes')?.value;
+                inbound1Times = document.getElementById('inboundTimes')?.value;
+                
+                // Clear connecting flight fields
+                outbound2Date = null;
+                inbound2Date = null;
+                outbound2Flight = null;
+                inbound2Flight = null;
+                outbound2Times = null;
+                inbound2Times = null;
+                
+                // Convert dates to DD-MMM-YY format
+                outboundDate = outboundDate ? convertDateToDisplayFormat(outboundDate) : null;
+                inboundDate = inboundDate ? convertDateToDisplayFormat(inboundDate) : null;
             } else {
-                // Connecting flight validation
-                const outbound1Date = document.getElementById('outbound1Date').value;
-                const inbound2Date = document.getElementById('inbound2Date').value;
+                // Connecting flight data
+                outbound1Date = document.getElementById('outbound1Date')?.value;
+                outbound2Date = document.getElementById('outbound2Date')?.value;
+                inbound1Date = document.getElementById('inbound1Date')?.value;
+                inbound2Date = document.getElementById('inbound2Date')?.value;
                 
-                if (outbound1Date && inbound2Date) {
-                    if (new Date(inbound2Date) <= new Date(outbound1Date)) {
-                        errors.push('Return date must be after departure date');
-                    }
-                }
+                outbound1Flight = document.getElementById('outbound1Flight')?.value;
+                outbound2Flight = document.getElementById('outbound2Flight')?.value;
+                inbound1Flight = document.getElementById('inbound1Flight')?.value;
+                inbound2Flight = document.getElementById('inbound2Flight')?.value;
+                
+                outbound1Times = document.getElementById('outbound1Times')?.value;
+                outbound2Times = document.getElementById('outbound2Times')?.value;
+                inbound1Times = document.getElementById('inbound1Times')?.value;
+                inbound2Times = document.getElementById('inbound2Times')?.value;
+                
+                // Clear direct flight dates
+                outboundDate = null;
+                inboundDate = null;
+                
+                // Convert dates to DD-MMM-YY format
+                outbound1Date = outbound1Date ? convertDateToDisplayFormat(outbound1Date) : null;
+                outbound2Date = outbound2Date ? convertDateToDisplayFormat(outbound2Date) : null;
+                inbound1Date = inbound1Date ? convertDateToDisplayFormat(inbound1Date) : null;
+                inbound2Date = inbound2Date ? convertDateToDisplayFormat(inbound2Date) : null;
             }
             
-            // Fare validation
-            const fare = parseFloat(document.getElementById('fare').value);
-            if (fare <= 0 || fare > 100000) {
-                errors.push('Fare must be between 0 and 100,000');
-            }
+            // Get form data - MATCHING YOUR DATABASE COLUMN NAMES EXACTLY
+            const formData = {
+                // Basic Info
+                sr_number: document.getElementById('srNumber')?.value || '',
+                request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
+                investment_type: document.getElementById('investmentType')?.value || 'Company Investment',
+                license: document.getElementById('license')?.value || 'QFC',
+                branch: document.getElementById('branch')?.value || 'HO',
+                airline_pnr: document.getElementById('airlinePnr')?.value || '',
+                gds_pnr: document.getElementById('gdsPnr')?.value || null,
+                segment: document.getElementById('segment')?.value || 'Umrah',
+                airline: document.getElementById('airline')?.value || '',
+                no_of_seats: parseInt(document.getElementById('noOfSeats')?.value) || 0,
+                
+                // Flight Details - Using your actual database column names
+                flight_segments: segments,
+                
+                // Direct flight dates
+                outbound_date: outboundDate,
+                inbound_date: inboundDate,
+                
+                // Connecting flight dates
+                outbound1_date: outbound1Date,
+                outbound2_date: outbound2Date,
+                inbound1_date: inbound1Date,
+                inbound2_date: inbound2Date,
+                
+                // Flight numbers - Using your actual database column names
+                outbound1_flight: outbound1Flight,
+                outbound2_flight: outbound2Flight,
+                inbound1_flight: inbound1Flight,
+                inbound2_flight: inbound2Flight,
+                
+                // Flight times - Using your actual database column names
+                outbound1_times: outbound1Times ? outbound1Times.toUpperCase() : null,
+                outbound2_times: outbound2Times ? outbound2Times.toUpperCase() : null,
+                inbound1_times: inbound1Times ? inbound1Times.toUpperCase() : null,
+                inbound2_times: inbound2Times ? inbound2Times.toUpperCase() : null,
+                
+                sector: document.getElementById('sector')?.value || '',
+                
+                // Financial - FARES CAN NOW EXCEED 100,000
+                fare: parseFloat(document.getElementById('fare')?.value) || 0,
+                taxes: parseFloat(document.getElementById('taxes')?.value) || 0,
+                payable_amount: parseFloat(document.getElementById('payableAmount')?.value) || 0,
+                pnr_amount: parseFloat(document.getElementById('pnrAmount')?.value) || 0,
+                issuance_date: document.getElementById('issuanceDate')?.value || null,
+                time_limit: document.getElementById('timeLimit')?.value || '',
+                payment_percentage: parseFloat(document.getElementById('paymentPercentage')?.value) || 100,
+                
+                // EMD Details
+                emd_refund_date: document.getElementById('emdRefundDate')?.value || null,
+                first_emd_number: document.getElementById('emd1Number')?.value || null,
+                first_emd_amount: document.getElementById('emd1Amount')?.value ? parseFloat(document.getElementById('emd1Amount').value) : null,
+                first_emd_status: document.getElementById('emd1Status')?.value || null,
+                first_emd_time_limit: document.getElementById('emd1TimeLimit')?.value || null,
+                first_emd_issuance_date: document.getElementById('emd1IssuanceDate')?.value || null,
+                first_emd_payment_percentage: document.getElementById('emd1PaymentPercent')?.value ? parseFloat(document.getElementById('emd1PaymentPercent').value) : null,
+                second_emd_number: document.getElementById('emd2Number')?.value || null,
+                second_emd_amount: document.getElementById('emd2Amount')?.value ? parseFloat(document.getElementById('emd2Amount').value) : null,
+                second_emd_time_limit: document.getElementById('emd2TimeLimit')?.value || null,
+                third_emd_number: document.getElementById('emd3Number')?.value || null,
+                third_emd_amount: document.getElementById('emd3Amount')?.value ? parseFloat(document.getElementById('emd3Amount').value) : null,
+                third_emd_time_limit: document.getElementById('emd3TimeLimit')?.value || null,
+                
+                // Ticketing
+                ticketing_status: document.getElementById('ticketingStatus')?.value || 'pending',
+                no_of_tickets_issued: parseInt(document.getElementById('ticketsIssued')?.value) || 0,
+                balance_tickets: parseInt(document.getElementById('balanceTickets')?.value) || 0,
+                last_ticket_date: document.getElementById('lastTicketDate')?.value || null,
+                status: document.getElementById('overallStatus')?.value || 'draft',
+                notes: document.getElementById('notes')?.value || null,
+                updated_at: new Date().toISOString()
+            };
             
-            // Time format validation
-            const segmentsValue = document.getElementById('flightSegments').value;
+            console.log('Saving data with correct column names:', formData);
             
-            if (segmentsValue === '2') {
-                const outboundTimes = document.getElementById('outboundTimes')?.value;
-                const inboundTimes = document.getElementById('inboundTimes')?.value;
-                
-                const timePattern = /^[A-Z]{3}\s+\d{4}\s+[A-Z]{3}\s+\d{4}$/;
-                
-                if (outboundTimes && !timePattern.test(outboundTimes.toUpperCase())) {
-                    errors.push('Outbound Times format: e.g., ISB 0700 JED 1100');
-                }
-                
-                if (inboundTimes && !timePattern.test(inboundTimes.toUpperCase())) {
-                    errors.push('Inbound Times format: e.g., JED 0200 ISB 0500');
-                }
-            } else {
-                // Validate connecting flight times
-                const outbound1Times = document.getElementById('outbound1Times')?.value;
-                const inbound2Times = document.getElementById('inbound2Times')?.value;
-                
-                const timePattern = /^[A-Z]{3}\s+\d{4}\s+[A-Z]{3}\s+\d{4}$/;
-                
-                if (outbound1Times && !timePattern.test(outbound1Times.toUpperCase())) {
-                    errors.push('First Outbound Segment Times format: e.g., ISB 2200 DXB 0100');
-                }
-                
-                if (inbound2Times && !timePattern.test(inbound2Times.toUpperCase())) {
-                    errors.push('Last Inbound Segment Times format: e.g., DXB 2200 ISB 0200');
-                }
-            }
-            
-            return errors;
-        }
-        
-        // ========== MAIN SAVE FUNCTION ==========
-        async function saveAcquisition() {
-            console.log('Saving acquisition...');
-            
-            // Validate form
-            const validationErrors = validateForm();
-            if (validationErrors.length > 0) {
-                showError(validationErrors.join('<br>'));
-                return;
-            }
-            
-            // Disable save button and show loading
-            const saveButton = document.getElementById('saveButton');
-            const originalText = saveButton?.innerHTML;
-            if (saveButton) {
-                saveButton.disabled = true;
-                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...';
-            }
-            
-            try {
-                // Get flight segment type
-                const segments = document.getElementById('flightSegments').value;
-                const isDirect = segments === '2';
-                
-                // Prepare flight data based on segment type
-                let outboundDate, inboundDate, outboundFlight, inboundFlight, outboundTimes, inboundTimes;
-                let outbound1Date, inbound1Date, outbound1Flight, inbound1Flight, outbound1Times, inbound1Times;
-                let outbound2Date, inbound2Date, outbound2Flight, inbound2Flight, outbound2Times, inbound2Times;
-                
-                if (isDirect) {
-                    // Direct flight data
-                    outboundDate = document.getElementById('outboundDate')?.value;
-                    inboundDate = document.getElementById('inboundDate')?.value;
-                    outboundFlight = document.getElementById('outboundFlight')?.value;
-                    inboundFlight = document.getElementById('inboundFlight')?.value;
-                    outboundTimes = document.getElementById('outboundTimes')?.value;
-                    inboundTimes = document.getElementById('inboundTimes')?.value;
-                    
-                    // Convert dates to DD-MMM-YY format
-                    outboundDate = outboundDate ? convertDateToDisplayFormat(outboundDate) : null;
-                    inboundDate = inboundDate ? convertDateToDisplayFormat(inboundDate) : null;
-                } else {
-                    // Connecting flight data
-                    outbound1Date = document.getElementById('outbound1Date')?.value;
-                    outbound2Date = document.getElementById('outbound2Date')?.value;
-                    inbound1Date = document.getElementById('inbound1Date')?.value;
-                    inbound2Date = document.getElementById('inbound2Date')?.value;
-                    
-                    outbound1Flight = document.getElementById('outbound1Flight')?.value;
-                    outbound2Flight = document.getElementById('outbound2Flight')?.value;
-                    inbound1Flight = document.getElementById('inbound1Flight')?.value;
-                    inbound2Flight = document.getElementById('inbound2Flight')?.value;
-                    
-                    outbound1Times = document.getElementById('outbound1Times')?.value;
-                    outbound2Times = document.getElementById('outbound2Times')?.value;
-                    inbound1Times = document.getElementById('inbound1Times')?.value;
-                    inbound2Times = document.getElementById('inbound2Times')?.value;
-                    
-                    // Convert dates to DD-MMM-YY format
-                    outbound1Date = outbound1Date ? convertDateToDisplayFormat(outbound1Date) : null;
-                    outbound2Date = outbound2Date ? convertDateToDisplayFormat(outbound2Date) : null;
-                    inbound1Date = inbound1Date ? convertDateToDisplayFormat(inbound1Date) : null;
-                    inbound2Date = inbound2Date ? convertDateToDisplayFormat(inbound2Date) : null;
-                }
-                
-                // Get form data
-                const formData = {
-                    sr_number: document.getElementById('srNumber')?.value || '',
-                    request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
-                    airline_pnr: document.getElementById('airlinePnr')?.value || '',
-                    no_of_seats: parseInt(document.getElementById('noOfSeats')?.value) || 0,
-                    fare: parseFloat(document.getElementById('fare')?.value) || 0,
-                    time_limit: document.getElementById('timeLimit')?.value || '',
-                    investment_type: document.getElementById('investmentType')?.value || 'Company Investment',
-                    license_number: document.getElementById('license')?.value || 'QFC',
-                    branch: document.getElementById('branch')?.value || 'HO',
-                    gds_pnr: document.getElementById('gdsPnr')?.value || null,
-                    segment: document.getElementById('segment')?.value || 'Umrah',
-                    airline: document.getElementById('airline')?.value || '',
-                    flight_segments: segments,
-                    
-                    // Direct flight fields
-                    outbound_date: outboundDate,
-                    inbound_date: inboundDate,
-                    outbound_flight: outboundFlight,
-                    inbound_flight: inboundFlight,
-                    outbound_times: outboundTimes ? outboundTimes.toUpperCase() : null,
-                    inbound_times: inboundTimes ? inboundTimes.toUpperCase() : null,
-                    
-                    // Connecting flight fields
-                    outbound1_date: outbound1Date,
-                    outbound2_date: outbound2Date,
-                    inbound1_date: inbound1Date,
-                    inbound2_date: inbound2Date,
-                    outbound1_flight: outbound1Flight,
-                    outbound2_flight: outbound2Flight,
-                    inbound1_flight: inbound1Flight,
-                    inbound2_flight: inbound2Flight,
-                    outbound1_times: outbound1Times ? outbound1Times.toUpperCase() : null,
-                    outbound2_times: outbound2Times ? outbound2Times.toUpperCase() : null,
-                    inbound1_times: inbound1Times ? inbound1Times.toUpperCase() : null,
-                    inbound2_times: inbound2Times ? inbound2Times.toUpperCase() : null,
-                    
-                    sector: document.getElementById('sector')?.value || '',
-                    taxes: parseFloat(document.getElementById('taxes')?.value) || 0,
-                    payable_amount: parseFloat(document.getElementById('payableAmount')?.value) || 0,
-                    pnr_amount: parseFloat(document.getElementById('pnrAmount')?.value) || 0,
-                    issuance_date: document.getElementById('issuanceDate')?.value || null,
-                    payment_percentage: parseFloat(document.getElementById('paymentPercentage')?.value) || 100,
-                    emd_refund_date: document.getElementById('emdRefundDate')?.value || null,
-                    first_emd_number: document.getElementById('emd1Number')?.value || null,
-                    first_emd_amount: document.getElementById('emd1Amount')?.value ? parseFloat(document.getElementById('emd1Amount').value) : null,
-                    first_emd_status: document.getElementById('emd1Status')?.value || null,
-                    first_emd_time_limit: document.getElementById('emd1TimeLimit')?.value || null,
-                    first_emd_issuance_date: document.getElementById('emd1IssuanceDate')?.value || null,
-                    first_emd_payment_percentage: document.getElementById('emd1PaymentPercent')?.value ? parseFloat(document.getElementById('emd1PaymentPercent').value) : null,
-                    second_emd_number: document.getElementById('emd2Number')?.value || null,
-                    second_emd_amount: document.getElementById('emd2Amount')?.value ? parseFloat(document.getElementById('emd2Amount').value) : null,
-                    second_emd_time_limit: document.getElementById('emd2TimeLimit')?.value || null,
-                    third_emd_number: document.getElementById('emd3Number')?.value || null,
-                    third_emd_amount: document.getElementById('emd3Amount')?.value ? parseFloat(document.getElementById('emd3Amount').value) : null,
-                    third_emd_time_limit: document.getElementById('emd3TimeLimit')?.value || null,
-                    ticketing_status: document.getElementById('ticketingStatus')?.value || 'pending',
-                    no_of_tickets_issued: parseInt(document.getElementById('ticketsIssued')?.value) || 0,
-                    balance_tickets: parseInt(document.getElementById('balanceTickets')?.value) || 0,
-                    last_ticket_date: document.getElementById('lastTicketDate')?.value || null,
-                    status: document.getElementById('overallStatus')?.value || 'draft',
-                    notes: document.getElementById('notes')?.value || null,
-                    created_at: new Date().toISOString()
-                };
-                
-                console.log('Saving data:', formData);
-                
-                if (editingId) {
-                    // Update existing record
-                    const { data, error } = await supabaseClient
-                        .from('seat_acquisitions')
-                        .update(formData)
-                        .eq('id', editingId)
-                        .select();
-                    
-                    if (error) throw error;
-                    
-                    showSuccess('✅ Updated successfully! SR#: ' + formData.sr_number);
-                    editingId = null;
-                } else {
-                    // Insert new record
-                    const { data, error } = await supabaseClient
-                        .from('seat_acquisitions')
-                        .insert([formData])
-                        .select();
-                    
-                    if (error) throw error;
-                    
-                    showSuccess('✅ Saved successfully! SR#: ' + formData.sr_number);
-                }
-                
-                // Reset form and reload data
-                resetForm();
-                await loadAcquisitions();
-                
-            } catch (error) {
-                console.error('Save error:', error);
-                showError('❌ Error saving: ' + (error.message || 'Please check console for details'));
-            } finally {
-                // Re-enable save button
-                if (saveButton) {
-                    saveButton.disabled = false;
-                    saveButton.innerHTML = originalText;
-                }
-            }
-        }
-        
-        // ========== OTHER FUNCTIONS ==========
-        async function loadAcquisitions() {
-            try {
-                if (!supabaseClient) {
-                    console.log('Supabase not initialized, using localStorage');
-                    // Fallback to localStorage
-                    const savedData = localStorage.getItem('qfc_acquisitions');
-                    acquisitions = savedData ? JSON.parse(savedData) : [];
-                    updateTable();
-                    updateDashboard();
-                    return;
-                }
-                
+            if (editingId) {
+                // Update existing record
                 const { data, error } = await supabaseClient
                     .from('seat_acquisitions')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(20);
+                    .update(formData)
+                    .eq('id', editingId)
+                    .select();
                 
                 if (error) throw error;
                 
-                acquisitions = data || [];
-                updateTable();
-                updateDashboard();
+                showSuccess('✅ Updated successfully! SR#: ' + formData.sr_number);
+                editingId = null;
+            } else {
+                // Insert new record
+                const { data, error } = await supabaseClient
+                    .from('seat_acquisitions')
+                    .insert([formData])
+                    .select();
                 
-                // Also save to localStorage as backup
-                localStorage.setItem('qfc_acquisitions', JSON.stringify(acquisitions));
+                if (error) throw error;
                 
-            } catch (error) {
-                console.error('Load error:', error);
-                // Fallback to localStorage
+                showSuccess('✅ Saved successfully! SR#: ' + formData.sr_number);
+            }
+            
+            // Reset form and reload data
+            resetForm();
+            await loadAcquisitions();
+            
+        } catch (error) {
+            console.error('Save error:', error);
+            showError('❌ Error saving: ' + (error.message || 'Please check console for details'));
+        } finally {
+            // Re-enable save button
+            if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalText;
+            }
+        }
+    }
+    
+    // ========== OTHER FUNCTIONS ==========
+    async function loadAcquisitions() {
+        try {
+            if (!supabaseClient) {
+                console.log('Supabase not initialized, using localStorage');
                 const savedData = localStorage.getItem('qfc_acquisitions');
                 acquisitions = savedData ? JSON.parse(savedData) : [];
                 updateTable();
                 updateDashboard();
-                showError('Using offline data. Please check internet connection.');
-            }
-        }
-        
-        function updateTable() {
-            const tableBody = document.getElementById('acquisitionsTable');
-            const tableCount = document.getElementById('tableCount');
-            
-            if (!acquisitions || acquisitions.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center py-5">
-                            <div class="text-muted">
-                                <i class="bi bi-inbox display-6"></i>
-                                <p class="mt-2">No acquisitions yet</p>
-                                <small>Save your first acquisition above</small>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                if (tableCount) tableCount.textContent = '0 records';
                 return;
             }
             
-            let html = '';
-            acquisitions.forEach(item => {
-                const id = item.id || '';
-                const isEditing = editingId === id;
-                const rowClass = isEditing ? 'table-warning' : '';
-                
-                let statusClass = 'status-draft';
-                if (item.status === 'approved') statusClass = 'status-approved';
-                if (item.status === 'submitted') statusClass = 'status-pending';
-                
-                html += `
-                    <tr class="${rowClass}">
-                        <td><strong>${item.sr_number || ''}</strong></td>
-                        <td>${item.airline_pnr || ''}</td>
-                        <td>${item.no_of_seats || 0}</td>
-                        <td>${item.fare ? parseFloat(item.fare).toFixed(2) : '0.00'}</td>
-                        <td><span class="status-badge ${statusClass}">${item.status || 'draft'}</span></td>
-                        <td>${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-primary" onclick="editItem('${id}')" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-outline-danger" onclick="deleteItem('${id}', '${item.sr_number}')" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
+            const { data, error } = await supabaseClient
+                .from('seat_acquisitions')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(20);
             
-            tableBody.innerHTML = html;
-            if (tableCount) tableCount.textContent = `${acquisitions.length} records`;
+            if (error) throw error;
+            
+            acquisitions = data || [];
+            updateTable();
+            updateDashboard();
+            
+            localStorage.setItem('qfc_acquisitions', JSON.stringify(acquisitions));
+            
+        } catch (error) {
+            console.error('Load error:', error);
+            const savedData = localStorage.getItem('qfc_acquisitions');
+            acquisitions = savedData ? JSON.parse(savedData) : [];
+            updateTable();
+            updateDashboard();
+            showError('Using offline data. Please check internet connection.');
+        }
+    }
+    
+    function updateTable() {
+        const tableBody = document.getElementById('acquisitionsTable');
+        const tableCount = document.getElementById('tableCount');
+        
+        if (!acquisitions || acquisitions.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <div class="text-muted">
+                            <i class="bi bi-inbox display-6"></i>
+                            <p class="mt-2">No acquisitions yet</p>
+                            <small>Save your first acquisition above</small>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            if (tableCount) tableCount.textContent = '0 records';
+            return;
         }
         
-        function updateDashboard() {
-            if (!acquisitions || acquisitions.length === 0) {
-                document.getElementById('totalSeats').textContent = '0';
-                document.getElementById('totalRevenue').textContent = '0.00';
-                document.getElementById('totalAcquisitions').textContent = '0';
-                document.getElementById('pendingItems').textContent = '0';
+        let html = '';
+        acquisitions.forEach(item => {
+            const id = item.id || '';
+            const isEditing = editingId === id;
+            const rowClass = isEditing ? 'table-warning' : '';
+            
+            let statusClass = 'status-draft';
+            if (item.status === 'approved') statusClass = 'status-approved';
+            if (item.status === 'submitted') statusClass = 'status-pending';
+            
+            html += `
+                <tr class="${rowClass}">
+                    <td><strong>${item.sr_number || ''}</strong></td>
+                    <td>${item.airline_pnr || ''}</td>
+                    <td>${item.no_of_seats || 0}</td>
+                    <td>${item.fare ? parseFloat(item.fare).toFixed(2) : '0.00'}</td>
+                    <td><span class="status-badge ${statusClass}">${item.status || 'draft'}</span></td>
+                    <td>${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="editItem('${id}')" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteItem('${id}', '${item.sr_number}')" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tableBody.innerHTML = html;
+        if (tableCount) tableCount.textContent = `${acquisitions.length} records`;
+    }
+    
+    function updateDashboard() {
+        if (!acquisitions || acquisitions.length === 0) {
+            document.getElementById('totalSeats').textContent = '0';
+            document.getElementById('totalRevenue').textContent = '0.00';
+            document.getElementById('totalAcquisitions').textContent = '0';
+            document.getElementById('pendingItems').textContent = '0';
+            return;
+        }
+        
+        const totalSeats = acquisitions.reduce((sum, item) => sum + (item.no_of_seats || 0), 0);
+        const totalRevenue = acquisitions.reduce((sum, item) => sum + (item.pnr_amount || 0), 0);
+        const pendingCount = acquisitions.filter(item => item.status === 'draft' || item.status === 'submitted').length;
+        
+        document.getElementById('totalSeats').textContent = totalSeats;
+        document.getElementById('totalRevenue').textContent = totalRevenue.toFixed(2);
+        document.getElementById('totalAcquisitions').textContent = acquisitions.length;
+        document.getElementById('pendingItems').textContent = pendingCount;
+    }
+    
+    function resetForm() {
+        editingId = null;
+        
+        // Reset flight segments to default
+        document.getElementById('flightSegments').value = '2';
+        toggleFlightSegments();
+        
+        // Generate new SR number
+        generateSRNumber();
+        
+        // Clear form fields
+        const fieldsToClear = [
+            'airlinePnr', 'gdsPnr', 'noOfSeats', 'outboundDate', 'inboundDate',
+            'outboundFlight', 'inboundFlight', 'outboundTimes', 'inboundTimes',
+            'outbound1Date', 'outbound2Date', 'inbound1Date', 'inbound2Date',
+            'outbound1Flight', 'outbound2Flight', 'inbound1Flight', 'inbound2Flight',
+            'outbound1Times', 'outbound2Times', 'inbound1Times', 'inbound2Times',
+            'sector', 'fare', 'taxes', 'issuanceDate', 'emdRefundDate',
+            'emd1Number', 'emd1Amount', 'emd1TimeLimit', 'emd1IssuanceDate', 'emd1PaymentPercent',
+            'emd2Number', 'emd2Amount', 'emd2TimeLimit', 'emd3Number', 'emd3Amount', 'emd3TimeLimit',
+            'ticketsIssued', 'lastTicketDate', 'notes'
+        ];
+        
+        fieldsToClear.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.value = '';
+        });
+        
+        // Reset select fields to defaults
+        document.getElementById('investmentType').value = 'Company Investment';
+        document.getElementById('license').value = 'QFC';
+        document.getElementById('branch').value = 'HO';
+        document.getElementById('segment').value = 'Umrah';
+        document.getElementById('airline').value = '';
+        document.getElementById('emd1Status').value = '';
+        document.getElementById('ticketingStatus').value = 'pending';
+        document.getElementById('overallStatus').value = 'draft';
+        document.getElementById('paymentPercentage').value = '100';
+        
+        // Set default dates
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('requestDate').value = today;
+        
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
+        
+        // Recalculate
+        calculateAmounts();
+        calculateBalanceTickets();
+        
+        // Update UI buttons
+        document.getElementById('saveButton').innerHTML = '<i class="bi bi-save me-2"></i>Save Acquisition';
+        document.getElementById('saveButton').className = 'btn btn-primary btn-lg';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        
+        // Switch to first tab
+        const firstTab = document.querySelector('#basic-tab');
+        if (firstTab) firstTab.click();
+        
+        // Update table
+        updateTable();
+        
+        showSuccess('Form reset successfully');
+    }
+    
+    function cancelEdit() {
+        resetForm();
+    }
+    
+    async function editItem(id) {
+        try {
+            // Find item in local array first
+            const item = acquisitions.find(item => item.id == id);
+            if (!item) {
+                showError('Item not found');
                 return;
             }
             
-            const totalSeats = acquisitions.reduce((sum, item) => sum + (item.no_of_seats || 0), 0);
-            const totalRevenue = acquisitions.reduce((sum, item) => sum + (item.pnr_amount || 0), 0);
-            const pendingCount = acquisitions.filter(item => item.status === 'draft' || item.status === 'submitted').length;
+            editingId = id;
             
-            document.getElementById('totalSeats').textContent = totalSeats;
-            document.getElementById('totalRevenue').textContent = totalRevenue.toFixed(2);
-            document.getElementById('totalAcquisitions').textContent = acquisitions.length;
-            document.getElementById('pendingItems').textContent = pendingCount;
-        }
-        
-        function resetForm() {
-            editingId = null;
-            
-            // Reset flight segments to default
-            document.getElementById('flightSegments').value = '2';
+            // Set flight segments
+            const segments = item.flight_segments || '2';
+            document.getElementById('flightSegments').value = segments;
             toggleFlightSegments();
             
-            // Generate new SR number
-            generateSRNumber();
+            // Convert dates from DD-MMM-YY to YYYY-MM-DD for calendar input
+            const outboundDateForInput = item.outbound_date ? convertDisplayToDateInput(item.outbound_date) : '';
+            const inboundDateForInput = item.inbound_date ? convertDisplayToDateInput(item.inbound_date) : '';
+            const outbound1DateForInput = item.outbound1_date ? convertDisplayToDateInput(item.outbound1_date) : '';
+            const outbound2DateForInput = item.outbound2_date ? convertDisplayToDateInput(item.outbound2_date) : '';
+            const inbound1DateForInput = item.inbound1_date ? convertDisplayToDateInput(item.inbound1_date) : '';
+            const inbound2DateForInput = item.inbound2_date ? convertDisplayToDateInput(item.inbound2_date) : '';
             
-            // Clear form fields
-            const fieldsToClear = [
-                'airlinePnr', 'gdsPnr', 'noOfSeats', 'outboundDate', 'inboundDate',
-                'outboundFlight', 'inboundFlight', 'outboundTimes', 'inboundTimes',
-                'outbound1Date', 'outbound2Date', 'inbound1Date', 'inbound2Date',
-                'outbound1Flight', 'outbound2Flight', 'inbound1Flight', 'inbound2Flight',
-                'outbound1Times', 'outbound2Times', 'inbound1Times', 'inbound2Times',
-                'sector', 'fare', 'taxes', 'issuanceDate', 'emdRefundDate',
-                'emd1Number', 'emd1Amount', 'emd1TimeLimit', 'emd1IssuanceDate', 'emd1PaymentPercent',
-                'emd2Number', 'emd2Amount', 'emd2TimeLimit', 'emd3Number', 'emd3Amount', 'emd3TimeLimit',
-                'ticketsIssued', 'lastTicketDate', 'notes'
+            // Fill form with item data - USING CORRECT DATABASE COLUMN NAMES
+            const fields = [
+                { id: 'srNumber', value: item.sr_number },
+                { id: 'requestDate', value: item.request_date },
+                { id: 'investmentType', value: item.investment_type },
+                { id: 'license', value: item.license },
+                { id: 'branch', value: item.branch },
+                { id: 'airlinePnr', value: item.airline_pnr },
+                { id: 'gdsPnr', value: item.gds_pnr },
+                { id: 'segment', value: item.segment },
+                { id: 'airline', value: item.airline },
+                { id: 'noOfSeats', value: item.no_of_seats },
+                { id: 'outboundDate', value: outboundDateForInput },
+                { id: 'inboundDate', value: inboundDateForInput },
+                { id: 'outboundFlight', value: item.outbound1_flight },
+                { id: 'inboundFlight', value: item.inbound1_flight },
+                { id: 'outboundTimes', value: item.outbound1_times },
+                { id: 'inboundTimes', value: item.inbound1_times },
+                { id: 'outbound1Date', value: outbound1DateForInput },
+                { id: 'outbound2Date', value: outbound2DateForInput },
+                { id: 'inbound1Date', value: inbound1DateForInput },
+                { id: 'inbound2Date', value: inbound2DateForInput },
+                { id: 'outbound1Flight', value: item.outbound1_flight },
+                { id: 'outbound2Flight', value: item.outbound2_flight },
+                { id: 'inbound1Flight', value: item.inbound1_flight },
+                { id: 'inbound2Flight', value: item.inbound2_flight },
+                { id: 'outbound1Times', value: item.outbound1_times },
+                { id: 'outbound2Times', value: item.outbound2_times },
+                { id: 'inbound1Times', value: item.inbound1_times },
+                { id: 'inbound2Times', value: item.inbound2_times },
+                { id: 'sector', value: item.sector },
+                { id: 'fare', value: item.fare },
+                { id: 'taxes', value: item.taxes },
+                { id: 'paymentPercentage', value: item.payment_percentage },
+                { id: 'issuanceDate', value: item.issuance_date },
+                { id: 'timeLimit', value: item.time_limit },
+                { id: 'emdRefundDate', value: item.emd_refund_date },
+                { id: 'emd1Number', value: item.first_emd_number },
+                { id: 'emd1Amount', value: item.first_emd_amount },
+                { id: 'emd1Status', value: item.first_emd_status },
+                { id: 'emd1TimeLimit', value: item.first_emd_time_limit },
+                { id: 'emd1IssuanceDate', value: item.first_emd_issuance_date },
+                { id: 'emd1PaymentPercent', value: item.first_emd_payment_percentage },
+                { id: 'emd2Number', value: item.second_emd_number },
+                { id: 'emd2Amount', value: item.second_emd_amount },
+                { id: 'emd2TimeLimit', value: item.second_emd_time_limit },
+                { id: 'emd3Number', value: item.third_emd_number },
+                { id: 'emd3Amount', value: item.third_emd_amount },
+                { id: 'emd3TimeLimit', value: item.third_emd_time_limit },
+                { id: 'ticketingStatus', value: item.ticketing_status },
+                { id: 'ticketsIssued', value: item.no_of_tickets_issued },
+                { id: 'lastTicketDate', value: item.last_ticket_date },
+                { id: 'overallStatus', value: item.status },
+                { id: 'notes', value: item.notes }
             ];
             
-            fieldsToClear.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.value = '';
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element && field.value !== null && field.value !== undefined) {
+                    element.value = field.value;
+                }
             });
-            
-            // Reset select fields to defaults
-            document.getElementById('investmentType').value = 'Company Investment';
-            document.getElementById('license').value = 'QFC';
-            document.getElementById('branch').value = 'HO';
-            document.getElementById('segment').value = 'Umrah';
-            document.getElementById('airline').value = '';
-            document.getElementById('emd1Status').value = '';
-            document.getElementById('ticketingStatus').value = 'pending';
-            document.getElementById('overallStatus').value = 'draft';
-            document.getElementById('paymentPercentage').value = '100';
-            
-            // Set default dates
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('requestDate').value = today;
-            
-            const nextWeek = new Date();
-            nextWeek.setDate(nextWeek.getDate() + 7);
-            document.getElementById('timeLimit').value = nextWeek.toISOString().split('T')[0];
             
             // Recalculate
             calculateAmounts();
             calculateBalanceTickets();
             
-            // Update UI buttons
-            document.getElementById('saveButton').innerHTML = '<i class="bi bi-save me-2"></i>Save Acquisition';
-            document.getElementById('saveButton').className = 'btn btn-primary btn-lg';
-            document.getElementById('cancelEditBtn').style.display = 'none';
+            // Update UI
+            document.getElementById('saveButton').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update';
+            document.getElementById('saveButton').className = 'btn btn-warning btn-lg';
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
             
-            // Switch to first tab
-            const firstTab = document.querySelector('#basic-tab');
-            if (firstTab) firstTab.click();
+            // Switch to flight tab to show the dates
+            const flightTab = document.querySelector('#flight-tab');
+            if (flightTab) flightTab.click();
             
-            // Update table
+            // Scroll to form
+            document.getElementById('acquireForm').scrollIntoView({ behavior: 'smooth' });
+            
+            showSuccess('Editing: ' + item.sr_number);
+            
+        } catch (error) {
+            console.error('Edit error:', error);
+            showError('Failed to load for editing');
+        }
+    }
+    
+    async function deleteItem(id, srNumber) {
+        if (!confirm(`Are you sure you want to delete ${srNumber}? This action cannot be undone.`)) return;
+        
+        try {
+            if (supabaseClient) {
+                const { error } = await supabaseClient
+                    .from('seat_acquisitions')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+            }
+            
+            // Remove from local array
+            acquisitions = acquisitions.filter(item => item.id != id);
+            
+            // Update localStorage
+            localStorage.setItem('qfc_acquisitions', JSON.stringify(acquisitions));
+            
+            // If we were editing this item, cancel edit
+            if (editingId == id) {
+                resetForm();
+            }
+            
+            // Update UI
             updateTable();
+            updateDashboard();
             
-            showSuccess('Form reset successfully');
+            showSuccess('Deleted: ' + srNumber);
+            
+        } catch (error) {
+            console.error('Delete error:', error);
+            showError('Failed to delete');
+        }
+    }
+    
+    // ========== NOTIFICATION FUNCTIONS ==========
+    function showSuccess(message) {
+        const successToast = document.getElementById('successToast');
+        const successMessage = document.getElementById('successMessage');
+        
+        if (successMessage) successMessage.textContent = message;
+        if (successToast) {
+            const toast = new bootstrap.Toast(successToast);
+            toast.show();
+        }
+    }
+    
+    function showError(message) {
+        const errorToast = document.getElementById('errorToast');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        if (errorMessage) errorMessage.innerHTML = message;
+        if (errorToast) {
+            const toast = new bootstrap.Toast(errorToast);
+            toast.show();
+        }
+    }
+    
+    // ========== CSV EXPORT FUNCTION ==========
+    function exportToCSV() {
+        if (acquisitions.length === 0) {
+            showError('No data to export');
+            return;
         }
         
-        function cancelEdit() {
-            resetForm();
-        }
+        const headers = ['SR#', 'Airline PNR', 'Seats', 'Fare', 'Status', 'Date', 'Airline', 'Sector'];
         
-        async function editItem(id) {
-            try {
-                // Find item in local array first
-                const item = acquisitions.find(item => item.id == id);
-                if (!item) {
-                    showError('Item not found');
-                    return;
-                }
-                
-                editingId = id;
-                
-                // Set flight segments
-                const segments = item.flight_segments || '2';
-                document.getElementById('flightSegments').value = segments;
-                toggleFlightSegments();
-                
-                // Convert dates from DD-MMM-YY to YYYY-MM-DD for calendar input
-                const outboundDateForInput = item.outbound_date ? convertDisplayToDateInput(item.outbound_date) : '';
-                const inboundDateForInput = item.inbound_date ? convertDisplayToDateInput(item.inbound_date) : '';
-                const outbound1DateForInput = item.outbound1_date ? convertDisplayToDateInput(item.outbound1_date) : '';
-                const outbound2DateForInput = item.outbound2_date ? convertDisplayToDateInput(item.outbound2_date) : '';
-                const inbound1DateForInput = item.inbound1_date ? convertDisplayToDateInput(item.inbound1_date) : '';
-                const inbound2DateForInput = item.inbound2_date ? convertDisplayToDateInput(item.inbound2_date) : '';
-                
-                // Fill form with item data
-                const fields = [
-                    { id: 'srNumber', value: item.sr_number },
-                    { id: 'requestDate', value: item.request_date },
-                    { id: 'investmentType', value: item.investment_type },
-                    { id: 'license', value: item.license_number },
-                    { id: 'branch', value: item.branch },
-                    { id: 'airlinePnr', value: item.airline_pnr },
-                    { id: 'gdsPnr', value: item.gds_pnr },
-                    { id: 'segment', value: item.segment },
-                    { id: 'airline', value: item.airline },
-                    { id: 'noOfSeats', value: item.no_of_seats },
-                    { id: 'outboundDate', value: outboundDateForInput },
-                    { id: 'inboundDate', value: inboundDateForInput },
-                    { id: 'outboundFlight', value: item.outbound_flight },
-                    { id: 'inboundFlight', value: item.inbound_flight },
-                    { id: 'outboundTimes', value: item.outbound_times },
-                    { id: 'inboundTimes', value: item.inbound_times },
-                    { id: 'outbound1Date', value: outbound1DateForInput },
-                    { id: 'outbound2Date', value: outbound2DateForInput },
-                    { id: 'inbound1Date', value: inbound1DateForInput },
-                    { id: 'inbound2Date', value: inbound2DateForInput },
-                    { id: 'outbound1Flight', value: item.outbound1_flight },
-                    { id: 'outbound2Flight', value: item.outbound2_flight },
-                    { id: 'inbound1Flight', value: item.inbound1_flight },
-                    { id: 'inbound2Flight', value: item.inbound2_flight },
-                    { id: 'outbound1Times', value: item.outbound1_times },
-                    { id: 'outbound2Times', value: item.outbound2_times },
-                    { id: 'inbound1Times', value: item.inbound1_times },
-                    { id: 'inbound2Times', value: item.inbound2_times },
-                    { id: 'sector', value: item.sector },
-                    { id: 'fare', value: item.fare },
-                    { id: 'taxes', value: item.taxes },
-                    { id: 'paymentPercentage', value: item.payment_percentage },
-                    { id: 'issuanceDate', value: item.issuance_date },
-                    { id: 'timeLimit', value: item.time_limit },
-                    { id: 'emdRefundDate', value: item.emd_refund_date },
-                    { id: 'emd1Number', value: item.first_emd_number },
-                    { id: 'emd1Amount', value: item.first_emd_amount },
-                    { id: 'emd1Status', value: item.first_emd_status },
-                    { id: 'emd1TimeLimit', value: item.first_emd_time_limit },
-                    { id: 'emd1IssuanceDate', value: item.first_emd_issuance_date },
-                    { id: 'emd1PaymentPercent', value: item.first_emd_payment_percentage },
-                    { id: 'emd2Number', value: item.second_emd_number },
-                    { id: 'emd2Amount', value: item.second_emd_amount },
-                    { id: 'emd2TimeLimit', value: item.second_emd_time_limit },
-                    { id: 'emd3Number', value: item.third_emd_number },
-                    { id: 'emd3Amount', value: item.third_emd_amount },
-                    { id: 'emd3TimeLimit', value: item.third_emd_time_limit },
-                    { id: 'ticketingStatus', value: item.ticketing_status },
-                    { id: 'ticketsIssued', value: item.no_of_tickets_issued },
-                    { id: 'lastTicketDate', value: item.last_ticket_date },
-                    { id: 'overallStatus', value: item.status },
-                    { id: 'notes', value: item.notes }
-                ];
-                
-                fields.forEach(field => {
-                    const element = document.getElementById(field.id);
-                    if (element && field.value !== null && field.value !== undefined) {
-                        element.value = field.value;
-                    }
-                });
-                
-                // Recalculate
-                calculateAmounts();
-                calculateBalanceTickets();
-                
-                // Update UI
-                document.getElementById('saveButton').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update';
-                document.getElementById('saveButton').className = 'btn btn-warning btn-lg';
-                document.getElementById('cancelEditBtn').style.display = 'inline-block';
-                
-                // Switch to flight tab to show the dates
-                const flightTab = document.querySelector('#flight-tab');
-                if (flightTab) flightTab.click();
-                
-                // Scroll to form
-                document.getElementById('acquireForm').scrollIntoView({ behavior: 'smooth' });
-                
-                showSuccess('Editing: ' + item.sr_number);
-                
-            } catch (error) {
-                console.error('Edit error:', error);
-                showError('Failed to load for editing');
-            }
-        }
+        const csvRows = [
+            headers.join(','),
+            ...acquisitions.map(item => [
+                `"${item.sr_number || ''}"`,
+                `"${item.airline_pnr || ''}"`,
+                item.no_of_seats || 0,
+                item.fare || 0,
+                `"${item.status || ''}"`,
+                `"${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}"`,
+                `"${item.airline || ''}"`,
+                `"${item.sector || ''}"`
+            ].join(','))
+        ];
         
-        async function deleteItem(id, srNumber) {
-            if (!confirm(`Are you sure you want to delete ${srNumber}? This action cannot be undone.`)) return;
-            
-            try {
-                if (supabaseClient) {
-                    const { error } = await supabaseClient
-                        .from('seat_acquisitions')
-                        .delete()
-                        .eq('id', id);
-                    
-                    if (error) throw error;
-                }
-                
-                // Remove from local array
-                acquisitions = acquisitions.filter(item => item.id != id);
-                
-                // Update localStorage
-                localStorage.setItem('qfc_acquisitions', JSON.stringify(acquisitions));
-                
-                // If we were editing this item, cancel edit
-                if (editingId == id) {
-                    resetForm();
-                }
-                
-                // Update UI
-                updateTable();
-                updateDashboard();
-                
-                showSuccess('Deleted: ' + srNumber);
-                
-            } catch (error) {
-                console.error('Delete error:', error);
-                showError('Failed to delete');
-            }
-        }
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qfc-acquisitions-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
         
-        // ========== NOTIFICATION FUNCTIONS ==========
-        function showSuccess(message) {
-            const successToast = document.getElementById('successToast');
-            const successMessage = document.getElementById('successMessage');
-            
-            if (successMessage) successMessage.textContent = message;
-            if (successToast) {
-                const toast = new bootstrap.Toast(successToast);
-                toast.show();
-            }
-        }
-        
-        function showError(message) {
-            const errorToast = document.getElementById('errorToast');
-            const errorMessage = document.getElementById('errorMessage');
-            
-            if (errorMessage) errorMessage.textContent = message;
-            if (errorToast) {
-                const toast = new bootstrap.Toast(errorToast);
-                toast.show();
-            }
-        }
-        
-        // ========== CSV EXPORT FUNCTION ==========
-        function exportToCSV() {
-            if (acquisitions.length === 0) {
-                showError('No data to export');
-                return;
-            }
-            
-            const headers = ['SR#', 'Airline PNR', 'Seats', 'Fare', 'Status', 'Date', 'Airline', 'Sector'];
-            
-            const csvRows = [
-                headers.join(','), // Header row
-                ...acquisitions.map(item => [
-                    `"${item.sr_number || ''}"`,
-                    `"${item.airline_pnr || ''}"`,
-                    item.no_of_seats || 0,
-                    item.fare || 0,
-                    `"${item.status || ''}"`,
-                    `"${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}"`,
-                    `"${item.airline || ''}"`,
-                    `"${item.sector || ''}"`
-                ].join(','))
-            ];
-            
-            const csvString = csvRows.join('\n');
-            const blob = new Blob([csvString], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `qfc-acquisitions-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-            
-            showSuccess(`Exported ${acquisitions.length} records`);
-        }
-        
-        // Make functions globally available
-        window.saveAcquisition = saveAcquisition;
-        window.resetForm = resetForm;
-        window.cancelEdit = cancelEdit;
-        window.editItem = editItem;
-        window.deleteItem = deleteItem;
-        window.toggleFlightSegments = toggleFlightSegments;
-        window.exportToCSV = exportToCSV;
-    </script>
+        showSuccess(`Exported ${acquisitions.length} records`);
+    }
+    
+    // ========== GLOBAL FUNCTION EXPORTS ==========
+    window.saveAcquisition = saveAcquisition;
+    window.resetForm = resetForm;
+    window.cancelEdit = cancelEdit;
+    window.editItem = editItem;
+    window.deleteItem = deleteItem;
+    window.toggleFlightSegments = toggleFlightSegments;
+    window.exportToCSV = exportToCSV;
+</script>
 </body>
 </html>
