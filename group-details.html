@@ -25,65 +25,59 @@
             z-index: 1000;
             max-width: 400px;
         }
-        /* Flight Details Styles */
-        .flight-card {
-            border-left: 4px solid;
-            transition: transform 0.2s;
+        .qfc-brand {
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1.2;
         }
-        .flight-card:hover {
-            transform: translateY(-2px);
-        }
-        .airport-code {
-            display: inline-block;
-            background: #e9ecef;
-            color: #495057;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-family: monospace;
-            font-weight: 600;
-            font-size: 0.85rem;
+        .qfc-subtitle {
+            font-size: 0.8rem;
+            color: #6c757d;
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-    <div class="container">
-        <a class="navbar-brand" href="index.html">
-            <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
-            <div class="d-inline-block">
-                <div class="qfc-brand">QFC Group Pvt Ltd</div>
-                <div class="qfc-subtitle">Group Seat Platform</div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
+                <div class="d-inline-block">
+                    <div class="qfc-brand">QFC Group Pvt Ltd</div>
+                    <div class="qfc-subtitle">Group Seat Platform</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house-door me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="groups.html">
+                            <i class="bi bi-people me-1"></i>All Groups
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="bi bi-info-circle me-1"></i>Group Details
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sell-seats.html">
+                            <i class="bi bi-cart-plus me-1"></i>Sell Seats
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </a>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.html">
-                        <i class="bi bi-house-door me-1"></i>Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="groups.html">
-                        <i class="bi bi-people me-1"></i>All Groups
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">
-                        <i class="bi bi-info-circle me-1"></i>Group Details
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="sell-seats.html">
-                        <i class="bi bi-cart-plus me-1"></i>Sell Seats
-                    </a>
-                </li>
-            </ul>
         </div>
-    </div>
-</nav>
+    </nav>
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -98,105 +92,6 @@
                 <button class="btn btn-sell btn-lg" onclick="openSellForm()">
                     <i class="bi bi-cart-plus me-2"></i>Sell Seats
                 </button>
-            </div>
-        </div>
-
-        <!-- Flight Details Card -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-airplane me-2"></i>Flight Details</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- Outbound Flight -->
-                    <div class="col-md-6">
-                        <div class="card border-primary flight-card mb-3">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0"><i class="bi bi-airplane-fill text-primary me-2"></i>Outbound Flight</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Date:</strong></div>
-                                    <div class="col-8" id="detailOutboundDate">Loading...</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Flight:</strong></div>
-                                    <div class="col-8" id="detailOutboundFlight">Loading...</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Departure:</strong></div>
-                                    <div class="col-8">
-                                        <span class="airport-code" id="detailOutboundDept">-</span>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Arrival:</strong></div>
-                                    <div class="col-8">
-                                        <span class="airport-code" id="detailOutboundArr">-</span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4"><strong>Times:</strong></div>
-                                    <div class="col-8">
-                                        <span id="detailOutboundDeptTime">-</span> → 
-                                        <span id="detailOutboundArrTime">-</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Inbound Flight -->
-                    <div class="col-md-6">
-                        <div class="card border-success flight-card mb-3">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0"><i class="bi bi-airplane text-success me-2"></i>Inbound Flight</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Date:</strong></div>
-                                    <div class="col-8" id="detailInboundDate">Loading...</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Flight:</strong></div>
-                                    <div class="col-8" id="detailInboundFlight">Loading...</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Departure:</strong></div>
-                                    <div class="col-8">
-                                        <span class="airport-code" id="detailInboundDept">-</span>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Arrival:</strong></div>
-                                    <div class="col-8">
-                                        <span class="airport-code" id="detailInboundArr">-</span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4"><strong>Times:</strong></div>
-                                    <div class="col-8">
-                                        <span id="detailInboundDeptTime">-</span> → 
-                                        <span id="detailInboundArrTime">-</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Time Summary -->
-                <div class="alert alert-info mt-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-clock-history me-3 fs-4"></i>
-                        <div>
-                            <h6 class="mb-1">Flight Schedule Summary</h6>
-                            <div id="flightSummary" class="small">
-                                <!-- Will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -367,22 +262,49 @@
         </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript - FIXED: Removed duplicate Supabase imports -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
+        // Debug script loading
+        console.log('Page loading started...');
+        
+        // Check all loaded scripts
+        const resources = performance.getEntriesByType('resource');
+        const supabaseScripts = resources.filter(r => r.name.includes('supabase'));
+        const appScripts = resources.filter(r => r.name.includes('app.js'));
+        
+        console.log('Supabase scripts loaded:', supabaseScripts.length);
+        console.log('app.js scripts loaded:', appScripts.length);
+        console.log('All scripts loaded:', resources.filter(r => r.initiatorType === 'script').map(r => r.name));
+        
         // Supabase Configuration
         const supabaseUrl = 'https://ojlxkzkialguthdeiley.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         
-        let currentGroup = null;
-        let agentSales = [];
-        const groupId = localStorage.getItem('currentGroupId');
+        // Check if Supabase is available
+        if (typeof supabase === 'undefined') {
+            console.error('Supabase is not loaded!');
+            // Try to load it dynamically
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = initializeApp;
+            document.head.appendChild(script);
+        } else {
+            initializeApp();
+        }
+        
+        function initializeApp() {
+            console.log('Supabase loaded, initializing app...');
+            const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+            
+            let currentGroup = null;
+            let agentSales = [];
+            const groupId = localStorage.getItem('currentGroupId');
 
-        // Airline logos mapping
-        const airlineLogos = {
+            // Airline logos mapping
+            const airlineLogos = {
             'SV': 'SVlogo.png',
             'PA': 'PAlogo.png',
             'PK': 'PKlogo.png',
@@ -393,423 +315,366 @@
             'J9': 'J9logo.png'
         };
 
-        // Airline names mapping
-        const airlineNames = {
-            'SV': 'Saudi Airlines',
-            'PK': 'Pakistan International Airlines',
-            'EK': 'Emirates',
-            'F3': 'Flyadeal',
-            'PA': 'Airblue',
-            'PF': 'Palestine Airlines',
-            '9P': 'Pakistan Airlines',
-            'J9': 'Jazeera Airways'
-        };
 
-        document.addEventListener('DOMContentLoaded', async function() {
-            if (!groupId) {
-                showAlert('No group selected. Redirecting to groups page.', 'warning');
-                setTimeout(() => window.location.href = 'groups.html', 2000);
-                return;
-            }
-            
-            try {
-                await loadGroupDetails();
-                await loadAgentSales();
-            } catch (error) {
-                console.error('Error loading data:', error);
-                showAlert('Error loading group details', 'danger');
-            }
-        });
-
-        async function loadGroupDetails() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('seat_acquisitions')
-                    .select('*')
-                    .eq('id', groupId)
-                    .single();
-                
-                if (error) throw error;
-                
-                currentGroup = data;
-                displayGroupDetails();
-                displayFlightDetails(currentGroup);
-                
-            } catch (error) {
-                console.error('Error loading group details:', error);
-                showAlert('Failed to load group details', 'danger');
-                setTimeout(() => window.location.href = 'groups.html', 2000);
-            }
-        }
-
-        async function loadAgentSales() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('agent_sales')
-                    .select('*')
-                    .eq('group_id', groupId)
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    if (error.code === 'PGRST204' || error.message.includes('does not exist')) {
-                        console.log('agent_sales table not found or has issues');
-                        agentSales = [];
-                        showAlert('Agent sales table not configured properly', 'warning');
-                        return;
-                    }
-                    throw error;
-                }
-                
-                agentSales = data || [];
-                displayAgentSales();
-                updateSeatProgress();
-                
-            } catch (error) {
-                console.error('Error loading agent sales:', error);
-                agentSales = [];
-                showAlert('Error loading agent sales', 'warning');
-            }
-        }
-
-        function displayGroupDetails() {
-            if (!currentGroup) return;
-            
-            const airlineCode = currentGroup.airline || '';
-            const logoUrl = airlineLogos[airlineCode] || 'https://cdn-icons-png.flaticon.com/512/824/824239.png';
-            const airlineName = airlineNames[airlineCode] || airlineCode;
-            
-            // Update page title
-            document.getElementById('groupTitle').textContent = `${airlineName} - ${currentGroup.sector || 'Flight Group'}`;
-            
-            // Update airline logo and name
-            document.getElementById('airlineLogo').src = logoUrl;
-            document.getElementById('airlineName').textContent = airlineName;
-            
-            // Update basic information
-            document.getElementById('srNumber').textContent = currentGroup.sr_number || '-';
-            document.getElementById('airlinePnr').textContent = currentGroup.airline_pnr || '-';
-            document.getElementById('gdsPnr').textContent = currentGroup.gds_pnr || '-';
-            document.getElementById('segment').textContent = currentGroup.segment || '-';
-            document.getElementById('sector').textContent = currentGroup.sector || '-';
-            document.getElementById('outboundDate').textContent = formatDateForDisplay(currentGroup.outbound_date) || '-';
-            document.getElementById('inboundDate').textContent = formatDateForDisplay(currentGroup.inbound_date) || '-';
-            document.getElementById('timeLimit').textContent = currentGroup.time_limit || '-';
-            document.getElementById('status').textContent = currentGroup.status || 'draft';
-            document.getElementById('createdDate').textContent = currentGroup.created_at ? new Date(currentGroup.created_at).toLocaleDateString() : '-';
-            
-            // Update financial information
-            document.getElementById('totalSeats').textContent = currentGroup.no_of_seats || 0;
-            document.getElementById('farePerSeat').textContent = (currentGroup.fare || 0).toFixed(2);
-            document.getElementById('taxesPerSeat').textContent = (currentGroup.taxes || 0).toFixed(2);
-            document.getElementById('pnrAmount').textContent = (currentGroup.pnr_amount || 0).toFixed(2);
-        }
-
-        // Function to parse time string like "ISB 0700 JED 1100"
-        function parseFlightTime(timeString) {
-            if (!timeString) return { departure: {}, arrival: {} };
-            
-            const parts = timeString.trim().split(/\s+/);
-            if (parts.length !== 4) return { departure: {}, arrival: {} };
-            
-            return {
-                departure: {
-                    airport: parts[0],
-                    time: parts[1]
-                },
-                arrival: {
-                    airport: parts[2],
-                    time: parts[3]
-                }
+            // Airline names mapping
+            const airlineNames = {
+                'SV': 'Saudi Airlines',
+                'PK': 'Pakistan International Airlines',
+                'EK': 'Emirates',
+                'F3': 'Flyadeal',
+                'PA': 'Airblue',
+                'PF': 'Palestine Airlines',
+                '9P': 'Pakistan Airlines',
+                'J9': 'Jazeera Airways'
             };
-        }
 
-        // Function to format time from "0700" to "07:00"
-        function formatTime(timeStr) {
-            if (!timeStr || timeStr.length !== 4) return timeStr;
-            return timeStr.substring(0, 2) + ':' + timeStr.substring(2);
-        }
-
-        // Function to display flight details
-        function displayFlightDetails(group) {
-            if (!group) return;
-            
-            // Format dates
-            document.getElementById('detailOutboundDate').textContent = 
-                formatDateForDisplay(group.outbound_date) || 'N/A';
-            document.getElementById('detailInboundDate').textContent = 
-                formatDateForDisplay(group.inbound_date) || 'N/A';
-            
-            // Display flight numbers
-            document.getElementById('detailOutboundFlight').textContent = 
-                group.outbound_flight || 'N/A';
-            document.getElementById('detailInboundFlight').textContent = 
-                group.inbound_flight || 'N/A';
-            
-            // Parse and display outbound times
-            const outboundTimes = parseFlightTime(group.outbound_times);
-            if (outboundTimes.departure.airport) {
-                document.getElementById('detailOutboundDept').textContent = 
-                    outboundTimes.departure.airport;
-                document.getElementById('detailOutboundArr').textContent = 
-                    outboundTimes.arrival.airport;
-                document.getElementById('detailOutboundDeptTime').textContent = 
-                    formatTime(outboundTimes.departure.time);
-                document.getElementById('detailOutboundArrTime').textContent = 
-                    formatTime(outboundTimes.arrival.time);
-            }
-            
-            // Parse and display inbound times
-            const inboundTimes = parseFlightTime(group.inbound_times);
-            if (inboundTimes.departure.airport) {
-                document.getElementById('detailInboundDept').textContent = 
-                    inboundTimes.departure.airport;
-                document.getElementById('detailInboundArr').textContent = 
-                    inboundTimes.arrival.airport;
-                document.getElementById('detailInboundDeptTime').textContent = 
-                    formatTime(inboundTimes.departure.time);
-                document.getElementById('detailInboundArrTime').textContent = 
-                    formatTime(inboundTimes.arrival.time);
-            }
-            
-            // Create flight summary
-            updateFlightSummary(group);
-        }
-
-        // Function to create flight summary
-        function updateFlightSummary(group) {
-            const summaryDiv = document.getElementById('flightSummary');
-            if (!summaryDiv) return;
-            
-            let summaryHTML = '';
-            
-            if (group.outbound_flight || group.outbound_times) {
-                summaryHTML += `
-                    <div class="mb-2">
-                        <i class="bi bi-arrow-right-circle text-primary me-2"></i>
-                        <strong>Outbound:</strong> ${group.outbound_flight || ''} 
-                        on ${formatDateForDisplay(group.outbound_date) || ''}
-                    </div>
-                `;
-            }
-            
-            if (group.inbound_flight || group.inbound_times) {
-                summaryHTML += `
-                    <div>
-                        <i class="bi bi-arrow-left-circle text-success me-2"></i>
-                        <strong>Inbound:</strong> ${group.inbound_flight || ''} 
-                        on ${formatDateForDisplay(group.inbound_date) || ''}
-                    </div>
-                `;
-            }
-            
-            if (!summaryHTML) {
-                summaryHTML = '<span class="text-muted">No flight details available</span>';
-            }
-            
-            summaryDiv.innerHTML = summaryHTML;
-        }
-
-        // Date formatting function
-        function formatDateForDisplay(dateStr) {
-            if (!dateStr) return '';
-            
-            // If already in correct format (01-MAR-26), return as is
-            if (/^\d{2}-[A-Z]{3}-\d{2}$/.test(dateStr.toUpperCase())) {
-                return dateStr.toUpperCase();
-            }
-            
-            // Try to parse date string
-            try {
-                const date = new Date(dateStr);
-                if (isNaN(date.getTime())) return dateStr;
+            document.addEventListener('DOMContentLoaded', async function() {
+                console.log('DOMContentLoaded fired - initializing...');
                 
-                const day = String(date.getDate()).padStart(2, '0');
-                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
-                                   'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-                const month = monthNames[date.getMonth()];
-                const year = String(date.getFullYear()).slice(-2);
-                
-                return `${day}-${month}-${year}`;
-            } catch (error) {
-                return dateStr;
-            }
-        }
-
-        function displayAgentSales() {
-            const tableBody = document.getElementById('agentSalesTable');
-            const agentCount = document.getElementById('agentCount');
-            
-            if (!agentSales || agentSales.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="9" class="text-center py-4">
-                            <div class="text-muted">
-                                <i class="bi bi-people display-6"></i>
-                                <p class="mt-2">No seats sold to agents yet</p>
-                                <button class="btn btn-sm btn-primary mt-2" onclick="openSellForm()">
-                                    <i class="bi bi-cart-plus me-1"></i>Sell First Seat
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                agentCount.textContent = '0 Agents';
-                return;
-            }
-            
-            let html = '';
-            let totalSold = 0;
-            
-            agentSales.forEach(sale => {
-                totalSold += parseInt(sale.seats_sold) || 0;
-                
-                // Calculate sale amount
-                const saleAmount = (sale.sale_price || 0) * (sale.seats_sold || 0);
-                const commissionAmount = saleAmount * ((sale.commission_percentage || 0) / 100);
-                const netAmount = saleAmount - commissionAmount;
-                
-                html += `
-                    <tr class="seat-card">
-                        <td>
-                            <strong>${sale.agent_name || 'Unknown Agent'}</strong>
-                            <br><small class="text-muted">${sale.agent_company || ''}</small>
-                        </td>
-                        <td>${sale.license_number || '-'}</td>
-                        <td>
-                            <small class="d-block">${sale.agent_phone || '-'}</small>
-                            <small class="text-muted">${sale.agent_email || ''}</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-primary">${sale.seats_sold || 0}</span>
-                        </td>
-                        <td>
-                            <strong>${saleAmount.toFixed(2)}</strong>
-                            <br><small class="text-muted">Net: ${netAmount.toFixed(2)}</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-info">${sale.commission_percentage || 0}%</span>
-                            <br><small class="text-muted">${commissionAmount.toFixed(2)}</small>
-                        </td>
-                        <td>
-                            <span class="badge ${sale.payment_status === 'paid' ? 'bg-success' : 'bg-warning'}">
-                                ${sale.payment_status || 'pending'}
-                            </span>
-                        </td>
-                        <td>${sale.sale_date ? new Date(sale.sale_date).toLocaleDateString() : '-'}</td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-primary" onclick="editSale('${sale.id}')">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-outline-danger" onclick="deleteSale('${sale.id}', '${sale.agent_name}')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            tableBody.innerHTML = html;
-            agentCount.textContent = `${agentSales.length} Agent${agentSales.length !== 1 ? 's' : ''}`;
-        }
-
-        function updateSeatProgress() {
-            if (!currentGroup) return;
-            
-            const totalSeats = currentGroup.no_of_seats || 0;
-            const soldSeats = agentSales.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0);
-            const availableSeats = Math.max(0, totalSeats - soldSeats);
-            const progressPercent = totalSeats > 0 ? (soldSeats / totalSeats) * 100 : 0;
-            
-            document.getElementById('soldSeatsCount').textContent = soldSeats;
-            document.getElementById('availableSeatsCount').textContent = availableSeats;
-            document.getElementById('remainingSeats').textContent = availableSeats;
-            document.getElementById('progressBar').style.width = `${progressPercent}%`;
-            document.getElementById('progressText').textContent = `${progressPercent.toFixed(1)}% of seats sold (${soldSeats}/${totalSeats})`;
-            
-            // Update button state if no seats available
-            const sellButton = document.querySelector('.btn-sell');
-            if (sellButton && availableSeats === 0) {
-                sellButton.disabled = true;
-                sellButton.innerHTML = '<i class="bi bi-cart-x me-2"></i>Sold Out';
-                sellButton.className = 'btn btn-secondary btn-lg';
-            }
-        }
-
-        function openSellForm() {
-            if (!currentGroup) return;
-            
-            const availableSeats = Math.max(0, (currentGroup.no_of_seats || 0) - 
-                agentSales.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0));
-            
-            if (availableSeats === 0) {
-                showAlert('No seats available for sale.', 'warning');
-                return;
-            }
-            
-            localStorage.setItem('sellGroupId', currentGroup.id);
-            localStorage.setItem('availableSeats', availableSeats);
-            window.location.href = 'sell-seats.html';
-        }
-
-        function editSale(saleId) {
-            const sale = agentSales.find(s => s.id === saleId);
-            if (sale) {
-                localStorage.setItem('editSaleId', saleId);
-                openSellForm();
-            }
-        }
-
-        async function deleteSale(saleId, agentName) {
-            if (!confirm(`Delete sale to ${agentName}? This action cannot be undone.`)) return;
-            
-            try {
-                const { error } = await supabaseClient
-                    .from('agent_sales')
-                    .delete()
-                    .eq('id', saleId);
-                
-                if (error) throw error;
-                
-                // Remove from local array
-                agentSales = agentSales.filter(sale => sale.id !== saleId);
-                
-                // Update display
-                displayAgentSales();
-                updateSeatProgress();
-                
-                showAlert('Sale deleted successfully.', 'success');
-                
-            } catch (error) {
-                console.error('Error deleting sale:', error);
-                showAlert('Failed to delete sale.', 'danger');
-            }
-        }
-
-        function showAlert(message, type = 'info') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-fixed alert-dismissible fade show`;
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            document.body.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
+                if (!groupId) {
+                    showAlert('No group selected. Redirecting to groups page.', 'warning');
+                    setTimeout(() => window.location.href = 'groups.html', 2000);
+                    return;
                 }
-            }, 5000);
-        }
+                
+                try {
+                    await loadGroupDetails();
+                    await loadAgentSales();
+                    console.log('All data loaded successfully');
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    showAlert('Error loading group details', 'danger');
+                }
+            });
 
-        // Make functions available globally
-        window.openSellForm = openSellForm;
-        window.editSale = editSale;
-        window.deleteSale = deleteSale;
+            async function loadGroupDetails() {
+                try {
+                    console.log('Loading group details for ID:', groupId);
+                    const { data, error } = await supabaseClient
+                        .from('seat_acquisitions')
+                        .select('*')
+                        .eq('id', groupId)
+                        .single();
+                    
+                    if (error) throw error;
+                    
+                    currentGroup = data;
+                    console.log('Loaded group data:', currentGroup);
+                    console.log('Outbound date:', currentGroup.outbound1_date);
+                    console.log('Inbound date:', currentGroup.inbound1_date);
+                    console.log('Sector:', currentGroup.sector);
+                    console.log('Airline:', currentGroup.airline);
+                    
+                    displayGroupDetails();
+                    
+                } catch (error) {
+                    console.error('Error loading group details:', error);
+                    showAlert('Failed to load group details', 'danger');
+                    setTimeout(() => window.location.href = 'groups.html', 2000);
+                }
+            }
+
+            async function loadAgentSales() {
+                try {
+                    console.log('Loading agent sales...');
+                    const { data, error } = await supabaseClient
+                        .from('agent_sales')
+                        .select('*')
+                        .eq('group_id', groupId)
+                        .order('created_at', { ascending: false });
+                    
+                    if (error) {
+                        if (error.code === 'PGRST204' || error.message.includes('does not exist')) {
+                            console.log('agent_sales table not found or has issues');
+                            agentSales = [];
+                            showAlert('Agent sales table not configured properly', 'warning');
+                            return;
+                        }
+                        throw error;
+                    }
+                    
+                    agentSales = data || [];
+                    console.log('Loaded', agentSales.length, 'agent sales');
+                    displayAgentSales();
+                    updateSeatProgress();
+                    
+                } catch (error) {
+                    console.error('Error loading agent sales:', error);
+                    agentSales = [];
+                    showAlert('Error loading agent sales', 'warning');
+                }
+            }
+
+            function displayGroupDetails() {
+                if (!currentGroup) return;
+                
+                console.log('Displaying group details...');
+                
+                const airlineCode = currentGroup.airline || '';
+                const logoKey = airlineCode.toUpperCase();
+                const logoUrl = airlineLogos[logoKey] || airlineLogos['DEFAULT'];
+                const airlineName = airlineNames[logoKey] || airlineCode || 'Unknown Airline';
+                
+                // Update page title
+                document.getElementById('groupTitle').textContent = `${airlineName} - ${currentGroup.sector || 'Flight Group'}`;
+                
+                // Update airline logo and name
+                const logoElement = document.getElementById('airlineLogo');
+                logoElement.src = logoUrl;
+                logoElement.alt = `${airlineName} Logo`;
+                logoElement.onerror = function() {
+                    console.log('Logo failed to load, using default');
+                    this.src = airlineLogos['DEFAULT'];
+                };
+                
+                document.getElementById('airlineName').textContent = airlineName;
+                
+                // Update basic information
+                document.getElementById('srNumber').textContent = currentGroup.sr_number || '-';
+                document.getElementById('airlinePnr').textContent = currentGroup.airline_pnr || '-';
+                document.getElementById('gdsPnr').textContent = currentGroup.gds_pnr || '-';
+                document.getElementById('segment').textContent = currentGroup.segment || '-';
+                document.getElementById('sector').textContent = currentGroup.sector || '-';
+                
+                // Using outbound1_date and inbound1_date
+                document.getElementById('outboundDate').textContent = formatDateForDisplay(currentGroup.outbound1_date) || '-';
+                document.getElementById('inboundDate').textContent = formatDateForDisplay(currentGroup.inbound1_date) || '-';
+                
+                document.getElementById('timeLimit').textContent = currentGroup.time_limit || '-';
+                document.getElementById('status').textContent = currentGroup.status || 'draft';
+                document.getElementById('createdDate').textContent = currentGroup.created_at ? new Date(currentGroup.created_at).toLocaleDateString() : '-';
+                
+                // Update financial information
+                document.getElementById('totalSeats').textContent = currentGroup.no_of_seats || 0;
+                document.getElementById('farePerSeat').textContent = (currentGroup.fare || 0).toFixed(2);
+                document.getElementById('taxesPerSeat').textContent = (currentGroup.taxes || 0).toFixed(2);
+                document.getElementById('pnrAmount').textContent = (currentGroup.pnr_amount || 0).toFixed(2);
+                
+                console.log('Group details displayed');
+            }
+
+            function formatDateForDisplay(dateStr) {
+                if (!dateStr) return '';
+                
+                try {
+                    const date = new Date(dateStr);
+                    if (isNaN(date.getTime())) {
+                        // Try parsing as DD-MMM-YY format
+                        const parts = String(dateStr).split('-');
+                        if (parts.length === 3) {
+                            const day = parts[0].padStart(2, '0');
+                            const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                               'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                            let month = parts[1].toUpperCase();
+                            
+                            // If month is a number, convert to name
+                            if (/^\d+$/.test(month)) {
+                                const monthNum = parseInt(month) - 1;
+                                month = monthNames[monthNum] || month;
+                            }
+                            
+                            const year = parts[2].slice(-2);
+                            return `${day}-${month}-${year}`;
+                        }
+                        return dateStr;
+                    }
+                    
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                       'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                    const month = monthNames[date.getMonth()];
+                    const year = String(date.getFullYear()).slice(-2);
+                    
+                    return `${day}-${month}-${year}`;
+                } catch (error) {
+                    return dateStr;
+                }
+            }
+
+            function displayAgentSales() {
+                const tableBody = document.getElementById('agentSalesTable');
+                const agentCount = document.getElementById('agentCount');
+                
+                if (!agentSales || agentSales.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="bi bi-people display-6"></i>
+                                    <p class="mt-2">No seats sold to agents yet</p>
+                                    <button class="btn btn-sm btn-primary mt-2" onclick="window.openSellForm()">
+                                        <i class="bi bi-cart-plus me-1"></i>Sell First Seat
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    agentCount.textContent = '0 Agents';
+                    return;
+                }
+                
+                let html = '';
+                
+                agentSales.forEach(sale => {
+                    const saleAmount = (sale.sale_price || 0) * (sale.seats_sold || 0);
+                    const commissionAmount = saleAmount * ((sale.commission_percentage || 0) / 100);
+                    const netAmount = saleAmount - commissionAmount;
+                    
+                    html += `
+                        <tr class="seat-card">
+                            <td>
+                                <strong>${sale.agent_name || 'Unknown Agent'}</strong>
+                                <br><small class="text-muted">${sale.agent_company || ''}</small>
+                            </td>
+                            <td>${sale.license_number || '-'}</td>
+                            <td>
+                                <small class="d-block">${sale.agent_phone || '-'}</small>
+                                <small class="text-muted">${sale.agent_email || ''}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">${sale.seats_sold || 0}</span>
+                            </td>
+                            <td>
+                                <strong>${saleAmount.toFixed(2)}</strong>
+                                <br><small class="text-muted">Net: ${netAmount.toFixed(2)}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">${sale.commission_percentage || 0}%</span>
+                                <br><small class="text-muted">${commissionAmount.toFixed(2)}</small>
+                            </td>
+                            <td>
+                                <span class="badge ${sale.payment_status === 'paid' ? 'bg-success' : 'bg-warning'}">
+                                    ${sale.payment_status || 'pending'}
+                                </span>
+                            </td>
+                            <td>${sale.sale_date ? new Date(sale.sale_date).toLocaleDateString() : '-'}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="window.editSale('${sale.id}')">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" onclick="window.deleteSale('${sale.id}', '${sale.agent_name}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tableBody.innerHTML = html;
+                agentCount.textContent = `${agentSales.length} Agent${agentSales.length !== 1 ? 's' : ''}`;
+                console.log('Agent sales displayed:', agentSales.length);
+            }
+
+            function updateSeatProgress() {
+                if (!currentGroup) return;
+                
+                const totalSeats = currentGroup.no_of_seats || 0;
+                const soldSeats = agentSales.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0);
+                const availableSeats = Math.max(0, totalSeats - soldSeats);
+                const progressPercent = totalSeats > 0 ? (soldSeats / totalSeats) * 100 : 0;
+                
+                document.getElementById('soldSeatsCount').textContent = soldSeats;
+                document.getElementById('availableSeatsCount').textContent = availableSeats;
+                document.getElementById('remainingSeats').textContent = availableSeats;
+                document.getElementById('progressBar').style.width = `${progressPercent}%`;
+                document.getElementById('progressText').textContent = `${progressPercent.toFixed(1)}% of seats sold (${soldSeats}/${totalSeats})`;
+                
+                const sellButton = document.querySelector('.btn-sell');
+                if (sellButton) {
+                    if (availableSeats === 0) {
+                        sellButton.disabled = true;
+                        sellButton.innerHTML = '<i class="bi bi-cart-x me-2"></i>Sold Out';
+                        sellButton.className = 'btn btn-secondary btn-lg';
+                        sellButton.title = 'All seats are sold';
+                    } else {
+                        sellButton.disabled = false;
+                        sellButton.innerHTML = '<i class="bi bi-cart-plus me-2"></i>Sell Seats';
+                        sellButton.className = 'btn btn-sell btn-lg';
+                        sellButton.title = '';
+                    }
+                }
+                
+                console.log('Seat progress updated - Sold:', soldSeats, '/', totalSeats, 'Available:', availableSeats);
+            }
+
+            function openSellForm() {
+                if (!currentGroup) return;
+                
+                const totalSeats = currentGroup.no_of_seats || 0;
+                const soldSeats = agentSales.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0);
+                const availableSeats = Math.max(0, totalSeats - soldSeats);
+                
+                if (availableSeats === 0) {
+                    showAlert('No seats available for sale. You can only edit existing sales.', 'warning');
+                    return;
+                }
+                
+                localStorage.setItem('sellGroupId', currentGroup.id);
+                localStorage.setItem('availableSeats', availableSeats);
+                window.location.href = 'sell-seats.html';
+            }
+
+            function editSale(saleId) {
+                // ALWAYS allow editing of existing sales
+                const sale = agentSales.find(s => s.id === saleId);
+                if (sale) {
+                    localStorage.setItem('editSaleId', saleId);
+                    window.location.href = 'sell-seats.html';
+                }
+            }
+
+            async function deleteSale(saleId, agentName) {
+                if (!confirm(`Delete sale to ${agentName}? This action cannot be undone.`)) return;
+                
+                try {
+                    const { error } = await supabaseClient
+                        .from('agent_sales')
+                        .delete()
+                        .eq('id', saleId);
+                    
+                    if (error) throw error;
+                    
+                    agentSales = agentSales.filter(sale => sale.id !== saleId);
+                    displayAgentSales();
+                    updateSeatProgress();
+                    
+                    showAlert('Sale deleted successfully.', 'success');
+                    
+                } catch (error) {
+                    console.error('Error deleting sale:', error);
+                    showAlert('Failed to delete sale.', 'danger');
+                }
+            }
+
+            function showAlert(message, type = 'info') {
+                const existingAlerts = document.querySelectorAll('.alert-fixed');
+                existingAlerts.forEach(alert => alert.remove());
+                
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-fixed alert-dismissible fade show`;
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(alertDiv);
+                
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+            }
+
+            // Make functions available globally
+            window.openSellForm = openSellForm;
+            window.editSale = editSale;
+            window.deleteSale = deleteSale;
+            
+            console.log('App initialized successfully');
+        }
     </script>
 </body>
 </html>
-
-
