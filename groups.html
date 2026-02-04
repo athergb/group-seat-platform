@@ -13,7 +13,7 @@
         .card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 24px; border: none; }
         .card-header { background-color: #1a365d; color: white; border-radius: 12px 12px 0 0 !important; }
         .airline-logo { width: 80px; height: 80px; object-fit: contain; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .group-card { transition: transform 0.3s, box-shadow 0.3s; border-left: 5px solid #1a365d; min-height: 450px; display: flex; flex-direction: column; }
+        .group-card { transition: transform 0.3s, box-shadow 0.3s; border-left: 5px solid #1a365d; }
         .group-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
         .progress { height: 10px; }
         .alert-fixed {
@@ -30,7 +30,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
         }
         
         .flight-box {
@@ -73,13 +73,13 @@
         }
         
         .outbound .flight-icon {
-            order: 2;
+            order: 2; /* Icon on right for outbound */
             margin-right: 0;
             margin-left: 8px;
         }
         
         .inbound .flight-icon {
-            order: 1;
+            order: 1; /* Icon on left for inbound */
         }
         
         .flight-info {
@@ -105,6 +105,7 @@
             color: #495057;
         }
         
+        /* PNR and Branch parallel display */
         .pnr-branch-container {
             display: flex;
             gap: 10px;
@@ -137,93 +138,41 @@
         .badge-submitted { background-color: #cff4fc; color: #055160; }
         .badge-approved { background-color: #d1e7dd; color: #0f5132; }
         .badge-rejected { background-color: #f8d7da; color: #721c24; }
-        
-        .btn-download {
-            background-color: #6c757d;
-            color: white;
-            border: none;
-        }
-        .btn-download:hover {
-            background-color: #5a6268;
-            color: white;
-        }
-        
-        .logo-fallback {
-            width: 80px;
-            height: 80px;
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: #1a365d;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .airline-logo.failed {
-            display: none;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* Card spacing fixes */
-        .group-card .card-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 1rem 1rem 0.5rem 1rem;
-        }
-        
-        .card-footer {
-            padding: 0.75rem 1rem;
-        }
-        
-        /* Progress bar spacing */
-        .mb-3:has(.progress) {
-            margin-bottom: 0.75rem !important;
-        }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
-                <div class="d-inline-block">
-                    <div class="qfc-brand">QFC Group Pvt Ltd</div>
-                    <div class="qfc-subtitle">Flight Groups Dashboard</div>
-                </div>
-            </a>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">
-                            <i class="bi bi-house-door me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="groups.html">
-                            <i class="bi bi-people me-1"></i>Groups
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#acquireForm">
-                            <i class="bi bi-plus-circle me-1"></i>New Group
-                        </a>
-                    </li>
-                </ul>
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <img src="QFClogo.png" alt="QFC Logo" height="30" class="me-2">
+            <div class="d-inline-block">
+                <div class="qfc-brand">QFC Group Pvt Ltd</div>
+                <div class="qfc-subtitle">Flight Groups Dashboard</div>
             </div>
+        </a>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">
+                        <i class="bi bi-house-door me-1"></i>Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="groups.html">
+                        <i class="bi bi-people me-1"></i>Groups
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html#acquireForm">
+                        <i class="bi bi-plus-circle me-1"></i>New Group
+                    </a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -237,7 +186,7 @@
                     <i class="bi bi-arrow-clockwise me-2"></i>Refresh
                 </button>
                 <button class="btn btn-outline-success ms-2" onclick="exportGroupsToCSV()">
-                    <i class="bi bi-download me-2"></i>Export CSV
+                    <i class="bi bi-download me-2"></i>Export
                 </button>
             </div>
         </div>
@@ -335,12 +284,9 @@
         </div>
     </div>
 
-    <!-- JavaScript Libraries -->
+    <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Add html2canvas for image download -->
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    
     <script>
         // Supabase Configuration
         const supabaseClient = window.supabase.createClient(
@@ -350,9 +296,6 @@
         
         let groups = [];
         let agentSales = [];
-        
-        // Store converted image data URLs
-        const imageDataCache = new Map();
 
         // Airline logos mapping
         const airlineLogos = {
@@ -366,46 +309,7 @@
             'J9': 'J9logo.png'
         };
 
-        const defaultLogo = '';
-
-        // Function to convert image to data URL - IMPROVED VERSION
-        function imageToDataUrl(url) {
-            return new Promise((resolve) => {
-                // Skip if no URL or if it's a data URL already
-                if (!url || url.startsWith('data:')) {
-                    resolve(url);
-                    return;
-                }
-                
-                // For local files, try to load them
-                const img = new Image();
-                img.crossOrigin = 'Anonymous';
-                
-                img.onload = () => {
-                    try {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                        const dataUrl = canvas.toDataURL('image/png');
-                        resolve(dataUrl);
-                    } catch (error) {
-                        // If canvas fails, return null to use fallback
-                        resolve(null);
-                    }
-                };
-                
-                img.onerror = () => {
-                    resolve(null);
-                };
-                
-                // Add timestamp to prevent caching issues
-                const timestamp = new Date().getTime();
-                const separator = url.includes('?') ? '&' : '?';
-                img.src = `${url}${separator}_=${timestamp}`;
-            });
-        }
+        const defaultLogo = 'https://cdn-icons-png.flaticon.com/512/824/824239.png';
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing...');
@@ -535,7 +439,7 @@
             }
 
             let html = '';
-            filteredGroups.forEach((group, index) => {
+            filteredGroups.forEach(group => {
                 const airlineCode = group.airline || '';
                 const logoUrl = airlineLogos[airlineCode] || defaultLogo;
                 
@@ -683,14 +587,9 @@
                     `;
                 }
 
-                // Create logo display - use fallback text if image fails
-                const logoDisplay = logoUrl ? 
-                    `<img src="${logoUrl}" alt="${airlineCode}" class="airline-logo" onerror="this.classList.add('failed'); this.parentElement.innerHTML='<div class=\\'logo-fallback\\'>${airlineCode}</div>';" onclick="viewGroupDetails('${group.id}')" style="cursor:pointer;">` :
-                    `<div class="logo-fallback">${airlineCode}</div>`;
-
                 html += `
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card group-card h-100" id="groupCard-${index}">
+                        <div class="card group-card h-100">
                             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="mb-0">${airlineCode} - ${group.sector || 'N/A'}</h5>
@@ -701,7 +600,8 @@
                             <div class="card-body">
                                 <div class="row align-items-center mb-3">
                                     <div class="col-4 text-center">
-                                        ${logoDisplay}
+                                        <img src="${logoUrl}" alt="${airlineCode}" class="airline-logo" 
+                                             onclick="viewGroupDetails('${group.id}')" style="cursor:pointer;">
                                     </div>
                                     <div class="col-8">
                                         <!-- PNR and Branch displayed parallel -->
@@ -732,24 +632,24 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Quick Stats - FIXED VERSION with reduced spacing -->
-                                <div class="row text-center mb-2">
+                                <!-- Quick Stats -->
+                                <div class="row text-center mb-3">
                                     <div class="col-4">
-                                        <div class="border rounded p-1" style="min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                                            <small class="text-muted d-block mb-1" style="font-size: 0.7rem;">Total</small>
-                                            <strong style="font-size: 1rem;">${group.no_of_seats || 0}</strong>
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block">Total</small>
+                                            <strong>${group.no_of_seats || 0}</strong>
                                         </div>
                                     </div>
                                     <div class="col-4">
-                                        <div class="border rounded p-1" style="min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                                            <small class="text-muted d-block mb-1" style="font-size: 0.7rem;">Sold</small>
-                                            <strong class="text-success" style="font-size: 1rem;">${soldSeats}</strong>
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block">Sold</small>
+                                            <strong class="text-success">${soldSeats}</strong>
                                         </div>
                                     </div>
                                     <div class="col-4">
-                                        <div class="border rounded p-1" style="min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                                            <small class="text-muted d-block mb-1" style="font-size: 0.7rem;">Available</small>
-                                            <strong class="text-warning" style="font-size: 1rem;">${availableSeats}</strong>
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block">Available</small>
+                                            <strong class="text-warning">${availableSeats}</strong>
                                         </div>
                                     </div>
                                 </div>
@@ -757,13 +657,10 @@
                             <div class="card-footer bg-transparent border-top">
                                 <div class="d-flex justify-content-between">
                                     <button class="btn btn-sm btn-outline-primary" onclick="viewGroupDetails('${group.id}')">
-                                        <i class="bi bi-eye me-1"></i>Details
-                                    </button>
-                                    <button class="btn btn-sm btn-download" onclick="downloadCardAsImage('groupCard-${index}', '${airlineCode}-${group.sector || 'Group'}')">
-                                        <i class="bi bi-image me-1"></i>Save as Image
+                                        <i class="bi bi-eye me-1"></i>Full Details
                                     </button>
                                     <button class="btn btn-sm btn-success" onclick="sellSeats('${group.id}')" ${availableSeats === 0 ? 'disabled' : ''}>
-                                        <i class="bi bi-cart-plus me-1"></i>Sell
+                                        <i class="bi bi-cart-plus me-1"></i>Sell Seats (${availableSeats})
                                     </button>
                                 </div>
                             </div>
@@ -773,134 +670,6 @@
             });
             
             grid.innerHTML = html;
-        }
-
-        // Function to download card as image - FIXED VERSION
-        async function downloadCardAsImage(cardId, filename) {
-            try {
-                const cardElement = document.getElementById(cardId);
-                
-                if (!cardElement) {
-                    showAlert('Card not found!', 'danger');
-                    return;
-                }
-                
-                // Show loading state on button
-                const originalButtons = cardElement.querySelector('.card-footer').innerHTML;
-                cardElement.querySelector('.card-footer').innerHTML = `
-                    <div class="d-flex justify-content-center">
-                        <span class="spinner-border spinner-border-sm text-primary"></span>
-                        <span class="ms-2">Generating image...</span>
-                    </div>
-                `;
-                
-                // Clone the element
-                const clone = cardElement.cloneNode(true);
-                
-                // Process images in the clone
-                const images = clone.querySelectorAll('img');
-                await Promise.all(Array.from(images).map(async (img, index) => {
-                    try {
-                        // Try to load the image and convert to data URL
-                        const dataUrl = await imageToDataUrl(img.src);
-                        if (dataUrl) {
-                            img.src = dataUrl;
-                            img.crossOrigin = 'anonymous';
-                            return new Promise((resolve) => {
-                                img.onload = resolve;
-                                img.onerror = () => {
-                                    // If image still fails, replace with fallback
-                                    replaceImageWithFallback(img);
-                                    resolve();
-                                };
-                            });
-                        } else {
-                            replaceImageWithFallback(img);
-                        }
-                    } catch (error) {
-                        replaceImageWithFallback(img);
-                    }
-                }));
-                
-                // Function to replace image with fallback
-                function replaceImageWithFallback(imgElement) {
-                    const parent = imgElement.parentElement;
-                    const airlineCode = imgElement.alt || 'Airline';
-                    const fallbackDiv = document.createElement('div');
-                    fallbackDiv.style.cssText = `
-                        width: 80px;
-                        height: 80px;
-                        background: white;
-                        padding: 10px;
-                        border-radius: 10px;
-                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-weight: bold;
-                        font-size: 1.2rem;
-                        color: #1a365d;
-                    `;
-                    fallbackDiv.textContent = airlineCode;
-                    parent.replaceChild(fallbackDiv, imgElement);
-                }
-                
-                // Add clone to document temporarily
-                clone.style.cssText = `
-                    position: fixed;
-                    left: 0;
-                    top: 0;
-                    width: ${cardElement.offsetWidth}px;
-                    opacity: 0;
-                    pointer-events: none;
-                    z-index: -9999;
-                `;
-                document.body.appendChild(clone);
-                
-                // Wait a bit for images to load
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // Use html2canvas with better configuration
-                const canvas = await html2canvas(clone, {
-                    backgroundColor: '#ffffff',
-                    scale: 2,
-                    logging: false,
-                    useCORS: true,
-                    allowTaint: true,
-                    removeContainer: true,
-                    onclone: function(clonedDoc, element) {
-                        // Ensure all fonts are loaded
-                        element.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-                    }
-                });
-                
-                // Remove clone
-                document.body.removeChild(clone);
-                
-                // Create download link
-                const link = document.createElement('a');
-                const cleanFilename = filename.replace(/[^a-zA-Z0-9-]/g, '-');
-                link.download = `${cleanFilename}-${new Date().toISOString().split('T')[0]}.png`;
-                link.href = canvas.toDataURL('image/png', 1.0);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Restore buttons
-                cardElement.querySelector('.card-footer').innerHTML = originalButtons;
-                
-                showAlert('Card image downloaded successfully!', 'success');
-                
-            } catch (error) {
-                console.error('Error downloading image:', error);
-                showAlert('Error downloading image. Please try again.', 'danger');
-                
-                // Restore buttons on error
-                const cardElement = document.getElementById(cardId);
-                if (cardElement) {
-                    cardElement.querySelector('.card-footer').innerHTML = originalButtons;
-                }
-            }
         }
 
         function filterGroups() {
@@ -1145,7 +914,6 @@
         window.sellSeats = sellSeats;
         window.refreshGroups = refreshGroups;
         window.exportGroupsToCSV = exportGroupsToCSV;
-        window.downloadCardAsImage = downloadCardAsImage;
     </script>
 </body>
 </html>
