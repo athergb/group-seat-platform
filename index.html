@@ -277,6 +277,15 @@
         font-size: 0.9rem;
     }
     
+    /* ========== FLIGHT SEGMENTS ========== */
+    .flight-segment-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+    
     /* ========== RESPONSIVE ========== */
     @media (max-width: 768px) {
         .container {
@@ -560,56 +569,188 @@
                     <!-- Flight Details Tab -->
                     <div class="tab-pane fade" id="flight" role="tabpanel">
                         <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h5>Outbound Flight</h5>
-                                <div class="flight-info-grid">
-                                    <div class="flight-field">
-                                        <label class="form-label">Flight Date</label>
-                                        <input type="date" class="form-control" id="outboundDate">
-                                        <div class="format-hint">Will be stored as: 01-MAR-26</div>
-                                    </div>
-                                    <div class="flight-field">
-                                        <label class="form-label">Flight Number</label>
-                                        <input type="text" class="form-control" id="outboundFlight" 
-                                               placeholder="e.g., SV723">
-                                    </div>
-                                    <div class="flight-field" style="grid-column: span 2;">
-                                        <label class="form-label">Departure & Arrival Times</label>
-                                        <input type="text" class="form-control" id="outboundTimes" 
-                                               placeholder="e.g., ISB 0700 JED 1100">
-                                        <div class="format-hint">Format: [Departure Airport] [Time] [Arrival Airport] [Time]</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h5>Inbound Flight</h5>
-                                <div class="flight-info-grid">
-                                    <div class="flight-field">
-                                        <label class="form-label">Flight Date</label>
-                                        <input type="date" class="form-control" id="inboundDate">
-                                        <div class="format-hint">Will be stored as: 15-MAR-26</div>
-                                    </div>
-                                    <div class="flight-field">
-                                        <label class="form-label">Flight Number</label>
-                                        <input type="text" class="form-control" id="inboundFlight" 
-                                               placeholder="e.g., SV724">
-                                    </div>
-                                    <div class="flight-field" style="grid-column: span 2;">
-                                        <label class="form-label">Departure & Arrival Times</label>
-                                        <input type="text" class="form-control" id="inboundTimes" 
-                                               placeholder="e.g., JED 0200 ISB 0500">
-                                        <div class="format-hint">Format: [Departure Airport] [Time] [Arrival Airport] [Time]</div>
-                                    </div>
-                                </div>
-                            </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Flight Segments</label>
+                <select class="form-select" id="flightSegments" onchange="toggleFlightSegments()">
+                    <option value="2">Direct Flight (2 segments)</option>
+                    <option value="4">Connecting Flight (4 segments)</option>
+                </select>
+                <div class="format-hint">Select 4 segments for flights with connections (e.g., Emirates, Qatar)</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- OUTBOUND FLIGHTS -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3" style="color: #1a365d;">
+                <i class="bi bi-airplane-engines me-2"></i>Outbound Journey
+            </h5>
+        </div>
+        
+        <!-- Direct Flight (2 segments) - Default Visible -->
+        <div id="directOutbound" class="flight-segment-section">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="flight-info-grid">
+                        <div class="flight-field">
+                            <label class="form-label">Flight Date</label>
+                            <input type="date" class="form-control" id="outboundDate">
+                            <div class="format-hint">e.g., 01-MAR-26</div>
                         </div>
-                        
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Note:</strong> Use calendar picker for dates. Dates will be automatically stored as 01-MAR-26 format.
+                        <div class="flight-field">
+                            <label class="form-label">Flight Number</label>
+                            <input type="text" class="form-control" id="outboundFlight" 
+                                   placeholder="e.g., SV723">
+                        </div>
+                        <div class="flight-field" style="grid-column: span 2;">
+                            <label class="form-label">Departure & Arrival Times</label>
+                            <input type="text" class="form-control" id="outboundTimes" 
+                                   placeholder="e.g., ISB 0700 JED 1100">
+                            <div class="format-hint">Format: [Departure Airport] [Time] [Arrival Airport] [Time]</div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Connecting Flight (4 segments) - Hidden by Default -->
+        <div id="connectingOutbound" class="flight-segment-section" style="display: none;">
+            <div class="row">
+                <!-- First Segment -->
+                <div class="col-md-6">
+                    <h6>First Segment (e.g., ISB → DXB)</h6>
+                    <div class="flight-info-grid">
+                        <div class="flight-field">
+                            <label class="form-label">Flight Date</label>
+                            <input type="date" class="form-control" id="outbound1Date">
+                        </div>
+                        <div class="flight-field">
+                            <label class="form-label">Flight Number</label>
+                            <input type="text" class="form-control" id="outbound1Flight" 
+                                   placeholder="e.g., EK613">
+                        </div>
+                        <div class="flight-field" style="grid-column: span 2;">
+                            <label class="form-label">Departure & Arrival Times</label>
+                            <input type="text" class="form-control" id="outbound1Times" 
+                                   placeholder="e.g., ISB 2200 DXB 0100">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Second Segment -->
+                <div class="col-md-6">
+                    <h6>Second Segment (e.g., DXB → JED)</h6>
+                    <div class="flight-info-grid">
+                        <div class="flight-field">
+                            <label class="form-label">Flight Date</label>
+                            <input type="date" class="form-control" id="outbound2Date">
+                        </div>
+                        <div class="flight-field">
+                            <label class="form-label">Flight Number</label>
+                            <input type="text" class="form-control" id="outbound2Flight" 
+                                   placeholder="e.g., EK817">
+                        </div>
+                        <div class="flight-field" style="grid-column: span 2;">
+                            <label class="form-label">Departure & Arrival Times</label>
+                            <input type="text" class="form-control" id="outbound2Times" 
+                                   placeholder="e.g., DXB 0800 JED 1100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- INBOUND FLIGHTS -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3" style="color: #1a365d;">
+                <i class="bi bi-airplane-engines me-2"></i>Inbound Journey
+            </h5>
+        </div>
+        
+        <!-- Direct Flight (2 segments) - Default Visible -->
+        <div id="directInbound" class="flight-segment-section">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="flight-info-grid">
+                        <div class="flight-field">
+                            <label class="form-label">Flight Date</label>
+                            <input type="date" class="form-control" id="inboundDate">
+                            <div class="format-hint">e.g., 15-MAR-26</div>
+                        </div>
+                        <div class="flight-field">
+                            <label class="form-label">Flight Number</label>
+                            <input type="text" class="form-control" id="inboundFlight" 
+                                   placeholder="e.g., SV724">
+                        </div>
+                        <div class="flight-field" style="grid-column: span 2;">
+                            <label class="form-label">Departure & Arrival Times</label>
+                            <input type="text" class="form-control" id="inboundTimes" 
+                                   placeholder="e.g., JED 0200 ISB 0500">
+                            <div class="format-hint">Format: [Departure Airport] [Time] [Arrival Airport] [Time]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Connecting Flight (4 segments) - Hidden by Default -->
+        <div id="connectingInbound" class="flight-segment-section" style="display: none;">
+            <div class="row">
+                <!-- First Segment -->
+                <div class="col-md-6">
+                    <h6>First Segment (e.g., JED → DXB)</h6>
+                    <div class="flight-info-grid">
+                        <div class="flight-field">
+                            <label class="form-label">Flight Date</label>
+                            <input type="date" class="form-control" id="inbound1Date">
+                        </div>
+                        <div class="flight-field">
+                            <label class="form-label">Flight Number</label>
+                            <input type="text" class="form-control" id="inbound1Flight" 
+                                   placeholder="e.g., EK818">
+                        </div>
+                        <div class="flight-field" style="grid-column: span 2;">
+                            <label class="form-label">Departure & Arrival Times</label>
+                            <input type="text" class="form-control" id="inbound1Times" 
+                                   placeholder="e.g., JED 1300 DXB 1600">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Second Segment -->
+                <div class="col-md-6">
+                    <h6>Second Segment (e.g., DXB → ISB)</h6>
+                    <div class="flight-info-grid">
+                        <div class="flight-field">
+                            <label class="form-label">Flight Date</label>
+                            <input type="date" class="form-control" id="inbound2Date">
+                        </div>
+                        <div class="flight-field">
+                            <label class="form-label">Flight Number</label>
+                            <input type="text" class="form-control" id="inbound2Flight" 
+                                   placeholder="e.g., EK614">
+                        </div>
+                        <div class="flight-field" style="grid-column: span 2;">
+                            <label class="form-label">Departure & Arrival Times</label>
+                            <input type="text" class="form-control" id="inbound2Times" 
+                                   placeholder="e.g., DXB 2200 ISB 0200">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informational Alert -->
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Note:</strong> For connecting flights (Emirates, Qatar, Etihad), select "4 segments". For direct flights (Saudia, PIA, Airblue), keep "2 segments".
+    </div>
+</div>
 
                     <!-- Financial Tab -->
                     <div class="tab-pane fade" id="financial" role="tabpanel">
@@ -867,6 +1008,46 @@
         let editingId = null;
         let supabaseClient = null;
         
+        // ========== FLIGHT SEGMENTS TOGGLE FUNCTION ==========
+        function toggleFlightSegments() {
+            console.log('Toggle function called');
+            const segments = document.getElementById('flightSegments').value;
+            const isDirect = segments === '2';
+            
+            console.log('Segments:', segments, 'Is direct:', isDirect);
+            
+            // Toggle outbound sections
+            const directOutbound = document.getElementById('directOutbound');
+            const connectingOutbound = document.getElementById('connectingOutbound');
+            
+            const directInbound = document.getElementById('directInbound');
+            const connectingInbound = document.getElementById('connectingInbound');
+            
+            if (directOutbound) directOutbound.style.display = isDirect ? 'block' : 'none';
+            if (connectingOutbound) connectingOutbound.style.display = isDirect ? 'none' : 'block';
+            if (directInbound) directInbound.style.display = isDirect ? 'block' : 'none';
+            if (connectingInbound) connectingInbound.style.display = isDirect ? 'none' : 'block';
+            
+            // Clear fields when switching
+            if (isDirect) {
+                // Clear connecting flight fields
+                ['outbound1', 'outbound2', 'inbound1', 'inbound2'].forEach(prefix => {
+                    ['Date', 'Flight', 'Times'].forEach(suffix => {
+                        const elem = document.getElementById(prefix + suffix);
+                        if (elem) elem.value = '';
+                    });
+                });
+            } else {
+                // Clear direct flight fields
+                ['outbound', 'inbound'].forEach(prefix => {
+                    ['Date', 'Flight', 'Times'].forEach(suffix => {
+                        const elem = document.getElementById(prefix + suffix);
+                        if (elem) elem.value = '';
+                    });
+                });
+            }
+        }
+        
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', function() {
             console.log('QFC Group Platform - Initializing...');
@@ -885,6 +1066,9 @@
                 
                 // Set default dates
                 initializeForm();
+                
+                // Initialize flight segments
+                toggleFlightSegments();
                 
                 // Setup event listeners
                 setupEventListeners();
@@ -1089,35 +1273,102 @@
             }
         }
         
+        // ========== FORM VALIDATION ==========
+        function validateForm() {
+            const errors = [];
+            
+            // Airline PNR validation
+            const airlinePnr = document.getElementById('airlinePnr').value.trim();
+            if (!airlinePnr || airlinePnr.length < 5) {
+                errors.push('Airline PNR must be at least 5 characters');
+            }
+            
+            // Number of seats validation
+            const seats = parseInt(document.getElementById('noOfSeats').value);
+            if (seats < 1 || seats > 1000) {
+                errors.push('Number of seats must be between 1 and 1000');
+            }
+            
+            // Date validation
+            const timeLimit = document.getElementById('timeLimit').value;
+            if (new Date(timeLimit) < new Date()) {
+                errors.push('Time Limit must be in the future');
+            }
+            
+            // Flight date validation
+            const segments = document.getElementById('flightSegments').value;
+            
+            if (segments === '2') {
+                // Direct flight validation
+                const outboundDate = document.getElementById('outboundDate').value;
+                const inboundDate = document.getElementById('inboundDate').value;
+                
+                if (outboundDate && inboundDate) {
+                    if (new Date(inboundDate) <= new Date(outboundDate)) {
+                        errors.push('Inbound date must be after outbound date');
+                    }
+                }
+            } else {
+                // Connecting flight validation
+                const outbound1Date = document.getElementById('outbound1Date').value;
+                const inbound2Date = document.getElementById('inbound2Date').value;
+                
+                if (outbound1Date && inbound2Date) {
+                    if (new Date(inbound2Date) <= new Date(outbound1Date)) {
+                        errors.push('Return date must be after departure date');
+                    }
+                }
+            }
+            
+            // Fare validation
+            const fare = parseFloat(document.getElementById('fare').value);
+            if (fare <= 0 || fare > 100000) {
+                errors.push('Fare must be between 0 and 100,000');
+            }
+            
+            // Time format validation
+            const segmentsValue = document.getElementById('flightSegments').value;
+            
+            if (segmentsValue === '2') {
+                const outboundTimes = document.getElementById('outboundTimes')?.value;
+                const inboundTimes = document.getElementById('inboundTimes')?.value;
+                
+                const timePattern = /^[A-Z]{3}\s+\d{4}\s+[A-Z]{3}\s+\d{4}$/;
+                
+                if (outboundTimes && !timePattern.test(outboundTimes.toUpperCase())) {
+                    errors.push('Outbound Times format: e.g., ISB 0700 JED 1100');
+                }
+                
+                if (inboundTimes && !timePattern.test(inboundTimes.toUpperCase())) {
+                    errors.push('Inbound Times format: e.g., JED 0200 ISB 0500');
+                }
+            } else {
+                // Validate connecting flight times
+                const outbound1Times = document.getElementById('outbound1Times')?.value;
+                const inbound2Times = document.getElementById('inbound2Times')?.value;
+                
+                const timePattern = /^[A-Z]{3}\s+\d{4}\s+[A-Z]{3}\s+\d{4}$/;
+                
+                if (outbound1Times && !timePattern.test(outbound1Times.toUpperCase())) {
+                    errors.push('First Outbound Segment Times format: e.g., ISB 2200 DXB 0100');
+                }
+                
+                if (inbound2Times && !timePattern.test(inbound2Times.toUpperCase())) {
+                    errors.push('Last Inbound Segment Times format: e.g., DXB 2200 ISB 0200');
+                }
+            }
+            
+            return errors;
+        }
+        
         // ========== MAIN SAVE FUNCTION ==========
         async function saveAcquisition() {
             console.log('Saving acquisition...');
             
-            // Validate required fields
-            const airlinePnr = document.getElementById('airlinePnr')?.value;
-            const noOfSeats = document.getElementById('noOfSeats')?.value;
-            const fare = document.getElementById('fare')?.value;
-            const timeLimit = document.getElementById('timeLimit')?.value;
-            const airline = document.getElementById('airline')?.value;
-            
-            if (!airlinePnr || !noOfSeats || !fare || !timeLimit || !airline) {
-                showError('Please fill in all required fields (*)');
-                return;
-            }
-            
-            // Validate time formats
-            const outboundTimes = document.getElementById('outboundTimes')?.value;
-            const inboundTimes = document.getElementById('inboundTimes')?.value;
-            
-            const timePattern = /^[A-Z]{3}\s+\d{4}\s+[A-Z]{3}\s+\d{4}$/;
-            
-            if (outboundTimes && !timePattern.test(outboundTimes.toUpperCase())) {
-                showError('Please enter Outbound Times in correct format: ISB 0700 JED 1100');
-                return;
-            }
-            
-            if (inboundTimes && !timePattern.test(inboundTimes.toUpperCase())) {
-                showError('Please enter Inbound Times in correct format: JED 0200 ISB 0500');
+            // Validate form
+            const validationErrors = validateForm();
+            if (validationErrors.length > 0) {
+                showError(validationErrors.join('<br>'));
                 return;
             }
             
@@ -1130,40 +1381,89 @@
             }
             
             try {
-                // Get date values from calendar inputs
-                const outboundDateInput = document.getElementById('outboundDate')?.value;
-                const inboundDateInput = document.getElementById('inboundDate')?.value;
+                // Get flight segment type
+                const segments = document.getElementById('flightSegments').value;
+                const isDirect = segments === '2';
                 
-                // Convert dates to DD-MMM-YY format for storage
-                const outboundDateFormatted = outboundDateInput ? convertDateToDisplayFormat(outboundDateInput) : null;
-                const inboundDateFormatted = inboundDateInput ? convertDateToDisplayFormat(inboundDateInput) : null;
+                // Prepare flight data based on segment type
+                let outboundDate, inboundDate, outboundFlight, inboundFlight, outboundTimes, inboundTimes;
+                let outbound1Date, inbound1Date, outbound1Flight, inbound1Flight, outbound1Times, inbound1Times;
+                let outbound2Date, inbound2Date, outbound2Flight, inbound2Flight, outbound2Times, inbound2Times;
                 
-                console.log('Date conversion:', {
-                    outbound: { input: outboundDateInput, formatted: outboundDateFormatted },
-                    inbound: { input: inboundDateInput, formatted: inboundDateFormatted }
-                });
+                if (isDirect) {
+                    // Direct flight data
+                    outboundDate = document.getElementById('outboundDate')?.value;
+                    inboundDate = document.getElementById('inboundDate')?.value;
+                    outboundFlight = document.getElementById('outboundFlight')?.value;
+                    inboundFlight = document.getElementById('inboundFlight')?.value;
+                    outboundTimes = document.getElementById('outboundTimes')?.value;
+                    inboundTimes = document.getElementById('inboundTimes')?.value;
+                    
+                    // Convert dates to DD-MMM-YY format
+                    outboundDate = outboundDate ? convertDateToDisplayFormat(outboundDate) : null;
+                    inboundDate = inboundDate ? convertDateToDisplayFormat(inboundDate) : null;
+                } else {
+                    // Connecting flight data
+                    outbound1Date = document.getElementById('outbound1Date')?.value;
+                    outbound2Date = document.getElementById('outbound2Date')?.value;
+                    inbound1Date = document.getElementById('inbound1Date')?.value;
+                    inbound2Date = document.getElementById('inbound2Date')?.value;
+                    
+                    outbound1Flight = document.getElementById('outbound1Flight')?.value;
+                    outbound2Flight = document.getElementById('outbound2Flight')?.value;
+                    inbound1Flight = document.getElementById('inbound1Flight')?.value;
+                    inbound2Flight = document.getElementById('inbound2Flight')?.value;
+                    
+                    outbound1Times = document.getElementById('outbound1Times')?.value;
+                    outbound2Times = document.getElementById('outbound2Times')?.value;
+                    inbound1Times = document.getElementById('inbound1Times')?.value;
+                    inbound2Times = document.getElementById('inbound2Times')?.value;
+                    
+                    // Convert dates to DD-MMM-YY format
+                    outbound1Date = outbound1Date ? convertDateToDisplayFormat(outbound1Date) : null;
+                    outbound2Date = outbound2Date ? convertDateToDisplayFormat(outbound2Date) : null;
+                    inbound1Date = inbound1Date ? convertDateToDisplayFormat(inbound1Date) : null;
+                    inbound2Date = inbound2Date ? convertDateToDisplayFormat(inbound2Date) : null;
+                }
                 
                 // Get form data
                 const formData = {
                     sr_number: document.getElementById('srNumber')?.value || '',
                     request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
-                    airline_pnr: airlinePnr,
-                    no_of_seats: parseInt(noOfSeats) || 0,
-                    fare: parseFloat(fare) || 0,
-                    time_limit: timeLimit,
+                    airline_pnr: document.getElementById('airlinePnr')?.value || '',
+                    no_of_seats: parseInt(document.getElementById('noOfSeats')?.value) || 0,
+                    fare: parseFloat(document.getElementById('fare')?.value) || 0,
+                    time_limit: document.getElementById('timeLimit')?.value || '',
                     investment_type: document.getElementById('investmentType')?.value || 'Company Investment',
                     license_number: document.getElementById('license')?.value || 'QFC',
                     branch: document.getElementById('branch')?.value || 'HO',
                     gds_pnr: document.getElementById('gdsPnr')?.value || null,
                     segment: document.getElementById('segment')?.value || 'Umrah',
-                    airline: airline,
-                    // Store dates in DD-MMM-YY format
-                    outbound_date: outboundDateFormatted,
-                    inbound_date: inboundDateFormatted,
-                    outbound_flight: document.getElementById('outboundFlight')?.value || null,
-                    inbound_flight: document.getElementById('inboundFlight')?.value || null,
+                    airline: document.getElementById('airline')?.value || '',
+                    flight_segments: segments,
+                    
+                    // Direct flight fields
+                    outbound_date: outboundDate,
+                    inbound_date: inboundDate,
+                    outbound_flight: outboundFlight,
+                    inbound_flight: inboundFlight,
                     outbound_times: outboundTimes ? outboundTimes.toUpperCase() : null,
                     inbound_times: inboundTimes ? inboundTimes.toUpperCase() : null,
+                    
+                    // Connecting flight fields
+                    outbound1_date: outbound1Date,
+                    outbound2_date: outbound2Date,
+                    inbound1_date: inbound1Date,
+                    inbound2_date: inbound2Date,
+                    outbound1_flight: outbound1Flight,
+                    outbound2_flight: outbound2Flight,
+                    inbound1_flight: inbound1Flight,
+                    inbound2_flight: inbound2Flight,
+                    outbound1_times: outbound1Times ? outbound1Times.toUpperCase() : null,
+                    outbound2_times: outbound2Times ? outbound2Times.toUpperCase() : null,
+                    inbound1_times: inbound1Times ? inbound1Times.toUpperCase() : null,
+                    inbound2_times: inbound2Times ? inbound2Times.toUpperCase() : null,
+                    
                     sector: document.getElementById('sector')?.value || '',
                     taxes: parseFloat(document.getElementById('taxes')?.value) || 0,
                     payable_amount: parseFloat(document.getElementById('payableAmount')?.value) || 0,
@@ -1327,10 +1627,6 @@
             
             tableBody.innerHTML = html;
             if (tableCount) tableCount.textContent = `${acquisitions.length} records`;
-            
-            // Make edit/delete functions available
-            window.editItem = editItem;
-            window.deleteItem = deleteItem;
         }
         
         function updateDashboard() {
@@ -1355,6 +1651,10 @@
         function resetForm() {
             editingId = null;
             
+            // Reset flight segments to default
+            document.getElementById('flightSegments').value = '2';
+            toggleFlightSegments();
+            
             // Generate new SR number
             generateSRNumber();
             
@@ -1362,6 +1662,9 @@
             const fieldsToClear = [
                 'airlinePnr', 'gdsPnr', 'noOfSeats', 'outboundDate', 'inboundDate',
                 'outboundFlight', 'inboundFlight', 'outboundTimes', 'inboundTimes',
+                'outbound1Date', 'outbound2Date', 'inbound1Date', 'inbound2Date',
+                'outbound1Flight', 'outbound2Flight', 'inbound1Flight', 'inbound2Flight',
+                'outbound1Times', 'outbound2Times', 'inbound1Times', 'inbound2Times',
                 'sector', 'fare', 'taxes', 'issuanceDate', 'emdRefundDate',
                 'emd1Number', 'emd1Amount', 'emd1TimeLimit', 'emd1IssuanceDate', 'emd1PaymentPercent',
                 'emd2Number', 'emd2Amount', 'emd2TimeLimit', 'emd3Number', 'emd3Amount', 'emd3TimeLimit',
@@ -1401,6 +1704,10 @@
             document.getElementById('saveButton').className = 'btn btn-primary btn-lg';
             document.getElementById('cancelEditBtn').style.display = 'none';
             
+            // Switch to first tab
+            const firstTab = document.querySelector('#basic-tab');
+            if (firstTab) firstTab.click();
+            
             // Update table
             updateTable();
             
@@ -1422,14 +1729,18 @@
                 
                 editingId = id;
                 
+                // Set flight segments
+                const segments = item.flight_segments || '2';
+                document.getElementById('flightSegments').value = segments;
+                toggleFlightSegments();
+                
                 // Convert dates from DD-MMM-YY to YYYY-MM-DD for calendar input
                 const outboundDateForInput = item.outbound_date ? convertDisplayToDateInput(item.outbound_date) : '';
                 const inboundDateForInput = item.inbound_date ? convertDisplayToDateInput(item.inbound_date) : '';
-                
-                console.log('Editing dates:', {
-                    stored: { outbound: item.outbound_date, inbound: item.inbound_date },
-                    converted: { outbound: outboundDateForInput, inbound: inboundDateForInput }
-                });
+                const outbound1DateForInput = item.outbound1_date ? convertDisplayToDateInput(item.outbound1_date) : '';
+                const outbound2DateForInput = item.outbound2_date ? convertDisplayToDateInput(item.outbound2_date) : '';
+                const inbound1DateForInput = item.inbound1_date ? convertDisplayToDateInput(item.inbound1_date) : '';
+                const inbound2DateForInput = item.inbound2_date ? convertDisplayToDateInput(item.inbound2_date) : '';
                 
                 // Fill form with item data
                 const fields = [
@@ -1449,6 +1760,18 @@
                     { id: 'inboundFlight', value: item.inbound_flight },
                     { id: 'outboundTimes', value: item.outbound_times },
                     { id: 'inboundTimes', value: item.inbound_times },
+                    { id: 'outbound1Date', value: outbound1DateForInput },
+                    { id: 'outbound2Date', value: outbound2DateForInput },
+                    { id: 'inbound1Date', value: inbound1DateForInput },
+                    { id: 'inbound2Date', value: inbound2DateForInput },
+                    { id: 'outbound1Flight', value: item.outbound1_flight },
+                    { id: 'outbound2Flight', value: item.outbound2_flight },
+                    { id: 'inbound1Flight', value: item.inbound1_flight },
+                    { id: 'inbound2Flight', value: item.inbound2_flight },
+                    { id: 'outbound1Times', value: item.outbound1_times },
+                    { id: 'outbound2Times', value: item.outbound2_times },
+                    { id: 'inbound1Times', value: item.inbound1_times },
+                    { id: 'inbound2Times', value: item.inbound2_times },
                     { id: 'sector', value: item.sector },
                     { id: 'fare', value: item.fare },
                     { id: 'taxes', value: item.taxes },
@@ -1565,12 +1888,49 @@
             }
         }
         
+        // ========== CSV EXPORT FUNCTION ==========
+        function exportToCSV() {
+            if (acquisitions.length === 0) {
+                showError('No data to export');
+                return;
+            }
+            
+            const headers = ['SR#', 'Airline PNR', 'Seats', 'Fare', 'Status', 'Date', 'Airline', 'Sector'];
+            
+            const csvRows = [
+                headers.join(','), // Header row
+                ...acquisitions.map(item => [
+                    `"${item.sr_number || ''}"`,
+                    `"${item.airline_pnr || ''}"`,
+                    item.no_of_seats || 0,
+                    item.fare || 0,
+                    `"${item.status || ''}"`,
+                    `"${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}"`,
+                    `"${item.airline || ''}"`,
+                    `"${item.sector || ''}"`
+                ].join(','))
+            ];
+            
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `qfc-acquisitions-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showSuccess(`Exported ${acquisitions.length} records`);
+        }
+        
         // Make functions globally available
         window.saveAcquisition = saveAcquisition;
         window.resetForm = resetForm;
         window.cancelEdit = cancelEdit;
         window.editItem = editItem;
         window.deleteItem = deleteItem;
+        window.toggleFlightSegments = toggleFlightSegments;
+        window.exportToCSV = exportToCSV;
     </script>
 </body>
 </html>
