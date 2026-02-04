@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QFC Group - Flight Groups</title>
-	<link rel="icon" type="image/png" href="QFClogo.png">
+    <link rel="icon" type="image/png" href="QFClogo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -15,10 +15,7 @@
         .airline-logo { width: 80px; height: 80px; object-fit: contain; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .group-card { transition: transform 0.3s, box-shadow 0.3s; border-left: 5px solid #1a365d; }
         .group-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        .badge-seats { font-size: 0.9rem; padding: 5px 10px; }
         .progress { height: 10px; }
-        .btn-view { background-color: #1a365d; color: white; }
-        .btn-view:hover { background-color: #2d4a8c; }
         .alert-fixed {
             position: fixed;
             top: 80px;
@@ -28,14 +25,119 @@
         }
         .stats-card h2 { font-size: 2rem; font-weight: bold; margin: 0; }
         .stats-card h5 { font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; }
-	
-.flight-times {
-    background-color: #f8f9fa;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border-left: 3px solid #1a365d;
-    margin-bottom: 1rem;
-}
+        
+        .flight-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .flight-box {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #1a365d;
+        }
+        
+        .flight-box.outbound {
+            border-left-color: #0d6efd;
+        }
+        
+        .flight-box.inbound {
+            border-left-color: #198754;
+        }
+        
+        .flight-header {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .flight-segment {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            padding: 3px 0;
+        }
+        
+        .flight-icon {
+            width: 24px;
+            display: flex;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .outbound .flight-icon {
+            order: 2; /* Icon on right for outbound */
+            margin-right: 0;
+            margin-left: 8px;
+        }
+        
+        .inbound .flight-icon {
+            order: 1; /* Icon on left for inbound */
+        }
+        
+        .flight-info {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+        
+        .flight-number {
+            font-weight: 600;
+            color: #1a365d;
+        }
+        
+        .flight-times {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+        
+        .date-badge {
+            background-color: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #495057;
+        }
+        
+        /* PNR and Branch parallel display */
+        .pnr-branch-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .pnr-branch-item {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        .pnr-branch-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-bottom: 2px;
+        }
+        .pnr-branch-value {
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-draft { background-color: #fff3cd; color: #856404; }
+        .badge-submitted { background-color: #cff4fc; color: #055160; }
+        .badge-approved { background-color: #d1e7dd; color: #0f5132; }
+        .badge-rejected { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -83,6 +185,9 @@
                 <button class="btn btn-primary" id="refreshButton">
                     <i class="bi bi-arrow-clockwise me-2"></i>Refresh
                 </button>
+                <button class="btn btn-outline-success ms-2" onclick="exportGroupsToCSV()">
+                    <i class="bi bi-download me-2"></i>Export
+                </button>
             </div>
         </div>
 
@@ -126,13 +231,13 @@
         <div class="card mb-4">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
                             <input type="text" class="form-control" id="searchGroups" placeholder="Search by PNR, Airline, SR Number...">
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <select class="form-select" id="filterAirline">
                             <option value="">All Airlines</option>
                             <option value="SV">Saudi Airlines (SV)</option>
@@ -140,14 +245,26 @@
                             <option value="EK">Emirates (EK)</option>
                             <option value="F3">Flyadeal (F3)</option>
                             <option value="PA">Airblue (PA)</option>
+                            <option value="J9">Jazeera Airways (J9)</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <select class="form-select" id="filterStatus">
                             <option value="">All Status</option>
                             <option value="active">Active</option>
                             <option value="completed">Completed</option>
                             <option value="pending">Pending</option>
+                            <option value="draft">Draft</option>
+                            <option value="approved">Approved</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterSegment">
+                            <option value="">All Segments</option>
+                            <option value="Umrah">Umrah</option>
+                            <option value="Employment">Employment</option>
+                            <option value="Hajj">Hajj</option>
+                            <option value="Tours">Tours</option>
                         </select>
                     </div>
                 </div>
@@ -170,13 +287,8 @@
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script>
-        // Supabase Configuration - REMOVED DUPLICATE DECLARATION
-        // const supabaseUrl and supabaseKey are already defined in the included script
-        // Just create the client once
-        
-        // Create Supabase client
+        // Supabase Configuration
         const supabaseClient = window.supabase.createClient(
             'https://ojlxkzkialguthdeiley.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qbHhremtpYWxndXRoZGVpbGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTE0MjQsImV4cCI6MjA4NTMyNzQyNH0.CYH4hRn4w87vvvskkHOQMyKONyDWnvF7_m5IOfgPR94'
@@ -187,17 +299,16 @@
 
         // Airline logos mapping
         const airlineLogos = {
-        	'SV': 'SVlogo.png',      // Saudi Airlines - using local file
-    		'PA': 'PAlogo.png',      // Airblue/Philippine Airlines - using local file
-    		'PK': 'PKlogo.png',      // Pakistan Airlines (you may need to add this file)
-    		'EK': 'EKlogo.png',      // Emirates (you may need to add this file)
-    		'F3': 'F3logo.png',      // Flyadeal (you may need to add this file)
-    		'PF': 'PFlogo.png',      // Palestine Airlines (you may need to add this file)
-    		'9P': '9Plogo.png',      // PIA (you may need to add this file)
-    		'J9': 'J9logo.png'       // Jazeera Airways (you may need to add this file)
+            'SV': 'SVlogo.png',
+            'PA': 'PAlogo.png',
+            'PK': 'PKlogo.png',
+            'EK': 'EKlogo.png',
+            'F3': 'F3logo.png',
+            'PF': 'PFlogo.png',
+            '9P': '9Plogo.png',
+            'J9': 'J9logo.png'
         };
 
-        // Default airline logo
         const defaultLogo = 'https://cdn-icons-png.flaticon.com/512/824/824239.png';
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -208,6 +319,7 @@
             document.getElementById('searchGroups').addEventListener('input', filterGroups);
             document.getElementById('filterAirline').addEventListener('change', filterGroups);
             document.getElementById('filterStatus').addEventListener('change', filterGroups);
+            document.getElementById('filterSegment').addEventListener('change', filterGroups);
             document.getElementById('refreshButton').addEventListener('click', refreshGroups);
         });
 
@@ -295,7 +407,7 @@
                     if (error.code === 'PGRST204' || error.message.includes('does not exist')) {
                         console.log('agent_sales table not found or has issues');
                         agentSales = [];
-                        return; // Don't throw error for missing table
+                        return;
                     }
                     console.error('Supabase error loading agent sales:', error);
                     throw error;
@@ -307,7 +419,6 @@
             } catch (error) {
                 console.error('Error loading agent sales:', error);
                 agentSales = [];
-                // Don't throw error, continue with empty agent sales
             }
         }
 
@@ -338,30 +449,153 @@
                 const availableSeats = Math.max(0, (group.no_of_seats || 0) - soldSeats);
                 const progressPercent = group.no_of_seats ? (soldSeats / group.no_of_seats) * 100 : 0;
                 
-                // Determine status
-                let status = 'active';
-                let statusClass = 'bg-success';
-                let statusText = 'Active';
+                // Format dates
+                const formattedOutboundDate = formatDateForDisplay(group.outbound_date);
+                const formattedInboundDate = formatDateForDisplay(group.inbound_date);
                 
-                if (availableSeats === 0) {
+                // Determine status
+                let status = group.status || 'draft';
+                let statusClass = 'badge-draft';
+                let statusText = 'Draft';
+                
+                if (status === 'approved') {
+                    statusClass = 'badge-approved';
+                    statusText = 'Approved';
+                } else if (status === 'submitted') {
+                    statusClass = 'badge-submitted';
+                    statusText = 'Submitted';
+                } else if (status === 'rejected') {
+                    statusClass = 'badge-rejected';
+                    statusText = 'Rejected';
+                } else if (availableSeats === 0) {
                     status = 'completed';
                     statusClass = 'bg-secondary';
                     statusText = 'Completed';
-                } else if (availableSeats < (group.no_of_seats || 0) * 0.5) {
-                    status = 'filling';
-                    statusClass = 'bg-warning';
-                    statusText = 'Filling';
+                } else if (availableSeats > 0) {
+                    status = 'active';
+                    statusClass = 'bg-success';
+                    statusText = 'Active';
+                }
+
+                // Determine flight type
+                const flightSegments = group.flight_segments || '2';
+                const isConnectingFlight = flightSegments === '4';
+                const flightType = isConnectingFlight ? 'Connecting Flight' : 'Direct Flight';
+                
+                // Build flight display
+                let flightDisplay = '';
+                
+                if (isConnectingFlight) {
+                    // Connecting flight - parallel display
+                    flightDisplay = `
+                        <div class="flight-container">
+                            <!-- Outbound Flights -->
+                            <div class="flight-box outbound">
+                                <div class="flight-header">
+                                    <span>Outbound</span>
+                                    <span class="date-badge">${formattedOutboundDate}</span>
+                                </div>
+                                <!-- First segment - plane on right -->
+                                <div class="flight-segment">
+                                    <div class="flight-info" style="text-align: right;">
+                                        <div class="flight-number">${group.outbound1_flight || 'N/A'}</div>
+                                        ${group.outbound1_times ? `<div class="flight-times">${group.outbound1_times}</div>` : ''}
+                                    </div>
+                                    <div class="flight-icon">
+                                        <i class="bi bi-airplane-fill text-primary"></i>
+                                    </div>
+                                </div>
+                                <!-- Second segment - plane on right -->
+                                <div class="flight-segment">
+                                    <div class="flight-info" style="text-align: right;">
+                                        <div class="flight-number">${group.outbound2_flight || 'N/A'}</div>
+                                        ${group.outbound2_times ? `<div class="flight-times">${group.outbound2_times}</div>` : ''}
+                                    </div>
+                                    <div class="flight-icon">
+                                        <i class="bi bi-airplane-fill text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Inbound Flights -->
+                            <div class="flight-box inbound">
+                                <div class="flight-header">
+                                    <span>Inbound</span>
+                                    <span class="date-badge">${formattedInboundDate}</span>
+                                </div>
+                                <!-- First segment - plane on left -->
+                                <div class="flight-segment">
+                                    <div class="flight-icon">
+                                        <i class="bi bi-airplane-fill text-success"></i>
+                                    </div>
+                                    <div class="flight-info">
+                                        <div class="flight-number">${group.inbound1_flight || 'N/A'}</div>
+                                        ${group.inbound1_times ? `<div class="flight-times">${group.inbound1_times}</div>` : ''}
+                                    </div>
+                                </div>
+                                <!-- Second segment - plane on left -->
+                                <div class="flight-segment">
+                                    <div class="flight-icon">
+                                        <i class="bi bi-airplane-fill text-success"></i>
+                                    </div>
+                                    <div class="flight-info">
+                                        <div class="flight-number">${group.inbound2_flight || 'N/A'}</div>
+                                        ${group.inbound2_times ? `<div class="flight-times">${group.inbound2_times}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Direct flight - parallel display
+                    flightDisplay = `
+                        <div class="flight-container">
+                            <!-- Outbound Flight -->
+                            <div class="flight-box outbound">
+                                <div class="flight-header">
+                                    <span>Outbound</span>
+                                    <span class="date-badge">${formattedOutboundDate}</span>
+                                </div>
+                                <div class="flight-segment">
+                                    <div class="flight-info" style="text-align: right;">
+                                        <div class="flight-number">${group.outbound_flight || 'N/A'}</div>
+                                        ${group.outbound_times ? `<div class="flight-times">${group.outbound_times}</div>` : ''}
+                                    </div>
+                                    <div class="flight-icon">
+                                        <i class="bi bi-airplane-fill text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Inbound Flight -->
+                            <div class="flight-box inbound">
+                                <div class="flight-header">
+                                    <span>Inbound</span>
+                                    <span class="date-badge">${formattedInboundDate}</span>
+                                </div>
+                                <div class="flight-segment">
+                                    <div class="flight-icon">
+                                        <i class="bi bi-airplane-fill text-success"></i>
+                                    </div>
+                                    <div class="flight-info">
+                                        <div class="flight-number">${group.inbound_flight || 'N/A'}</div>
+                                        ${group.inbound_times ? `<div class="flight-times">${group.inbound_times}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
 
                 html += `
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card group-card h-100">
-                            <div class="card-header ${statusClass} text-white d-flex justify-content-between align-items-center">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="mb-0">${airlineCode} - ${group.sector || 'N/A'}</h5>
-                                    <small>${group.segment || 'General'}</small>
+                                    <small>${group.segment || 'General'} • ${flightType}</small>
                                 </div>
-                                <span class="badge bg-light text-dark">${statusText}</span>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
                             </div>
                             <div class="card-body">
                                 <div class="row align-items-center mb-3">
@@ -370,23 +604,24 @@
                                              onclick="viewGroupDetails('${group.id}')" style="cursor:pointer;">
                                     </div>
                                     <div class="col-8">
-                                        <h6 class="mb-1"><strong>SR:</strong> ${group.sr_number || 'N/A'}</h6>
-                                        <h6 class="mb-1"><strong>PNR:</strong> ${group.airline_pnr || 'N/A'}</h6>
-                                        <h6 class="mb-1"><strong>Date:</strong> ${group.outbound_date || 'N/A'}</h6>
-					<h6 class="mb-1"><strong>Inbound:</strong> ${group.inbound_flight || 'N/A'}</h6>
+                                        <!-- PNR and Branch displayed parallel -->
+                                        <div class="pnr-branch-container">
+                                            <div class="pnr-branch-item">
+                                                <div class="pnr-branch-label">PNR</div>
+                                                <div class="pnr-branch-value">${group.airline_pnr || 'N/A'}</div>
+                                            </div>
+                                            <div class="pnr-branch-item">
+                                                <div class="pnr-branch-label">Branch</div>
+                                                <div class="pnr-branch-value">${group.branch || 'HO'}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <!-- Flight Times -->
-                <div class="flight-times mb-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-airplane-fill text-primary me-2"></i>
-                        <small class="text-muted">${group.outbound_times || 'N/A'}</small>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-airplane text-success me-2"></i>
-                        <small class="text-muted">${group.inbound_times || 'N/A'}</small>
-                    </div>
-                </div>
+                                
+                                <!-- Flight Information - Parallel Display -->
+                                ${flightDisplay}
+                                
+                                <!-- Seats Progress -->
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between mb-1">
                                         <span>Seats Progress</span>
@@ -397,7 +632,8 @@
                                     </div>
                                 </div>
                                 
-                                <div class="row text-center">
+                                <!-- Quick Stats -->
+                                <div class="row text-center mb-3">
                                     <div class="col-4">
                                         <div class="border rounded p-2">
                                             <small class="text-muted d-block">Total</small>
@@ -417,23 +653,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="mt-3">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="bi bi-calendar me-1"></i>Outbound: ${group.outbound_date || 'N/A'}
-                                    </small>
-                                    <small class="text-muted d-block">
-                                        <i class="bi bi-calendar-check me-1"></i>Inbound: ${group.inbound_date || 'N/A'}
-                                    </small>
-                                </div>
                             </div>
                             <div class="card-footer bg-transparent border-top">
                                 <div class="d-flex justify-content-between">
                                     <button class="btn btn-sm btn-outline-primary" onclick="viewGroupDetails('${group.id}')">
-                                        <i class="bi bi-eye me-1"></i>View Details
+                                        <i class="bi bi-eye me-1"></i>Full Details
                                     </button>
                                     <button class="btn btn-sm btn-success" onclick="sellSeats('${group.id}')" ${availableSeats === 0 ? 'disabled' : ''}>
-                                        <i class="bi bi-cart-plus me-1"></i>Sell Seats
+                                        <i class="bi bi-cart-plus me-1"></i>Sell Seats (${availableSeats})
                                     </button>
                                 </div>
                             </div>
@@ -449,8 +676,7 @@
             const searchTerm = document.getElementById('searchGroups').value.toLowerCase();
             const airlineFilter = document.getElementById('filterAirline').value;
             const statusFilter = document.getElementById('filterStatus').value;
-            
-            console.log('Filtering groups:', { searchTerm, airlineFilter, statusFilter });
+            const segmentFilter = document.getElementById('filterSegment').value;
             
             let filtered = groups;
             
@@ -462,7 +688,8 @@
                         (group.airline_pnr && group.airline_pnr.toLowerCase().includes(searchTerm)) ||
                         (group.airline && group.airline.toLowerCase().includes(searchTerm)) ||
                         (group.sector && group.sector.toLowerCase().includes(searchTerm)) ||
-                        (group.segment && group.segment.toLowerCase().includes(searchTerm))
+                        (group.segment && group.segment.toLowerCase().includes(searchTerm)) ||
+                        (group.branch && group.branch.toLowerCase().includes(searchTerm))
                     );
                 });
             }
@@ -472,31 +699,43 @@
                 filtered = filtered.filter(group => group.airline === airlineFilter);
             }
             
-            // Apply status filter
-            if (statusFilter) {
-                filtered = filtered.filter(group => {
-                    const groupSales = agentSales.filter(sale => sale.group_id === group.id);
-                    const soldSeats = groupSales.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0);
-                    const availableSeats = Math.max(0, (group.no_of_seats || 0) - soldSeats);
-                    
-                    if (statusFilter === 'completed') {
-                        return availableSeats === 0;
-                    } else if (statusFilter === 'active') {
-                        return availableSeats > 0;
-                    } else if (statusFilter === 'pending') {
-                        return soldSeats === 0;
-                    }
-                    return true;
-                });
+            // Apply segment filter
+            if (segmentFilter) {
+                filtered = filtered.filter(group => group.segment === segmentFilter);
             }
             
-            console.log('Filtered results:', filtered.length);
+            // Apply status filter
+            if (statusFilter) {
+                if (statusFilter === 'completed') {
+                    // Calculate completion based on sold seats
+                    filtered = filtered.filter(group => {
+                        const groupSales = agentSales.filter(sale => sale.group_id === group.id);
+                        const soldSeats = groupSales.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0);
+                        return soldSeats >= (group.no_of_seats || 0);
+                    });
+                } else if (statusFilter === 'active') {
+                    // Groups with available seats
+                    filtered = filtered.filter(group => {
+                        const groupSales = agentSales.filter(sale => sale.group_id === group.id);
+                        const soldSeats = groupSales.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0);
+                        return soldSeats < (group.no_of_seats || 0);
+                    });
+                } else if (statusFilter === 'pending') {
+                    // Groups with no sales yet
+                    filtered = filtered.filter(group => {
+                        const groupSales = agentSales.filter(sale => sale.group_id === group.id);
+                        return groupSales.length === 0;
+                    });
+                } else {
+                    // Filter by status field
+                    filtered = filtered.filter(group => group.status === statusFilter);
+                }
+            }
+            
             displayGroups(filtered);
         }
 
         function updateDashboardStats() {
-            console.log('Updating dashboard stats...');
-            
             if (!groups || groups.length === 0) {
                 resetStats();
                 return;
@@ -516,13 +755,6 @@
             
             const availableSeats = Math.max(0, totalSeats - totalSoldSeats);
             
-            console.log('Stats calculated:', {
-                activeGroups,
-                totalSeats,
-                totalSoldSeats,
-                availableSeats
-            });
-            
             // Update DOM
             document.getElementById('activeGroups').textContent = activeGroups;
             document.getElementById('totalGroupSeats').textContent = totalSeats;
@@ -533,15 +765,12 @@
         function refreshGroups() {
             console.log('Refreshing data...');
             
-            // Show loading on refresh button
             const refreshBtn = document.getElementById('refreshButton');
             const originalHtml = refreshBtn.innerHTML;
             refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Refreshing...';
             refreshBtn.disabled = true;
             
-            // Load data
             loadAllData().finally(() => {
-                // Restore button
                 refreshBtn.innerHTML = originalHtml;
                 refreshBtn.disabled = false;
             });
@@ -565,8 +794,85 @@
             window.location.href = 'sell-seats.html';
         }
 
+        function formatDateForDisplay(dateStr) {
+            if (!dateStr) return 'N/A';
+            
+            // If already in correct format (01-MAR-26), return as is
+            if (/^\d{2}-[A-Z]{3}-\d{2}$/.test(dateStr.toUpperCase())) {
+                return dateStr.toUpperCase();
+            }
+            
+            // Try to parse date string
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                
+                const day = String(date.getDate()).padStart(2, '0');
+                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                   'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                const month = monthNames[date.getMonth()];
+                const year = String(date.getFullYear()).slice(-2);
+                
+                return `${day}-${month}-${year}`;
+            } catch (error) {
+                return dateStr;
+            }
+        }
+
+        function exportGroupsToCSV() {
+            if (groups.length === 0) {
+                showAlert('No data to export', 'warning');
+                return;
+            }
+            
+            const headers = [
+                'PNR', 'Airline', 'Sector', 'Segment', 'Flight Type', 'Branch',
+                'Outbound Date', 'Inbound Date', 'Total Seats', 'Outbound Flight', 
+                'Inbound Flight', 'Status', 'Sold Seats', 'Available Seats'
+            ];
+            
+            const csvRows = [
+                headers.join(','),
+                ...groups.map(group => {
+                    const flightType = (group.flight_segments === '4') ? 'Connecting' : 'Direct';
+                    
+                    // Calculate sold seats for this group
+                    const groupSales = agentSales.filter(sale => sale.group_id === group.id);
+                    const soldSeats = groupSales.reduce((sum, sale) => sum + (parseInt(sale.seats_sold) || 0), 0);
+                    const availableSeats = Math.max(0, (group.no_of_seats || 0) - soldSeats);
+                    
+                    return [
+                        `"${group.airline_pnr || ''}"`,
+                        `"${group.airline || ''}"`,
+                        `"${group.sector || ''}"`,
+                        `"${group.segment || ''}"`,
+                        `"${flightType}"`,
+                        `"${group.branch || ''}"`,
+                        `"${formatDateForDisplay(group.outbound_date)}"`,
+                        `"${formatDateForDisplay(group.inbound_date)}"`,
+                        group.no_of_seats || 0,
+                        `"${group.outbound_flight || ''}"`,
+                        `"${group.inbound_flight || ''}"`,
+                        `"${group.status || ''}"`,
+                        soldSeats,
+                        availableSeats
+                    ].join(',');
+                })
+            ];
+            
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `flight-groups-export-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showAlert(`Exported ${groups.length} groups to CSV`, 'success');
+        }
+
         function showAlert(message, type = 'info') {
-            // Remove existing alerts
             const existingAlerts = document.querySelectorAll('.alert-fixed');
             existingAlerts.forEach(alert => alert.remove());
             
@@ -579,7 +885,6 @@
             
             document.body.appendChild(alertDiv);
             
-            // Auto remove after 5 seconds
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.remove();
@@ -608,37 +913,7 @@
         window.viewGroupDetails = viewGroupDetails;
         window.sellSeats = sellSeats;
         window.refreshGroups = refreshGroups;
-
-	// Add to your groups.html JavaScript
-function formatDateForDisplay(dateStr) {
-    if (!dateStr) return 'N/A';
-    
-    // If already in correct format (01-MAR-26), return as is
-    if (/^\d{2}-[A-Z]{3}-\d{2}$/.test(dateStr.toUpperCase())) {
-        return dateStr.toUpperCase();
-    }
-    
-    // Try to parse date string
-    try {
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) return dateStr;
-        
-        const day = String(date.getDate()).padStart(2, '0');
-        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
-                           'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        const month = monthNames[date.getMonth()];
-        const year = String(date.getFullYear()).slice(-2);
-        
-        return `${day}-${month}-${year}`;
-    } catch (error) {
-        return dateStr;
-    }
-}
-
-// Then in displayGroups, use:
-const formattedOutboundDate = formatDateForDisplay(group.outbound_date);
-const formattedInboundDate = formatDateForDisplay(group.inbound_date);
+        window.exportGroupsToCSV = exportGroupsToCSV;
     </script>
 </body>
 </html>
-
