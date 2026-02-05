@@ -1418,82 +1418,91 @@
                 inbound2Date = inbound2Date ? convertDateToDisplayFormat(inbound2Date) : null;
             }
             
-            // Get form data - MATCHING YOUR DATABASE COLUMN NAMES EXACTLY
-            const formData = {
-                // Basic Info
-                sr_number: document.getElementById('srNumber')?.value || '',
-                request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
-                investment_type: document.getElementById('investmentType')?.value || 'Company Investment',
-                license: document.getElementById('license')?.value || 'QFC',
-                branch: document.getElementById('branch')?.value || 'HO',
-                airline_pnr: document.getElementById('airlinePnr')?.value || '',
-                gds_pnr: document.getElementById('gdsPnr')?.value || null,
-                segment: document.getElementById('segment')?.value || 'Umrah',
-                airline: document.getElementById('airline')?.value || '',
-                no_of_seats: parseInt(document.getElementById('noOfSeats')?.value) || 0,
-                
-                // Flight Details - Using your actual database column names
-                flight_segments: segments,
-                
-                // Direct flight dates
-                outbound_date: outboundDate,
-                inbound_date: inboundDate,
-                
-                // Connecting flight dates
-                outbound1_date: outbound1Date,
-                outbound2_date: outbound2Date,
-                inbound1_date: inbound1Date,
-                inbound2_date: inbound2Date,
-                
-                // Flight numbers - Using your actual database column names
-                outbound1_flight: outbound1Flight,
-                outbound2_flight: outbound2Flight,
-                inbound1_flight: inbound1Flight,
-                inbound2_flight: inbound2Flight,
-                
-                // Flight times - Using your actual database column names
-                outbound1_times: outbound1Times ? outbound1Times.toUpperCase() : null,
-                outbound2_times: outbound2Times ? outbound2Times.toUpperCase() : null,
-                inbound1_times: inbound1Times ? inbound1Times.toUpperCase() : null,
-                inbound2_times: inbound2Times ? inbound2Times.toUpperCase() : null,
-                
-                sector: document.getElementById('sector')?.value || '',
-                
-                // Financial - FARES CAN NOW EXCEED 100,000
-                fare: parseFloat(document.getElementById('fare')?.value) || 0,
-                taxes: parseFloat(document.getElementById('taxes')?.value) || 0,
-                payable_amount: parseFloat(document.getElementById('payableAmount')?.value) || 0,
-                pnr_amount: parseFloat(document.getElementById('pnrAmount')?.value) || 0,
-                issuance_date: document.getElementById('issuanceDate')?.value || null,
-                time_limit: document.getElementById('timeLimit')?.value || '',
-                payment_percentage: parseFloat(document.getElementById('paymentPercentage')?.value) || 100,
-                
-                // EMD Details
-                emd_refund_date: document.getElementById('emdRefundDate')?.value || null,
-                first_emd_number: document.getElementById('emd1Number')?.value || null,
-                first_emd_amount: document.getElementById('emd1Amount')?.value ? parseFloat(document.getElementById('emd1Amount').value) : null,
-                first_emd_status: document.getElementById('emd1Status')?.value || null,
-                first_emd_time_limit: document.getElementById('emd1TimeLimit')?.value || null,
-                first_emd_issuance_date: document.getElementById('emd1IssuanceDate')?.value || null,
-                first_emd_payment_percentage: document.getElementById('emd1PaymentPercent')?.value ? parseFloat(document.getElementById('emd1PaymentPercent').value) : null,
-                second_emd_number: document.getElementById('emd2Number')?.value || null,
-                second_emd_amount: document.getElementById('emd2Amount')?.value ? parseFloat(document.getElementById('emd2Amount').value) : null,
-                second_emd_time_limit: document.getElementById('emd2TimeLimit')?.value || null,
-                third_emd_number: document.getElementById('emd3Number')?.value || null,
-                third_emd_amount: document.getElementById('emd3Amount')?.value ? parseFloat(document.getElementById('emd3Amount').value) : null,
-                third_emd_time_limit: document.getElementById('emd3TimeLimit')?.value || null,
-                
-                // Ticketing
-                ticketing_status: document.getElementById('ticketingStatus')?.value || 'pending',
-                no_of_tickets_issued: parseInt(document.getElementById('ticketsIssued')?.value) || 0,
-                balance_tickets: parseInt(document.getElementById('balanceTickets')?.value) || 0,
-                last_ticket_date: document.getElementById('lastTicketDate')?.value || null,
-                status: document.getElementById('overallStatus')?.value || 'draft',
-                notes: document.getElementById('notes')?.value || null,
-                updated_at: new Date().toISOString()
-            };
-            
-            console.log('Saving data with correct column names:', formData);
+// In the saveAcquisition() function, replace the formData object with this:
+
+// Get form data - MATCHING YOUR DATABASE COLUMN NAMES EXACTLY
+const formData = {
+    // Basic Info
+    sr_number: document.getElementById('srNumber')?.value || '',
+    request_date: document.getElementById('requestDate')?.value || new Date().toISOString().split('T')[0],
+    investment_type: document.getElementById('investmentType')?.value || 'Company Investment',
+    license: document.getElementById('license')?.value || 'QFC',
+    branch: document.getElementById('branch')?.value || 'HO',
+    airline_pnr: document.getElementById('airlinePnr')?.value || '',
+    gds_pnr: document.getElementById('gdsPnr')?.value || null,
+    segment: document.getElementById('segment')?.value || 'Umrah',
+    airline: document.getElementById('airline')?.value || '',
+    no_of_seats: parseInt(document.getElementById('noOfSeats')?.value) || 0,
+    
+    // Flight Details - Using your actual database column names
+    flight_segments: segments,
+    
+    // Direct flight dates - Convert empty strings to null
+    outbound_date: outboundDate || null,
+    inbound_date: inboundDate || null,
+    
+    // Connecting flight dates - Convert empty strings to null
+    outbound1_date: outbound1Date || null,
+    outbound2_date: outbound2Date || null,
+    inbound1_date: inbound1Date || null,
+    inbound2_date: inbound2Date || null,
+    
+    // Flight numbers - Using your actual database column names
+    outbound1_flight: outbound1Flight || null,
+    outbound2_flight: outbound2Flight || null,
+    inbound1_flight: inbound1Flight || null,
+    inbound2_flight: inbound2Flight || null,
+    
+    // Flight times - Using your actual database column names
+    outbound1_times: outbound1Times ? outbound1Times.toUpperCase() : null,
+    outbound2_times: outbound2Times ? outbound2Times.toUpperCase() : null,
+    inbound1_times: inbound1Times ? inbound1Times.toUpperCase() : null,
+    inbound2_times: inbound2Times ? inbound2Times.toUpperCase() : null,
+    
+    sector: document.getElementById('sector')?.value || null,
+    
+    // Financial - FARES CAN NOW EXCEED 100,000
+    fare: parseFloat(document.getElementById('fare')?.value) || 0,
+    taxes: parseFloat(document.getElementById('taxes')?.value) || 0,
+    payable_amount: parseFloat(document.getElementById('payableAmount')?.value) || 0,
+    pnr_amount: parseFloat(document.getElementById('pnrAmount')?.value) || 0,
+    issuance_date: document.getElementById('issuanceDate')?.value || null,
+    time_limit: document.getElementById('timeLimit')?.value || '',
+    payment_percentage: parseFloat(document.getElementById('paymentPercentage')?.value) || 100,
+    
+    // EMD Details - Convert empty strings to null
+    emd_refund_date: document.getElementById('emdRefundDate')?.value || null,
+    first_emd_number: document.getElementById('emd1Number')?.value || null,
+    first_emd_amount: document.getElementById('emd1Amount')?.value ? parseFloat(document.getElementById('emd1Amount').value) : null,
+    first_emd_status: document.getElementById('emd1Status')?.value || null,
+    first_emd_time_limit: document.getElementById('emd1TimeLimit')?.value || null,
+    first_emd_issuance_date: document.getElementById('emd1IssuanceDate')?.value || null,
+    first_emd_payment_percentage: document.getElementById('emd1PaymentPercent')?.value ? parseFloat(document.getElementById('emd1PaymentPercent').value) : null,
+    second_emd_number: document.getElementById('emd2Number')?.value || null,
+    second_emd_amount: document.getElementById('emd2Amount')?.value ? parseFloat(document.getElementById('emd2Amount').value) : null,
+    second_emd_time_limit: document.getElementById('emd2TimeLimit')?.value || null,
+    third_emd_number: document.getElementById('emd3Number')?.value || null,
+    third_emd_amount: document.getElementById('emd3Amount')?.value ? parseFloat(document.getElementById('emd3Amount').value) : null,
+    third_emd_time_limit: document.getElementById('emd3TimeLimit')?.value || null,
+    
+    // Ticketing
+    ticketing_status: document.getElementById('ticketingStatus')?.value || 'pending',
+    no_of_tickets_issued: parseInt(document.getElementById('ticketsIssued')?.value) || 0,
+    balance_tickets: parseInt(document.getElementById('balanceTickets')?.value) || 0,
+    last_ticket_date: document.getElementById('lastTicketDate')?.value || null,
+    status: document.getElementById('overallStatus')?.value || 'draft',
+    notes: document.getElementById('notes')?.value || null,
+    updated_at: new Date().toISOString()
+};
+
+// Also need to fix the time_limit field validation - it shouldn't be required if empty
+// Change this line in validateForm() function:
+const timeLimit = document.getElementById('timeLimit').value;
+if (timeLimit && new Date(timeLimit) < new Date()) {  // ADDED: if (timeLimit && ...)
+    errors.push('Time Limit must be in the future');
+}	
+           
+	   console.log('Saving data with correct column names:', formData);
             
             if (editingId) {
                 // Update existing record
